@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import BusinessDirectory from './BusinessDirectory'
 
 export default function Landing({ setShowLogin }) {
   const navigate = useNavigate()
@@ -48,6 +49,8 @@ export default function Landing({ setShowLogin }) {
           </div>
         </div>
       </section>
+
+      <BusinessDirectory />
 
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-14">
@@ -131,6 +134,7 @@ export default function Landing({ setShowLogin }) {
               <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Up to 50 appointments/mo</li>
               <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> SMS + Email reminders</li>
               <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> 1 staff member</li>
+              <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Listed in business directory</li>
             </ul>
             <button onClick={() => navigate('/pricing')} className="w-full mt-8 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-semibold py-2.5 rounded-xl transition">Start free trial</button>
           </div>
@@ -145,6 +149,7 @@ export default function Landing({ setShowLogin }) {
               <li className="flex items-center gap-2"><span className="text-emerald-300">✓</span> Custom reminder timing</li>
               <li className="flex items-center gap-2"><span className="text-emerald-300">✓</span> Up to 5 staff members</li>
               <li className="flex items-center gap-2"><span className="text-emerald-300">✓</span> Priority support</li>
+              <li className="flex items-center gap-2"><span className="text-emerald-300">✓</span> Featured in directory</li>
             </ul>
             <button onClick={() => navigate('/pricing')} className="w-full mt-8 bg-white text-indigo-600 hover:bg-indigo-50 font-semibold py-2.5 rounded-xl transition">Start free trial</button>
           </div>
@@ -157,6 +162,7 @@ export default function Landing({ setShowLogin }) {
               <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Unlimited staff</li>
               <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Custom branding</li>
               <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Dedicated support</li>
+              <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Top directory listing</li>
             </ul>
             <button onClick={() => navigate('/pricing')} className="w-full mt-8 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-semibold py-2.5 rounded-xl transition">Start free trial</button>
           </div>
