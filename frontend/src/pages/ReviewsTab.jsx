@@ -12,7 +12,7 @@ export default function ReviewsTab({ businessId }) {
 
   const fetchReviews = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/reviews/' + businessId)
+      const res = await fetch('https://appointease-03wm.onrender.com/api/reviews/' + businessId)
       const data = await res.json()
       setReviews(data.reviews)
       setAvgRating(data.avgRating)

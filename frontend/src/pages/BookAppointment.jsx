@@ -28,7 +28,7 @@ export default function BookAppointment() {
       const params = new URLSearchParams()
       if (search) params.append('search', search)
       if (category !== 'all') params.append('category', category)
-      const res = await fetch('http://localhost:8000/api/auth/businesses?' + params)
+      const res = await fetch('https://appointease-03wm.onrender.com/api/auth/businesses?' + params)
       const data = await res.json()
       setBusinesses(data)
     } catch (err) {
@@ -42,7 +42,7 @@ export default function BookAppointment() {
     setError('')
     const dateTime = date + 'T' + time
     try {
-      const res = await fetch('http://localhost:8000/api/appointments/book', {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/book', {
         method: 'POST',
         headers: {
           Authorization: 'Bearer ' + token,

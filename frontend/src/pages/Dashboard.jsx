@@ -17,7 +17,7 @@ export default function Dashboard({ setToken, setShowLogin }) {
 
   const fetchAppointments = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/appointments/business', {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/business', {
         headers: { Authorization: 'Bearer ' + token }
       })
       const data = await res.json()

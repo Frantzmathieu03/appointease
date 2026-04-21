@@ -21,7 +21,7 @@ export default function ClientDashboard() {
 
   const fetchAppointments = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/appointments/my', {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/my', {
         headers: { Authorization: 'Bearer ' + token }
       })
       const data = await res.json()
@@ -36,7 +36,7 @@ export default function ClientDashboard() {
   const handleCancel = async (id) => {
     const reason = prompt('Reason for cancellation (optional):')
     try {
-      const res = await fetch('http://localhost:8000/api/appointments/cancel/' + id, {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/cancel/' + id, {
         method: 'PUT',
         headers: {
           Authorization: 'Bearer ' + token,
@@ -59,7 +59,7 @@ export default function ClientDashboard() {
     const newDate = prompt('Enter new date and time (e.g. 2026-05-01T10:00):')
     if (!newDate) return
     try {
-      const res = await fetch('http://localhost:8000/api/appointments/reschedule/' + id, {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/reschedule/' + id, {
         method: 'PUT',
         headers: {
           Authorization: 'Bearer ' + token,

@@ -18,7 +18,7 @@ export default function ReviewForm({ appointmentId, businessId, onSuccess }) {
     setError('')
 
     try {
-      const res = await fetch('http://localhost:8000/api/reviews/submit', {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/reviews/submit', {
         method: 'POST',
         headers: {
           Authorization: 'Bearer ' + token,

@@ -12,7 +12,7 @@ export default function NotificationSettings() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/notifications/settings', {
+    fetch('https://appointease-03wm.onrender.com/api/notifications/settings', {
       headers: { Authorization: 'Bearer ' + token }
     })
     .then(r => r.json())
@@ -30,7 +30,7 @@ export default function NotificationSettings() {
     setSaving(true)
     setError('')
     setSuccess(false)
-    fetch('http://localhost:8000/api/notifications/settings', {
+    fetch('https://appointease-03wm.onrender.com/api/notifications/settings', {
       method: 'PUT',
       headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ channels: { sms, email }, reminders, customMessage: message })

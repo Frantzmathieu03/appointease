@@ -65,7 +65,7 @@ export default function Pricing() {
     setError('')
 
     try {
-      const res = await fetch('http://localhost:8000/api/payments/create-checkout', {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/payments/create-checkout', {
         method: 'POST',
         headers: {
           Authorization: 'Bearer ' + token,

@@ -23,8 +23,8 @@ export default function ClientLogin() {
     setError('')
 
     const url = isSignup
-      ? 'http://localhost:8000/api/auth/user/signup'
-      : 'http://localhost:8000/api/auth/user/login'
+      ? 'https://appointease-03wm.onrender.com/api/auth/user/signup'
+      : 'https://appointease-03wm.onrender.com/api/auth/user/login'
 
     const body = isSignup
       ? form

@@ -22,8 +22,8 @@ export default function Login({ setToken, setShowLogin }) {
     setError('')
 
     const url = isSignup
-      ? 'http://localhost:8000/api/auth/business/signup'
-      : 'http://localhost:8000/api/auth/business/login'
+      ? 'https://appointease-03wm.onrender.com/api/auth/business/signup'
+      : 'https://appointease-03wm.onrender.com/api/auth/business/login'
 
     const body = isSignup
       ? form
