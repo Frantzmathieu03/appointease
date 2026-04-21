@@ -1,8 +1,9 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+const Stripe = require('stripe')
 const Business = require('../models/Business')
 
 exports.createCheckoutSession = async (req, res) => {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
     const { plan } = req.body
 
     const prices = {
@@ -45,6 +46,7 @@ exports.getSubscriptionStatus = async (req, res) => {
 }
 
 exports.webhook = async (req, res) => {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
   const sig = req.headers['stripe-signature']
   let event
 
