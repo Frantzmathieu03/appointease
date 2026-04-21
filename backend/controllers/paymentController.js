@@ -21,7 +21,10 @@ exports.createCheckoutSession = async (req, res) => {
       payment_method_types: ['card'],
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: process.env.FRONTEND_URL + '/dashboard?success=true',
+      subscription_data: {
+        trial_period_days: 7
+      },
+      success_url: process.env.FRONTEND_URL + '/?success=true',
       cancel_url: process.env.FRONTEND_URL + '/?canceled=true',
       metadata: { businessId: req.user.id, plan }
     })

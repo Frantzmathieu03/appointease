@@ -113,7 +113,7 @@ export default function Pricing() {
       <div className="max-w-5xl mx-auto px-6 py-16">
         <div className="text-center mb-14">
           <h1 className="text-4xl font-extrabold text-slate-800 mb-4">Simple, honest pricing</h1>
-          <p className="text-slate-500 text-lg">No hidden fees. Cancel anytime. Start with a 14-day free trial.</p>
+          <p className="text-slate-500 text-lg">No hidden fees. Cancel anytime. Start with a 7-day free trial.</p>
         </div>
 
         {error && (
@@ -137,7 +137,8 @@ export default function Pricing() {
               <div className="text-4xl font-extrabold text-slate-800 my-4">
                 {plan.price}<span className="text-lg text-slate-400 font-normal">/mo</span>
               </div>
-              <p className="text-slate-500 text-sm mb-6">{plan.desc}</p>
+              <p className="text-slate-500 text-sm mb-2">{plan.desc}</p>
+              <p className="text-emerald-600 text-xs font-semibold mb-6">7-day free trial included</p>
               <ul className="space-y-3 text-sm text-slate-600 mb-8">
                 {plan.features.map((f, i) => (
                   <li key={i} className="flex items-center gap-2">
@@ -150,14 +151,14 @@ export default function Pricing() {
                 disabled={loading === plan.id}
                 className={'w-full font-semibold py-2.5 rounded-xl transition disabled:opacity-50 ' + plan.btn}
               >
-                {loading === plan.id ? 'Loading...' : 'Start free trial'}
+                {loading === plan.id ? 'Loading...' : 'Start 7-day free trial'}
               </button>
             </div>
           ))}
         </div>
 
         <p className="text-center text-slate-400 text-sm mt-8">
-          14-day free trial. No credit card required to start.
+          7-day free trial. Cancel anytime. No contracts.
         </p>
       </div>
     </div>
