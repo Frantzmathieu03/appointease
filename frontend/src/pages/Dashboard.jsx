@@ -8,6 +8,8 @@ export default function Dashboard({ setToken, setShowLogin }) {
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('appointments')
+  const urlParams = new URLSearchParams(window.location.search)
+  const paymentSuccess = urlParams.get('success')
 
   useEffect(() => {
     fetchAppointments()
@@ -80,6 +82,15 @@ export default function Dashboard({ setToken, setShowLogin }) {
       <div className="max-w-6xl mx-auto px-6 py-8">
 
         <div className="mb-8">
+          {paymentSuccess && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl p-4 mb-6 flex items-center gap-3">
+              <span className="text-2xl">🎉</span>
+              <div>
+                <p className="font-semibold">Payment successful! Welcome to AppointEase Pro!</p>
+                <p className="text-sm mt-1">Your subscription is now active. All features are unlocked.</p>
+              </div>
+            </div>
+          )}
           <h1 className="text-2xl font-bold text-slate-800">Welcome back, {business.name}!</h1>
           <p className="text-slate-500 mt-1">Here is what is happening with your business today.</p>
         </div>

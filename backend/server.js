@@ -7,6 +7,8 @@ dotenv.config()
 
 const app = express()
 
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }))
+
 app.use(cors())
 app.use(express.json())
 
@@ -14,12 +16,14 @@ const authRoutes = require('./routes/auth')
 const appointmentRoutes = require('./routes/appointments')
 const notificationRoutes = require('./routes/notifications')
 const reviewRoutes = require('./routes/reviews')
+const paymentRoutes = require('./routes/payments')
 const startScheduler = require('./utils/reminderScheduler')
 
 app.use('/api/auth', authRoutes)
 app.use('/api/appointments', appointmentRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/reviews', reviewRoutes)
+app.use('/api/payments', paymentRoutes)
 
 app.get('/', (req, res) => {
   res.send('Appointment app server is running!')
