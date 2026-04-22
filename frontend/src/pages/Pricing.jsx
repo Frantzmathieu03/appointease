@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Login from './Login'
 
 export default function Pricing() {
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
   const [loading, setLoading] = useState(null)
   const [error, setError] = useState('')
+  const [showSignup, setShowSignup] = useState(false)
+  const [pendingPlan, setPendingPlan] = useState(null)
 
   const plans = [
     {
@@ -17,7 +20,8 @@ export default function Pricing() {
         'Up to 50 appointments/mo',
         'SMS + Email reminders',
         '1 staff member',
-        'Basic analytics'
+        'Basic analytics',
+        'Listed in business directory'
       ],
       color: 'border-slate-200',
       btn: 'border border-indigo-600 text-indigo-600 hover:bg-indigo-50'
@@ -32,7 +36,8 @@ export default function Pricing() {
         'SMS + Email reminders',
         'Custom reminder timing',
         'Up to 5 staff members',
-        'Priority support'
+        'Priority support',
+        'Featured in directory'
       ],
       color: 'border-indigo-600',
       popular: true,
@@ -48,7 +53,8 @@ export default function Pricing() {
         'Unlimited staff',
         'Custom branding',
         'Dedicated support',
-        'API access'
+        'API access',
+        'Top directory listing'
       ],
       color: 'border-slate-200',
       btn: 'border border-indigo-600 text-indigo-600 hover:bg-indigo-50'
@@ -56,58 +62,70 @@ export default function Pricing() {
   ]
 
   const handleSubscribe = async (planId) => {
-    if (!token) {
-      navigate('/?signup=true')
+    const currentToken = localStorage.getItem('token')
+    if (!currentToken) {
+      setPendingPlan(planId)
+      setShowSignup(true)
       return
     }
-
     setLoading(planId)
     setError('')
-
     try {
       const res = await fetch('https://appointease-03wm.onrender.com/api/payments/create-checkout', {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer ' + token,
+          Authorization: 'Bearer ' + currentToken,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ plan: planId })
       })
-
       const data = await res.json()
-
       if (!res.ok) {
         setError(data.message)
         setLoading(null)
         return
       }
-
       window.location.href = data.url
-
     } catch (err) {
       setError('Something went wrong. Please try again.')
       setLoading(null)
     }
   }
 
+  const handleSignupComplete = (newToken) => {
+    setShowSignup(false)
+    if (pendingPlan) {
+      handleSubscribe(pendingPlan)
+      setPendingPlan(null)
+    }
+  }
+
+  if (showSignup) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-md mx-auto pt-10 px-4">
+          <div className="text-center mb-6">
+            <p className="text-slate-500 text-sm">Create your account to start your free trial</p>
+          </div>
+          <Login
+            setToken={handleSignupComplete}
+            setShowLogin={() => setShowSignup(false)}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <div
-          className="flex items-center gap-3 cursor-pointer group"
-          onClick={() => navigate('/')}
-        >
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <span className="text-white text-sm font-bold">A</span>
           </div>
           <span className="font-semibold text-slate-800">AppointEase</span>
         </div>
-        <button
-          onClick={() => navigate('/')}
-          className="text-sm text-slate-500 hover:text-indigo-600 font-medium transition"
-        >
-          ← Back
-        </button>
+        <button onClick={() => navigate('/')} className="text-sm text-slate-500 hover:text-indigo-600 font-medium transition">← Back</button>
       </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-16">
@@ -117,21 +135,14 @@ export default function Pricing() {
         </div>
 
         {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg p-3 mb-8 text-sm text-center">
-            {error}
-          </div>
+          <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg p-3 mb-8 text-sm text-center">{error}</div>
         )}
 
         <div className="grid md:grid-cols-3 gap-8">
           {plans.map(plan => (
-            <div
-              key={plan.id}
-              className={'bg-white rounded-2xl border-2 p-8 relative ' + plan.color}
-            >
+            <div key={plan.id} className={'bg-white rounded-2xl border-2 p-8 relative ' + plan.color}>
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-4 py-1 rounded-full">
-                  MOST POPULAR
-                </div>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>
               )}
               <h3 className="text-lg font-bold text-slate-800 mb-1">{plan.name}</h3>
               <div className="text-4xl font-extrabold text-slate-800 my-4">
