@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Pricing() {
@@ -13,10 +13,6 @@ export default function Pricing() {
   })
   const [signupLoading, setSignupLoading] = useState(false)
   const [signupError, setSignupError] = useState('')
-
-  useEffect(() => {
-    setError('')
-  }, [])
 
   const plans = [
     {
@@ -74,6 +70,14 @@ export default function Pricing() {
       })
       const data = await res.json()
       if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('business')
+          setPendingPlan(planId)
+          setShowSignup(true)
+          setLoading(null)
+          return
+        }
         setError(data.message)
         setLoading(null)
         return
@@ -205,6 +209,10 @@ export default function Pricing() {
           <h1 className="text-4xl font-extrabold text-slate-800 mb-4">Simple, honest pricing</h1>
           <p className="text-slate-500 text-lg">No hidden fees. Cancel anytime. Start with a 7-day free trial.</p>
         </div>
+
+        {error && (
+          <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg p-3 mb-8 text-sm text-center">{error}</div>
+        )}
 
         <div className="grid md:grid-cols-3 gap-8">
           {plans.map(plan => (
