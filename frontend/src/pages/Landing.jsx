@@ -14,20 +14,20 @@ export default function Landing({ setShowLogin }) {
           </div>
           <span className="text-xl font-bold text-slate-800">AppointEase</span>
         </div>
-        <div className="flex items-center gap-4">
-          <button onClick={() => setShowLogin(true)} className="text-slate-600 hover:text-indigo-600 font-medium text-sm transition">Business login</button>
-          <button onClick={() => navigate('/client')} className="text-slate-600 hover:text-indigo-600 font-medium text-sm transition">Book appointment</button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setShowLogin(true)} className="hidden md:block text-slate-600 hover:text-indigo-600 font-medium text-sm transition">Business login</button>
+          <button onClick={() => navigate('/client')} className="hidden md:block text-slate-600 hover:text-indigo-600 font-medium text-sm transition">Book appointment</button>
           <button onClick={() => navigate('/pricing')} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2 rounded-lg transition">Start free trial</button>
         </div>
       </nav>
 
       <section className="max-w-6xl mx-auto px-6 py-20 text-center">
         <div className="inline-block bg-indigo-50 text-indigo-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-6">Built for local service businesses</div>
-        <h1 className="text-5xl font-extrabold text-slate-800 leading-tight mb-6">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 leading-tight mb-6">
           Stop losing clients to<br />
           <span className="text-indigo-600">missed appointments</span>
         </h1>
-        <p className="text-xl text-slate-500 max-w-2xl mx-auto mb-10">
+        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10">
           AppointEase automatically sends SMS and email reminders to your clients before every appointment. No more no-shows. No more manual calls. Just more revenue.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
@@ -187,6 +187,11 @@ export default function Landing({ setShowLogin }) {
               <span className="text-white text-xs font-bold">A</span>
             </div>
             <span className="font-semibold text-slate-700">AppointEase</span>
+          </div>
+          <div className="flex gap-6 text-sm text-slate-400">
+            <button onClick={() => setShowLogin(true)} className="hover:text-indigo-600 transition">Business login</button>
+            <button onClick={() => navigate('/client')} className="hover:text-indigo-600 transition">Book appointment</button>
+            <button onClick={() => navigate('/pricing')} className="hover:text-indigo-600 transition">Pricing</button>
           </div>
           <p className="text-slate-400 text-sm">2026 AppointEase. All rights reserved.</p>
         </div>
