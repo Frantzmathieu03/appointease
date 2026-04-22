@@ -3,7 +3,9 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const dotenv = require('dotenv')
 
-dotenv.config()
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config()
+}
 
 const app = express()
 
@@ -26,7 +28,7 @@ app.use('/api/reviews', reviewRoutes)
 app.use('/api/payments', paymentRoutes)
 
 app.get('/', (req, res) => {
-  res.send('Appointment app server is running!')
+  res.send('AppointEase server is running!')
 })
 
 const PORT = process.env.PORT || 8000
