@@ -112,8 +112,9 @@ export default function Pricing() {
       setShowSignup(false)
       setSignupLoading(false)
       if (pendingPlan) {
-        checkout(data.token, pendingPlan)
+        const plan = pendingPlan
         setPendingPlan(null)
+        checkout(data.token, plan)
       }
     } catch (err) {
       setSignupError('Something went wrong. Please try again.')
@@ -175,7 +176,9 @@ export default function Pricing() {
               {signupLoading ? 'Creating account...' : 'Create account & start free trial'}
             </button>
           </form>
-          <p className="text-center text-slate-400 text-xs mt-4">Already have an account? <button onClick={() => navigate('/')} className="text-indigo-600">Sign in here</button></p>
+          <p className="text-center text-slate-400 text-xs mt-4">
+            Already have an account? <button onClick={() => navigate('/')} className="text-indigo-600">Sign in here</button>
+          </p>
         </div>
       </div>
     )
