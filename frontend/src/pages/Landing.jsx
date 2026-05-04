@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import BusinessDirectory from './BusinessDirectory'
 
 export default function Landing({ setShowLogin }) {
   const navigate = useNavigate()
@@ -16,7 +15,7 @@ export default function Landing({ setShowLogin }) {
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowLogin(true)} className="hidden md:block text-slate-600 hover:text-indigo-600 font-medium text-sm transition">Business login</button>
-          <button onClick={() => navigate('/client')} className="hidden md:block text-slate-600 hover:text-indigo-600 font-medium text-sm transition">Book appointment</button>
+          <button onClick={() => navigate('/businesses')} className="hidden md:block text-slate-600 hover:text-indigo-600 font-medium text-sm transition">Find a business</button>
           <button onClick={() => navigate('/pricing')} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2 rounded-lg transition">Start free trial</button>
         </div>
       </nav>
@@ -32,7 +31,7 @@ export default function Landing({ setShowLogin }) {
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <button onClick={() => navigate('/pricing')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3.5 rounded-xl text-lg transition">Start 7-day free trial</button>
-          <button onClick={() => setShowLogin(true)} className="text-slate-600 hover:text-indigo-600 font-semibold px-8 py-3.5 rounded-xl text-lg border border-slate-300 hover:border-indigo-400 transition">Business login</button>
+          <button onClick={() => navigate('/businesses')} className="text-slate-600 hover:text-indigo-600 font-semibold px-8 py-3.5 rounded-xl text-lg border border-slate-300 hover:border-indigo-400 transition">Find a business →</button>
         </div>
         <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
           <div className="text-center">
@@ -50,7 +49,22 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
-      <BusinessDirectory />
+      <section className="bg-indigo-50 py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="bg-white rounded-2xl border border-indigo-100 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">Looking to book an appointment?</h2>
+              <p className="text-slate-500">Search hundreds of local businesses and book instantly.</p>
+            </div>
+            <button
+              onClick={() => navigate('/businesses')}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-4 rounded-xl transition whitespace-nowrap text-lg"
+            >
+              Find a business near you →
+            </button>
+          </div>
+        </div>
+      </section>
 
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-14">
@@ -175,7 +189,7 @@ export default function Landing({ setShowLogin }) {
           <p className="text-indigo-200 mb-8 text-lg">Join hundreds of businesses already using AppointEase to fill their calendars and keep clients coming back.</p>
           <div className="flex gap-4 justify-center flex-wrap">
             <button onClick={() => navigate('/pricing')} className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold px-10 py-4 rounded-xl text-lg transition">Start your 7-day free trial</button>
-            <button onClick={() => navigate('/client')} className="bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-10 py-4 rounded-xl text-lg transition border border-indigo-400">Book an appointment</button>
+            <button onClick={() => navigate('/businesses')} className="bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-10 py-4 rounded-xl text-lg transition border border-indigo-400">Find a business</button>
           </div>
         </div>
       </section>
@@ -190,7 +204,7 @@ export default function Landing({ setShowLogin }) {
           </div>
           <div className="flex gap-6 text-sm text-slate-400">
             <button onClick={() => setShowLogin(true)} className="hover:text-indigo-600 transition">Business login</button>
-            <button onClick={() => navigate('/client')} className="hover:text-indigo-600 transition">Book appointment</button>
+            <button onClick={() => navigate('/businesses')} className="hover:text-indigo-600 transition">Find a business</button>
             <button onClick={() => navigate('/pricing')} className="hover:text-indigo-600 transition">Pricing</button>
           </div>
           <p className="text-slate-400 text-sm">2026 AppointEase. All rights reserved.</p>
