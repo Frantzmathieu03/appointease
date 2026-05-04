@@ -7,6 +7,7 @@ import ClientLogin from './pages/ClientLogin'
 import ClientDashboard from './pages/ClientDashboard'
 import BookAppointment from './pages/BookAppointment'
 import Pricing from './pages/Pricing'
+import Businesses from './pages/Businesses'
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '')
@@ -19,6 +20,7 @@ function App() {
         <Route path="/client/dashboard" element={<ClientDashboard />} />
         <Route path="/client/book/search" element={<BookAppointment />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/businesses" element={<Businesses />} />
         <Route path="/" element={
           token
             ? <Dashboard setToken={setToken} setShowLogin={setShowLogin} />
