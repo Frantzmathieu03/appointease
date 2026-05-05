@@ -2,6 +2,15 @@ const Business = require('../models/Business')
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const nodemailer = require('nodemailer')
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+})
 
 exports.businessSignup = async (req, res) => {
   try {
@@ -64,6 +73,47 @@ exports.userLogin = async (req, res) => {
     res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email } })
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message })
+  }
+}
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email, type } = req.body
+    const Model = type === 'business' ? Business : User
+    const user = await Model.findOne({ email })
+    if (!user) return res.status(400).json({ message: 'No account found with that email' })
+    const resetToken = jwt.sign({ id: user._id, type }, process.env.JWT_SECRET, { expiresIn: '1h' })
+    const resetLink = process.env.FRONTEND_URL + '/reset-password?token=' + resetToken + '&type=' + type
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Reset your AppointEase password',
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
+          <h2 style="color: #4f46e5;">Reset your password</h2>
+          <p>You requested a password reset for your AppointEase account.</p>
+          <p>Click the button below to reset your password. This link expires in 1 hour.</p>
+          <a href="${resetLink}" style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin: 16px 0;">Reset Password</a>
+          <p style="color: #94a3b8; font-size: 12px;">If you didn't request this, ignore this email.</p>
+        </div>
+      `
+    })
+    res.status(200).json({ message: 'Reset link sent to your email!' })
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message })
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password, type } = req.body
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const Model = type === 'business' ? Business : User
+    const hashedPassword = await bcrypt.hash(password, 10)
+    await Model.findByIdAndUpdate(decoded.id, { password: hashedPassword })
+    res.status(200).json({ message: 'Password reset successfully!' })
+  } catch (err) {
+    res.status(500).json({ message: 'Invalid or expired reset link' })
   }
 }
 
