@@ -63,7 +63,7 @@ export default function Login({ setToken, setShowLogin }) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.message); setLoading(false); return }
-      setSuccess('Reset link sent! Check your email.')
+      setSuccess('Reset link sent! Check your phone.')
       setLoading(false)
     } catch (err) {
       setError('Something went wrong.')
