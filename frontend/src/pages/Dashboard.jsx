@@ -8,8 +8,11 @@ export default function Dashboard({ setToken, setShowLogin }) {
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('appointments')
+  const [copied, setCopied] = useState(false)
   const urlParams = new URLSearchParams(window.location.search)
   const paymentSuccess = urlParams.get('success')
+
+  const bookingLink = 'https://appointease.io/book/' + (business.name || '').toLowerCase().replace(/\s+/g, '-')
 
   useEffect(() => {
     fetchAppointments()
@@ -41,6 +44,12 @@ export default function Dashboard({ setToken, setShowLogin }) {
     setToken('')
   }
 
+  const copyLink = () => {
+    navigator.clipboard.writeText(bookingLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const statusColors = {
     confirmed: 'bg-emerald-50 text-emerald-700',
     cancelled: 'bg-rose-50 text-rose-700',
@@ -59,10 +68,7 @@ export default function Dashboard({ setToken, setShowLogin }) {
     <div className="min-h-screen bg-slate-50">
 
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div
-          className="flex items-center gap-3 cursor-pointer group"
-          onClick={handleLogoClick}
-        >
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={handleLogoClick}>
           <div className="w-8 h-8 bg-indigo-600 group-hover:bg-indigo-700 rounded-lg flex items-center justify-center transition">
             <span className="text-white text-sm font-bold">A</span>
           </div>
@@ -70,12 +76,7 @@ export default function Dashboard({ setToken, setShowLogin }) {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-slate-600 text-sm hidden md:block">{business.name}</span>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-rose-500 hover:text-rose-600 font-medium"
-          >
-            Logout
-          </button>
+          <button onClick={handleLogout} className="text-sm text-rose-500 hover:text-rose-600 font-medium">Logout</button>
         </div>
       </nav>
 
@@ -91,6 +92,23 @@ export default function Dashboard({ setToken, setShowLogin }) {
               </div>
             </div>
           )}
+
+          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
+            <p className="text-sm font-medium text-indigo-800 mb-1">Your booking link — share this with your clients!</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <p className="text-indigo-600 text-sm font-mono bg-white px-3 py-2 rounded-lg border border-indigo-200 flex-1">
+                {bookingLink}
+              </p>
+              <button
+                onClick={copyLink}
+                className={'text-sm font-semibold px-4 py-2 rounded-lg transition ' + (copied ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white')}
+              >
+                {copied ? '✓ Copied!' : '📋 Copy link'}
+              </button>
+            </div>
+            <p className="text-xs text-indigo-500 mt-2">Share this link on Instagram, WhatsApp, or your website so clients can book directly!</p>
+          </div>
+
           <h1 className="text-2xl font-bold text-slate-800">Welcome back, {business.name}!</h1>
           <p className="text-slate-500 mt-1">Here is what is happening with your business today.</p>
         </div>
@@ -144,7 +162,7 @@ export default function Dashboard({ setToken, setShowLogin }) {
             ) : appointments.length === 0 ? (
               <div className="px-6 py-12 text-center">
                 <p className="text-slate-400 text-lg">No appointments yet</p>
-                <p className="text-slate-300 text-sm mt-1">Appointments will appear here when clients book</p>
+                <p className="text-slate-300 text-sm mt-1">Share your booking link above to get your first appointment!</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
@@ -161,25 +179,17 @@ export default function Dashboard({ setToken, setShowLogin }) {
                         <p className="text-slate-500 text-sm">{a.service}</p>
                         <div className="flex gap-3 mt-1 flex-wrap">
                           {a.client?.email && (
-                            <a href={'mailto:' + a.client.email} className="text-xs text-indigo-600 hover:underline">
-                              {a.client.email}
-                            </a>
+                            <a href={'mailto:' + a.client.email} className="text-xs text-indigo-600 hover:underline">{a.client.email}</a>
                           )}
                           {a.client?.phone && (
-                            <a href={'tel:' + a.client.phone} className="text-xs text-emerald-600 hover:underline">
-                              {a.client.phone}
-                            </a>
+                            <a href={'tel:' + a.client.phone} className="text-xs text-emerald-600 hover:underline">{a.client.phone}</a>
                           )}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-slate-700 text-sm font-medium">
-                        {new Date(a.date).toLocaleDateString()}
-                      </p>
-                      <p className="text-slate-400 text-xs">
-                        {new Date(a.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                      <p className="text-slate-700 text-sm font-medium">{new Date(a.date).toLocaleDateString()}</p>
+                      <p className="text-slate-400 text-xs">{new Date(a.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                     <span className={'text-xs font-semibold px-3 py-1 rounded-full capitalize ' + statusColors[a.status]}>
                       {a.status}
@@ -191,13 +201,8 @@ export default function Dashboard({ setToken, setShowLogin }) {
           </div>
         )}
 
-        {activeTab === 'reviews' && (
-          <ReviewsTab businessId={business.id} />
-        )}
-
-        {activeTab === 'settings' && (
-          <NotificationSettings />
-        )}
+        {activeTab === 'reviews' && <ReviewsTab businessId={business.id} />}
+        {activeTab === 'settings' && <NotificationSettings />}
 
       </div>
     </div>
