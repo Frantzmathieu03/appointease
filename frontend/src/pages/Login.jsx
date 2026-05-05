@@ -56,17 +56,25 @@ export default function Login({ setToken, setShowLogin }) {
     setError('')
     setSuccess('')
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 60000)
       const res = await fetch('https://appointease-03wm.onrender.com/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotEmail, type: 'business' })
+        body: JSON.stringify({ email: forgotEmail, type: 'business' }),
+        signal: controller.signal
       })
+      clearTimeout(timeout)
       const data = await res.json()
       if (!res.ok) { setError(data.message); setLoading(false); return }
-      setSuccess('Reset link sent! Check your phone.')
+      setSuccess('Reset link sent to your phone!')
       setLoading(false)
     } catch (err) {
-      setError('Something went wrong.')
+      if (err.name === 'AbortError') {
+        setError('Request timed out. Please try again.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
       setLoading(false)
     }
   }
@@ -81,7 +89,7 @@ export default function Login({ setToken, setShowLogin }) {
           <span className="font-semibold text-slate-800">AppointEase</span>
         </div>
         <h2 className="text-2xl font-bold text-slate-800 mb-2">Forgot password</h2>
-        <p className="text-slate-500 text-sm mb-6">Enter your email and we will send you a reset link.</p>
+        <p className="text-slate-500 text-sm mb-6">Enter your email and we will send a reset link to your phone.</p>
         {error && <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg p-3 mb-4 text-sm">{error}</div>}
         {success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg p-3 mb-4 text-sm">{success}</div>}
         <form onSubmit={handleForgot} className="space-y-4">
@@ -90,7 +98,7 @@ export default function Login({ setToken, setShowLogin }) {
             className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
           <button type="submit" disabled={loading}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50">
-            {loading ? 'Sending...' : 'Send reset link'}
+            {loading ? 'Sending... (may take 30 seconds)' : 'Send reset link'}
           </button>
         </form>
         <button onClick={() => setIsForgot(false)} className="w-full text-center text-slate-500 text-sm mt-4 hover:text-indigo-600">
