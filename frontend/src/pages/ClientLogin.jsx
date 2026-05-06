@@ -1,168 +1,93 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { SignIn, SignUp, useUser } from '@clerk/react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 
 export default function ClientLogin() {
   const navigate = useNavigate()
+  const { isSignedIn, user } = useUser()
   const [isSignup, setIsSignup] = useState(false)
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: ''
-  })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+  useEffect(() => {
+    if (isSignedIn && user) {
+      syncUserWithBackend(user)
+    }
+  }, [isSignedIn, user])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    const url = isSignup
-      ? 'https://appointease-03wm.onrender.com/api/auth/user/signup'
-      : 'https://appointease-03wm.onrender.com/api/auth/user/login'
-
-    const body = isSignup
-      ? form
-      : { email: form.email, password: form.password }
-
+  const syncUserWithBackend = async (clerkUser) => {
     try {
-      const res = await fetch(url, {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/auth/user/clerk-sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+          clerkId: clerkUser.id,
+          name: clerkUser.fullName || clerkUser.firstName + ' ' + clerkUser.lastName,
+          email: clerkUser.primaryEmailAddress?.emailAddress,
+          phone: clerkUser.primaryPhoneNumber?.phoneNumber || ''
+        })
       })
-
       const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message)
-        setLoading(false)
-        return
+      if (data.token) {
+        localStorage.setItem('clientToken', data.token)
+        localStorage.setItem('client', JSON.stringify(data.user))
+        navigate('/client/dashboard')
       }
-
-      localStorage.setItem('clientToken', data.token)
-      localStorage.setItem('client', JSON.stringify(data.user))
-      navigate('/client/dashboard')
-
     } catch (err) {
-      setError('Something went wrong. Please try again.')
-      setLoading(false)
+      console.log(err)
     }
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative">
-
-      <button
-        onClick={() => navigate('/')}
-        className="absolute top-6 left-6 text-slate-500 hover:text-indigo-600 text-sm font-medium transition"
-      >
-        ← Back to home
-      </button>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 w-full max-w-md p-8">
-
-        <div className="text-center mb-8">
-          <div
-            className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4 cursor-pointer hover:bg-indigo-700 transition"
-            onClick={() => navigate('/')}
-          >
-            <span className="text-white text-xl font-bold">A</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">AppointEase</h1>
-          <p className="text-slate-500 mt-1">
-            {isSignup ? 'Create your client account' : 'Sign in to book appointments'}
-          </p>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+      <div className="mb-6 flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+        <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
+          <span className="text-white font-bold text-lg">A</span>
         </div>
-
-        {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg p-3 mb-6 text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignup && (
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Full name</label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Jordan Rivera"
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                required
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email address</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="you@email.com"
-              className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          {isSignup && (
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Phone number</label>
-              <input
-                type="tel"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder="3051234567"
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                required
-              />
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Please wait...' : isSignup ? 'Create account' : 'Sign in'}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-slate-500 mt-6">
-          {isSignup ? 'Already have an account?' : "Don't have an account?"}
-          <button
-            onClick={() => setIsSignup(!isSignup)}
-            className="text-indigo-600 font-medium ml-1 hover:underline"
-          >
-            {isSignup ? 'Sign in' : 'Sign up'}
-          </button>
-        </p>
-
+        <span className="text-xl font-bold text-slate-800">AppointEase</span>
       </div>
+
+      {isSignup ? (
+        <>
+          <SignUp
+            appearance={{
+              elements: {
+                rootBox: 'w-full max-w-md',
+                card: 'shadow-none border border-slate-200 rounded-2xl',
+                headerTitle: 'text-slate-800',
+                headerSubtitle: 'text-slate-500',
+                socialButtonsBlockButton: 'border border-slate-300 hover:bg-slate-50',
+                formButtonPrimary: 'bg-indigo-600 hover:bg-indigo-700',
+                footerActionLink: 'text-indigo-600'
+              }
+            }}
+            redirectUrl="/client/dashboard"
+          />
+          <p className="text-slate-500 text-sm mt-4">
+            Already have an account?{' '}
+            <button onClick={() => setIsSignup(false)} className="text-indigo-600 font-medium">Sign in</button>
+          </p>
+        </>
+      ) : (
+        <>
+          <SignIn
+            appearance={{
+              elements: {
+                rootBox: 'w-full max-w-md',
+                card: 'shadow-none border border-slate-200 rounded-2xl',
+                headerTitle: 'text-slate-800',
+                headerSubtitle: 'text-slate-500',
+                socialButtonsBlockButton: 'border border-slate-300 hover:bg-slate-50',
+                formButtonPrimary: 'bg-indigo-600 hover:bg-indigo-700',
+                footerActionLink: 'text-indigo-600'
+              }
+            }}
+            redirectUrl="/client/dashboard"
+          />
+          <p className="text-slate-500 text-sm mt-4">
+            Don't have an account?{' '}
+            <button onClick={() => setIsSignup(true)} className="text-indigo-600 font-medium">Sign up</button>
+          </p>
+        </>
+      )}
     </div>
   )
 }
