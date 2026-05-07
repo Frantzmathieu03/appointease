@@ -1,3 +1,12 @@
+npm run dev
+cd ~/Desktop/appointment-app/frontend
+npm run dev
+Control + C
+cat > src/pages/BookBusiness.jsx << 'ENDOFFILE'
+Frantzs-MBP:frontend frantzmathieu$
+npm run dev
+cd frantzmathieu/Desktop/appointment-app
+cat > frontend/src/pages/BookBusiness.jsx << 'ENDOFFILE'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -20,6 +29,9 @@ export default function BookBusiness() {
   const [myAppointments, setMyAppointments] = useState([])
   const [cancelling, setCancelling] = useState(null)
   const [client, setClient] = useState(null)
+  const [rescheduling, setRescheduling] = useState(null)
+  const [rescheduleDate, setRescheduleDate] = useState('')
+  const [rescheduleTime, setRescheduleTime] = useState('')
 
   const categoryLabels = {
     salon: 'Hair Salon', barbershop: 'Barbershop', dental: 'Dental',
@@ -65,8 +77,7 @@ export default function BookBusiness() {
         headers: { Authorization: 'Bearer ' + token }
       })
       const data = await res.json()
-      const filtered = data
-      setMyAppointments(filtered)
+      setMyAppointments(data)
     } catch (err) {}
   }
 
@@ -122,13 +133,29 @@ export default function BookBusiness() {
     setCancelling(appointmentId)
     try {
       const token = localStorage.getItem('clientToken')
-      await fetch('https://appointease-03wm.onrender.com/api/appointments/' + appointmentId + '/cancel', {
+      await fetch('https://appointease-03wm.onrender.com/api/appointments/cancel/' + appointmentId, {
         method: 'PUT',
         headers: { Authorization: 'Bearer ' + token }
       })
       fetchMyAppointments()
     } catch (err) {}
     setCancelling(null)
+  }
+
+  const handleReschedule = async (appointmentId) => {
+    if (!rescheduleDate || !rescheduleTime) return
+    try {
+      const token = localStorage.getItem('clientToken')
+      await fetch('https://appointease-03wm.onrender.com/api/appointments/reschedule/' + appointmentId, {
+        method: 'PUT',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: rescheduleDate + 'T' + rescheduleTime })
+      })
+      setRescheduling(null)
+      setRescheduleDate('')
+      setRescheduleTime('')
+      fetchMyAppointments()
+    } catch (err) {}
   }
 
   const handleLogout = () => {
@@ -273,6 +300,9 @@ export default function BookBusiness() {
                 {booking ? 'Booking...' : 'Confirm appointment'}
               </button>
             </form>
+            <button onClick={() => setStep('dashboard')} className="w-full text-center text-slate-500 text-sm mt-4 hover:text-indigo-600">
+              ← Back to my appointments
+            </button>
           </div>
         )}
 
@@ -283,10 +313,10 @@ export default function BookBusiness() {
               {myAppointments.length === 0 ? (
                 <p className="text-slate-400 text-sm text-center py-4">No appointments yet at this business</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {myAppointments.map(a => (
                     <div key={a._id} className="border border-slate-100 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-3">
                         <div>
                           <p className="font-medium text-slate-800">{a.service}</p>
                           <p className="text-slate-500 text-sm">{new Date(a.date).toLocaleDateString()} at {new Date(a.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
@@ -296,10 +326,38 @@ export default function BookBusiness() {
                         </span>
                       </div>
                       {a.status === 'confirmed' && (
-                        <button onClick={() => handleCancel(a._id)} disabled={cancelling === a._id}
-                          className="w-full mt-2 border border-rose-200 text-rose-500 hover:bg-rose-50 text-xs font-semibold py-2 rounded-lg transition disabled:opacity-50">
-                          {cancelling === a._id ? 'Cancelling...' : 'Cancel appointment'}
-                        </button>
+                        <>
+                          {rescheduling === a._id ? (
+                            <div className="space-y-2 mt-2">
+                              <input type="date" value={rescheduleDate} onChange={e => setRescheduleDate(e.target.value)}
+                                min={new Date().toISOString().split('T')[0]}
+                                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                              <input type="time" value={rescheduleTime} onChange={e => setRescheduleTime(e.target.value)}
+                                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                              <div className="flex gap-2">
+                                <button onClick={() => handleReschedule(a._id)}
+                                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold py-2 rounded-lg transition">
+                                  Confirm reschedule
+                                </button>
+                                <button onClick={() => setRescheduling(null)}
+                                  className="flex-1 border border-slate-200 text-slate-600 text-xs font-semibold py-2 rounded-lg transition">
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2 mt-2">
+                              <button onClick={() => setRescheduling(a._id)}
+                                className="flex-1 border border-amber-200 text-amber-600 hover:bg-amber-50 text-xs font-semibold py-2 rounded-lg transition">
+                                Reschedule
+                              </button>
+                              <button onClick={() => handleCancel(a._id)} disabled={cancelling === a._id}
+                                className="flex-1 border border-rose-200 text-rose-500 hover:bg-rose-50 text-xs font-semibold py-2 rounded-lg transition disabled:opacity-50">
+                                {cancelling === a._id ? 'Cancelling...' : 'Cancel'}
+                              </button>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   ))}
