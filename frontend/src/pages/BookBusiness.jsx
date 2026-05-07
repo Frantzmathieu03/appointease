@@ -30,8 +30,6 @@ export default function BookBusiness() {
 
   useEffect(() => {
     fetchBusiness()
-    const token = localStorage.getItem('clientToken')
-    if (token) setStep('book')
   }, [slug])
 
   const fetchBusiness = async () => {
