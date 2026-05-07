@@ -65,7 +65,7 @@ export default function BookBusiness() {
         headers: { Authorization: 'Bearer ' + token }
       })
       const data = await res.json()
-      const filtered = data.filter(a => a.business === business._id || a.business?._id === business._id)
+      const filtered = data
       setMyAppointments(filtered)
     } catch (err) {}
   }
