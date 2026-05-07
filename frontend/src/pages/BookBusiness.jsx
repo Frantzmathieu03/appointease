@@ -61,7 +61,7 @@ export default function BookBusiness() {
   const fetchMyAppointments = async () => {
     try {
       const token = localStorage.getItem('clientToken')
-      const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/client', {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/my', {
         headers: { Authorization: 'Bearer ' + token }
       })
       const data = await res.json()
