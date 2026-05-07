@@ -13,7 +13,7 @@ export default function BookBusiness() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
   const [showLogin, setShowLogin] = useState(false)
-  const [isSignup, setIsSignup] = useState(false)
+  const [isSignup, setIsSignup] = useState(true)
   const [clientForm, setClientForm] = useState({ name: '', email: '', password: '', phone: '' })
   const [authLoading, setAuthLoading] = useState(false)
   const [authError, setAuthError] = useState('')
@@ -36,9 +36,7 @@ export default function BookBusiness() {
     try {
       const res = await fetch('https://appointease-03wm.onrender.com/api/auth/businesses?search=' + slug.replace(/-/g, ' '))
       const data = await res.json()
-      if (data.length > 0) {
-        setBusiness(data[0])
-      }
+      if (data.length > 0) setBusiness(data[0])
       setLoading(false)
     } catch (err) {
       setLoading(false)
@@ -98,7 +96,7 @@ export default function BookBusiness() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
       <div className="text-center">
         <p className="text-2xl font-bold text-slate-800 mb-2">Business not found</p>
-        <p className="text-slate-500 mb-6">This booking page doesn't exist.</p>
+        <p className="text-slate-500 mb-6">This booking page does not exist.</p>
         <button onClick={() => navigate('/')} className="bg-indigo-600 text-white px-6 py-2 rounded-lg">Go home</button>
       </div>
     </div>
@@ -127,23 +125,25 @@ export default function BookBusiness() {
           </div>
           <span className="font-semibold text-slate-800">AppointEase</span>
         </div>
-        <h2 className="text-xl font-bold text-slate-800 mb-1">{isSignup ? 'Create account to book' : 'Sign in to book'}</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-1">
+          {isSignup ? 'Create account to book' : 'Sign in to book'}
+        </h2>
         <p className="text-slate-500 text-sm mb-6">Booking at <strong>{business.name}</strong></p>
         {authError && <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg p-3 mb-4 text-sm">{authError}</div>}
         <form onSubmit={handleAuth} className="space-y-3">
           {isSignup && (
-            <>
-              <input type="text" placeholder="Full name" value={clientForm.name}
-                onChange={e => setClientForm({...clientForm, name: e.target.value})}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
-              <input type="tel" placeholder="Phone number" value={clientForm.phone}
-                onChange={e => setClientForm({...clientForm, phone: e.target.value})}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
-            </>
+            <input type="text" placeholder="Full name" value={clientForm.name}
+              onChange={e => setClientForm({...clientForm, name: e.target.value})}
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
           )}
           <input type="email" placeholder="Email address" value={clientForm.email}
             onChange={e => setClientForm({...clientForm, email: e.target.value})}
             className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          {isSignup && (
+            <input type="tel" placeholder="Phone number (for SMS reminders)" value={clientForm.phone}
+              onChange={e => setClientForm({...clientForm, phone: e.target.value})}
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          )}
           <input type="password" placeholder="Password" value={clientForm.password}
             onChange={e => setClientForm({...clientForm, password: e.target.value})}
             className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
@@ -201,12 +201,6 @@ export default function BookBusiness() {
               <div className="flex items-center gap-2 text-sm">
                 <span>✉️</span>
                 <a href={'mailto:' + business.email} className="text-indigo-600">{business.email}</a>
-              </div>
-            )}
-            {business.totalReviews > 0 && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-amber-400">{'★'.repeat(Math.round(business.avgRating))}</span>
-                <span className="text-slate-600">{business.avgRating} ({business.totalReviews} reviews)</span>
               </div>
             )}
           </div>
