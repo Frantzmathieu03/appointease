@@ -256,7 +256,7 @@ export default function Landing({ setShowLogin }) {
       <footer className="bg-slate-900 py-8 px-6">
         <div className="max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <Logo dark={true} />
-          <div className="flex gap-6 text-sm text-slate-500">
+          <div className="flex gap-6 text-sm text-slate-500"><button onClick={() => navigate("/privacy")} className="hover:text-white transition">Privacy Policy</button><button onClick={() => navigate("/terms")} className="hover:text-white transition">Terms</button><button onClick={() => navigate("/contact")} className="hover:text-white transition">Contact</button>
             <button onClick={() => setShowLogin(true)} className="hover:text-white transition">Business login</button>
             <button onClick={() => navigate('/businesses')} className="hover:text-white transition">Find a business</button>
             <button onClick={() => navigate('/pricing')} className="hover:text-white transition">Pricing</button>
