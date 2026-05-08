@@ -67,7 +67,7 @@ export default function Landing({ setShowLogin }) {
             </div>
           </div>
           <div className="relative rounded-2xl overflow-hidden h-32 group">
-            <img src="https://images.unsplash.com/photo-1588776814546-1ffbb7df4a58?w=400&q=80&auto=format&fit=crop" alt="Dental Office" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <img src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=400&q=80&auto=format&fit=crop" alt="Dental Office" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
             <div className="absolute inset-0 bg-slate-900/50 flex items-end p-3">
               <span className="text-white text-xs font-bold">🦷 Dental Offices</span>
             </div>
@@ -169,7 +169,7 @@ export default function Landing({ setShowLogin }) {
           <div className="grid grid-cols-2 gap-4">
             <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=80&auto=format&fit=crop" alt="Hair salon" className="rounded-2xl w-full h-48 object-cover" />
             <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80&auto=format&fit=crop" alt="Barbershop" className="rounded-2xl w-full h-48 object-cover mt-8" />
-            <img src="https://images.unsplash.com/photo-1588776814546-1ffbb7df4a58?w=400&q=80&auto=format&fit=crop" alt="Dental" className="rounded-2xl w-full h-48 object-cover" />
+            <img src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=400&q=80&auto=format&fit=crop" alt="Dental" className="rounded-2xl w-full h-48 object-cover" />
             <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80&auto=format&fit=crop" alt="Doctor" className="rounded-2xl w-full h-48 object-cover mt-8" />
           </div>
           <div>
