@@ -1,3 +1,4 @@
+import Logo from '../Logo'
 import { useState, useEffect } from 'react'
 import ReviewsTab from './ReviewsTab'
 import NotificationSettings from './NotificationSettings'

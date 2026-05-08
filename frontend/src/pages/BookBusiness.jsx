@@ -1,3 +1,4 @@
+import Logo from '../Logo'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
