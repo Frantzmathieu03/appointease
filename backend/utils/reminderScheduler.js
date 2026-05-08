@@ -11,7 +11,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const sendEmail = async (to, subject, message) => {
   try {
     await resend.emails.send({
-      from: "AppointEase <onboarding@resend.dev>",
+      from: "AppointEase <reminders@appointease.io>",
       to,
       subject,
       html: "<p>" + message + "</p>"
