@@ -1,7 +1,6 @@
 import Logo from '../Logo'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Logo from '../Logo'
 
 export default function Pricing() {
   const navigate = useNavigate()
@@ -137,12 +136,6 @@ export default function Pricing() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-8 w-full max-w-md">
           <div className="flex items-center gap-3 mb-6 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">A</span>
-            </div>
-            <span className="font-semibold text-slate-800">AppointEase</span>
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-1">Create your account</h2>
           <p className="text-slate-500 text-sm mb-6">Start your 7-day free trial — no credit card required</p>
           {signupError && (
             <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg p-3 mb-4 text-sm">{signupError}</div>
@@ -197,12 +190,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
-          </div>
-          <span className="font-semibold text-slate-800">AppointEase</span>
-        </div>
+          <div className="cursor-pointer" onClick={() => navigate("/")}><Logo /></div>
         <button onClick={() => navigate('/')} className="text-sm text-slate-500 hover:text-indigo-600 font-medium transition">← Back</button>
       </nav>
 
