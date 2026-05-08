@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom"
+import Logo from "../Logo"
 
 export default function Landing({ setShowLogin }) {
   const navigate = useNavigate()
