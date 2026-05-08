@@ -60,7 +60,7 @@ const checkReminders = async () => {
         if (reminder.unit === 'days') reminderHours = reminder.value * 24
         if (reminder.unit === 'minutes') reminderHours = reminder.value / 60
 
-        const isWithinWindow = diffHours > 0 && diffHours <= reminderHours && diffHours > (reminderHours - 1)
+        const isWithinWindow = diffHours > 0 const isWithinWindow = diffHours > 0 && diffHours <= reminderHours && diffHours > (reminderHours - 1)const isWithinWindow = diffHours > 0 && diffHours <= reminderHours && diffHours > (reminderHours - 1) diffHours <= reminderHours
 
         if (isWithinWindow) {
           const dateStr = apptTime.toLocaleDateString()
