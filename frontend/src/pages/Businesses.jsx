@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Logo from '../Logo'
 
 export default function Businesses() {
   const navigate = useNavigate()
