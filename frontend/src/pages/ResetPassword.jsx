@@ -1,7 +1,5 @@
-import Logo from '../Logo'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Logo from '../Logo'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
@@ -43,7 +41,7 @@ export default function ResetPassword() {
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <span className="text-white text-sm font-bold">A</span>
           </div>
-          <span className="font-semibold text-slate-800">AppointEase</span>
+          <Logo />
         </div>
 
         {success ? (

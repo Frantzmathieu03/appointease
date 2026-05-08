@@ -198,7 +198,7 @@ export default function BookBusiness() {
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <span className="text-white text-sm font-bold">A</span>
           </div>
-          <span className="font-semibold text-slate-800">AppointEase</span>
+          <Logo />
         </div>
         {client && (
           <div className="flex items-center gap-3">

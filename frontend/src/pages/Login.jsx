@@ -1,7 +1,5 @@
-import Logo from '../Logo'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Logo from '../Logo'
 
 export default function Login({ setToken, setShowLogin }) {
   const navigate = useNavigate()
@@ -88,7 +86,7 @@ export default function Login({ setToken, setShowLogin }) {
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <span className="text-white text-sm font-bold">A</span>
           </div>
-          <span className="font-semibold text-slate-800">AppointEase</span>
+          <Logo />
         </div>
         <h2 className="text-2xl font-bold text-slate-800 mb-2">Forgot password</h2>
         <p className="text-slate-500 text-sm mb-6">Enter your email and we will send a reset link to your phone.</p>
@@ -117,7 +115,7 @@ export default function Login({ setToken, setShowLogin }) {
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <span className="text-white text-sm font-bold">A</span>
           </div>
-          <span className="font-semibold text-slate-800">AppointEase</span>
+          <Logo />
         </div>
 
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
