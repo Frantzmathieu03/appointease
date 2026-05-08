@@ -1,3 +1,4 @@
+import Logo from '../Logo'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 

@@ -1,3 +1,4 @@
+import Logo from '../Logo'
 import { SignIn, SignUp, useUser } from '@clerk/react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
