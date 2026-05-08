@@ -1,9 +1,8 @@
-const cron = require("node-cron")
-const Appointment = require("../models/Appointment")
-const Business = require("../models/Business")
-const User = require("../models/User")
-const twilio = require("twilio")
-const { Resend } = require("resend")
+const cron = require('node-cron')
+const Appointment = require('../models/Appointment')
+const Business = require('../models/Business')
+const twilio = require('twilio')
+const { Resend } = require('resend')
 
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -11,14 +10,14 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const sendEmail = async (to, subject, message) => {
   try {
     await resend.emails.send({
-      from: "AppointEase <reminders@appointease.io>",
-      to,
-      subject,
-      html: "<p>" + message + "</p>"
+      from: 'AppointEase <reminders@appointease.io>',
+      to: to,
+      subject: subject,
+      html: '<div style="font-family:sans-serif;max-width:600px;margin:0 auto"><div style="background:#4f46e5;padding:20px;border-radius:12px 12px 0 0"><h2 style="color:white;margin:0">AppointEase</h2></div><div style="background:white;padding:24px;border:1px solid #e2e8f0;border-radius:0 0 12px 12px"><p style="color:#334155;font-size:16px">' + message + '</p></div></div>'
     })
-    console.log("Email sent to", to)
+    console.log('Email sent to', to)
   } catch (err) {
-    console.log("Email error:", err.message)
+    console.log('Email error:', err.message)
   }
 }
 
@@ -27,21 +26,21 @@ const sendSMS = async (to, message) => {
     await twilioClient.messages.create({
       body: message,
       from: process.env.TWILIO_PHONE,
-      to
+      to: to
     })
-    console.log("SMS sent to", to)
+    console.log('SMS sent to', to)
   } catch (err) {
-    console.log("SMS error:", err.message)
+    console.log('SMS error:', err.message)
   }
 }
 
 const checkReminders = async () => {
   try {
-    console.log("Running reminder check...")
+    console.log('Running reminder check...')
     const now = new Date()
-    const appointments = await Appointment.find({ status: "confirmed" })
-      .populate("business")
-      .populate("client")
+    const appointments = await Appointment.find({ status: 'confirmed' })
+      .populate('business')
+      .populate('client')
 
     for (const appointment of appointments) {
       const apptTime = new Date(appointment.date)
@@ -49,30 +48,32 @@ const checkReminders = async () => {
       const diffHours = diffMs / (1000 * 60 * 60)
       const business = appointment.business
       const client = appointment.client
-      const reminders = business.notifications && business.notifications.reminders ? business.notifications.reminders : [{ value: 24, unit: "hours" }]
+      if (!business || !client) continue
+      const reminders = (business.notifications && business.notifications.reminders) ? business.notifications.reminders : [{ value: 24, unit: 'hours' }]
       for (const reminder of reminders) {
         let reminderHours = reminder.value
-        if (reminder.unit === "days") reminderHours = reminder.value * 24
-        if (reminder.unit === "minutes") reminderHours = reminder.value / 60
+        if (reminder.unit === 'days') reminderHours = reminder.value * 24
+        if (reminder.unit === 'minutes') reminderHours = reminder.value / 60
         const isWithinWindow = diffHours > 0 && diffHours <= reminderHours
         if (isWithinWindow) {
           const dateStr = apptTime.toLocaleDateString()
-          const timeStr = apptTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-          let msg = (business.notifications && business.notifications.customMessage) || "Hi {client_name}, reminder for your appointment at {business_name} on {date} at {time}."
-          msg = msg.replace("{client_name}", client.name).replace("{business_name}", business.name).replace("{date}", dateStr).replace("{time}", timeStr)
-          if (client.email) await sendEmail(client.email, "Appointment Reminder - " + business.name, msg)
-          if (client.phone) await sendSMS(client.phone, msg + " - AppointEase")
-          console.log("Reminder sent for appointment:", appointment._id)
+          const timeStr = apptTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          let msg = (business.notifications && business.notifications.customMessage) ? business.notifications.customMessage : 'Hi {client_name}, reminder for your appointment at {business_name} on {date} at {time}.'
+          msg = msg.replace('{client_name}', client.name).replace('{business_name}', business.name).replace('{date}', dateStr).replace('{time}', timeStr)
+          if (client.email) await sendEmail(client.email, 'Appointment Reminder - ' + business.name, msg)
+          if (client.phone) await sendSMS(client.phone, msg + ' - AppointEase')
+          console.log('Reminder sent for:', appointment._id)
         }
       }
     }
   } catch (err) {
-    console.log("Reminder error:", err.message)
+    console.log('Reminder error:', err.message)
   }
 }
 
 const startScheduler = () => {
-  cron.schedule("* * * * *", checkReminders)
+  console.log('Reminder scheduler started!')
+  cron.schedule('* * * * *', checkReminders)
   checkReminders()
 }
 
