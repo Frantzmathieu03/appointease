@@ -1,12 +1,3 @@
-npm run dev
-cd ~/Desktop/appointment-app/frontend
-npm run dev
-Control + C
-cat > src/pages/BookBusiness.jsx << 'ENDOFFILE'
-Frantzs-MBP:frontend frantzmathieu$
-npm run dev
-cd frantzmathieu/Desktop/appointment-app
-cat > frontend/src/pages/BookBusiness.jsx << 'ENDOFFILE'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -301,7 +292,7 @@ export default function BookBusiness() {
               </button>
             </form>
             <button onClick={() => setStep('dashboard')} className="w-full text-center text-slate-500 text-sm mt-4 hover:text-indigo-600">
-              ← Back to my appointments
+              Back to my appointments
             </button>
           </div>
         )}
@@ -331,9 +322,9 @@ export default function BookBusiness() {
                             <div className="space-y-2 mt-2">
                               <input type="date" value={rescheduleDate} onChange={e => setRescheduleDate(e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
-                                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                               <input type="time" value={rescheduleTime} onChange={e => setRescheduleTime(e.target.value)}
-                                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                               <div className="flex gap-2">
                                 <button onClick={() => handleReschedule(a._id)}
                                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold py-2 rounded-lg transition">
