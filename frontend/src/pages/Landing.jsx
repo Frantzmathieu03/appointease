@@ -8,8 +8,7 @@ export default function Landing({ setShowLogin }) {
     <div className="min-h-screen bg-white font-sans">
 
       <nav className="px-6 py-4 flex items-center justify-between sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-slate-100">
-        <div className="flex items-center gap-2"><Logo />
-        </div>
+        <div className="flex items-center gap-2"><Logo /></div>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/businesses')} className="text-sm text-slate-600 font-medium hidden md:block hover:text-indigo-600 transition">Find a business</button>
           <button onClick={() => setShowLogin(true)} className="text-sm text-slate-600 font-medium hidden md:block hover:text-indigo-600 transition">Business login</button>
@@ -17,42 +16,74 @@ export default function Landing({ setShowLogin }) {
         </div>
       </nav>
 
-      <section className="max-w-3xl mx-auto px-6 pt-16 pb-10 text-center">
-        <div className="inline-block bg-indigo-50 text-indigo-600 text-xs font-semibold px-4 py-1.5 rounded-full mb-6">Built for local service businesses</div>
-        <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 leading-tight mb-5">
-          The appointment tool that <span className="text-indigo-600">eliminates no-shows</span>
-        </h1>
-        <p className="text-slate-500 text-xl mb-10 max-w-xl mx-auto leading-relaxed">
-          Automatically texts and emails your clients before every appointment. Set up in 2 minutes.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3 mb-10">
-          <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>📅</span> Automated reminders</div>
-          <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>📱</span> SMS + Email</div>
-          <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>⚡</span> 2 min setup</div>
-        </div>
-        <button onClick={() => navigate('/pricing')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-full text-lg transition mb-3 shadow-lg shadow-indigo-200">Start Your Free Trial — Free</button>
-        <p className="text-slate-400 text-sm mt-3">7 days free · No credit card required</p>
-      </section>
-
-      <section className="max-w-lg mx-auto px-6 pb-10">
-        <div className="bg-slate-900 rounded-3xl p-6 shadow-2xl">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-            <span className="text-emerald-400 text-xs font-mono">Reminder sent successfully</span>
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-10">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <div className="inline-block bg-indigo-50 text-indigo-600 text-xs font-semibold px-4 py-1.5 rounded-full mb-6">Built for local service businesses</div>
+            <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 leading-tight mb-5">
+              The appointment tool that <span className="text-indigo-600">eliminates no-shows</span>
+            </h1>
+            <p className="text-slate-500 text-xl mb-10 leading-relaxed">
+              Automatically texts and emails your clients before every appointment. Set up in 2 minutes.
+            </p>
+            <div className="flex flex-wrap gap-3 mb-10">
+              <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>📅</span> Automated reminders</div>
+              <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>📱</span> SMS + Email</div>
+              <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>⚡</span> 2 min setup</div>
+            </div>
+            <button onClick={() => navigate('/pricing')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-full text-lg transition mb-3 shadow-lg shadow-indigo-200">Start Your Free Trial — Free</button>
+            <p className="text-slate-400 text-sm mt-3">7 days free · No credit card required</p>
           </div>
-          <p className="text-white text-sm mb-4 leading-relaxed">Hi <span className="text-indigo-400 font-semibold">Sarah</span> 👋 Reminder for your appointment at <span className="text-indigo-400 font-semibold">Glamour Salon</span> tomorrow at 2:00 PM. Reply CONFIRM to confirm.</p>
-          <div className="flex items-center justify-between pt-4 border-t border-slate-700">
-            <div className="text-center"><p className="text-2xl font-extrabold text-white">98%</p><p className="text-slate-400 text-xs">Show-up rate</p></div>
-            <div className="text-center"><p className="text-2xl font-extrabold text-indigo-400">-80%</p><p className="text-slate-400 text-xs">No-shows</p></div>
-            <div className="text-center"><p className="text-2xl font-extrabold text-white">2min</p><p className="text-slate-400 text-xs">Setup time</p></div>
+          <div className="relative">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80&auto=format&fit=crop" alt="Business owner using AppointEase" className="rounded-3xl shadow-2xl w-full object-cover h-96" />
+            <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl p-4 border border-slate-100">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                <span className="text-emerald-600 text-xs font-semibold">Reminder sent</span>
+              </div>
+              <p className="text-slate-700 text-xs font-medium">Hi Sarah 👋 See you tomorrow at 2PM!</p>
+            </div>
+            <div className="absolute -top-4 -right-4 bg-indigo-600 rounded-2xl shadow-xl p-4 text-white">
+              <p className="text-2xl font-extrabold">98%</p>
+              <p className="text-indigo-200 text-xs">Show-up rate</p>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="py-10 px-6 border-t border-slate-100">
-        <p className="text-center text-slate-400 text-xs font-semibold tracking-widest uppercase mb-6">Trusted by businesses including</p>
-        <div className="flex justify-center gap-10 flex-wrap text-slate-400 font-semibold text-sm">
-          <span>💇 Hair Salons</span><span>✂️ Barbershops</span><span>🦷 Dental Offices</span><span>⚖️ Law Firms</span><span>🩺 Doctors</span>
+        <p className="text-center text-slate-400 text-xs font-semibold tracking-widest uppercase mb-8">Trusted by businesses including</p>
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="relative rounded-2xl overflow-hidden h-32 group">
+            <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=80&auto=format&fit=crop" alt="Hair Salon" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <div className="absolute inset-0 bg-slate-900/50 flex items-end p-3">
+              <span className="text-white text-xs font-bold">💇 Hair Salons</span>
+            </div>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden h-32 group">
+            <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80&auto=format&fit=crop" alt="Barbershop" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <div className="absolute inset-0 bg-slate-900/50 flex items-end p-3">
+              <span className="text-white text-xs font-bold">✂️ Barbershops</span>
+            </div>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden h-32 group">
+            <img src="https://images.unsplash.com/photo-1588776814546-1ffbb7df4a58?w=400&q=80&auto=format&fit=crop" alt="Dental Office" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <div className="absolute inset-0 bg-slate-900/50 flex items-end p-3">
+              <span className="text-white text-xs font-bold">🦷 Dental Offices</span>
+            </div>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden h-32 group">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80&auto=format&fit=crop" alt="Professional Services" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <div className="absolute inset-0 bg-slate-900/50 flex items-end p-3">
+              <span className="text-white text-xs font-bold">⚖️ Law Firms</span>
+            </div>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden h-32 group">
+            <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80&auto=format&fit=crop" alt="Doctor" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <div className="absolute inset-0 bg-slate-900/50 flex items-end p-3">
+              <span className="text-white text-xs font-bold">🩺 Doctors</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -76,24 +107,36 @@ export default function Landing({ setShowLogin }) {
       </section>
 
       <section className="py-16 px-6 bg-slate-900">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-4">HOW IT WORKS</p>
-          <h2 className="text-3xl font-extrabold text-white mb-3">From signup to first reminder in 3 steps.</h2>
-          <p className="text-slate-400 mb-12">Most booking tools make you figure it out yourself. AppointEase gets you running in minutes.</p>
-          <div className="space-y-10">
-            {[
-              { num: '1', title: 'Create your business account', desc: 'Sign up, add your business details and category. Your personal booking page is instantly created at appointease.io/book/your-name.' },
-              { num: '2', title: 'Share your booking link', desc: 'Send your unique link to clients via Instagram, WhatsApp, or text. They book directly on your page.' },
-              { num: '3', title: 'Reminders go out automatically', desc: 'AppointEase texts and emails your clients before every appointment. You never have to chase anyone again.' },
-            ].map((step, i) => (
-              <div key={i} className="flex gap-5">
-                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-white text-lg">{step.num}</div>
-                <div>
-                  <h3 className="text-white font-bold text-lg mb-1">{step.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{step.desc}</p>
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-4">HOW IT WORKS</p>
+            <h2 className="text-3xl font-extrabold text-white mb-3">From signup to first reminder in 3 steps.</h2>
+            <p className="text-slate-400 mb-12">Most booking tools make you figure it out yourself. AppointEase gets you running in minutes.</p>
+            <div className="space-y-10">
+              {[
+                { num: '1', title: 'Create your business account', desc: 'Sign up, add your business details and category. Your personal booking page is instantly created at appointease.io/book/your-name.' },
+                { num: '2', title: 'Share your booking link', desc: 'Send your unique link to clients via Instagram, WhatsApp, or text. They book directly on your page.' },
+                { num: '3', title: 'Reminders go out automatically', desc: 'AppointEase texts and emails your clients before every appointment. You never have to chase anyone again.' },
+              ].map((step, i) => (
+                <div key={i} className="flex gap-5">
+                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-white text-lg">{step.num}</div>
+                  <div>
+                    <h3 className="text-white font-bold text-lg mb-1">{step.title}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed">{step.desc}</p>
+                  </div>
                 </div>
+              ))}
+            </div>
+          </div>
+          <div className="relative">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80&auto=format&fit=crop" alt="Business owner using AppointEase on phone" className="rounded-3xl w-full object-cover h-96 shadow-2xl" />
+            <div className="absolute bottom-6 left-6 right-6 bg-slate-900/90 backdrop-blur rounded-2xl p-4 border border-slate-700">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <span className="text-emerald-400 text-xs font-mono">Reminder sent successfully</span>
               </div>
-            ))}
+              <p className="text-white text-sm leading-relaxed">Hi <span className="text-indigo-400 font-semibold">Sarah</span> 👋 Reminder for your appointment at <span className="text-indigo-400 font-semibold">Glamour Salon</span> tomorrow at 2:00 PM.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -122,38 +165,46 @@ export default function Landing({ setShowLogin }) {
       </section>
 
       <section className="py-16 px-6 bg-slate-50">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4 text-center">COMPARISON</p>
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-10 text-center">Why businesses switch to AppointEase</h2>
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left py-4 px-6 text-slate-500 font-medium">Feature</th>
-                  <th className="py-4 px-4 text-indigo-600 font-bold text-center">AppointEase</th>
-                  <th className="py-4 px-4 text-slate-400 font-medium text-center">Google Cal</th>
-                  <th className="py-4 px-4 text-slate-400 font-medium text-center">Vagaro</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ['Auto SMS reminders', true, false, true],
-                  ['Auto email reminders', true, false, true],
-                  ['Custom reminder timing', true, false, false],
-                  ['Personal booking link', true, false, true],
-                  ['Works for any business', true, true, false],
-                  ['Setup in 2 minutes', true, true, false],
-                  ['Affordable pricing', true, true, false],
-                ].map(([feature, us, google, vagaro], i) => (
-                  <tr key={i} className="border-b border-slate-50">
-                    <td className="py-3 px-6 text-slate-700 font-medium">{feature}</td>
-                    <td className="py-3 px-4 text-center">{us ? <span className="text-emerald-500 text-lg">✓</span> : <span className="text-slate-200 text-lg">✕</span>}</td>
-                    <td className="py-3 px-4 text-center">{google ? <span className="text-emerald-500 text-lg">✓</span> : <span className="text-slate-200 text-lg">✕</span>}</td>
-                    <td className="py-3 px-4 text-center">{vagaro ? <span className="text-emerald-500 text-lg">✓</span> : <span className="text-slate-200 text-lg">✕</span>}</td>
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-2 gap-4">
+            <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=80&auto=format&fit=crop" alt="Hair salon" className="rounded-2xl w-full h-48 object-cover" />
+            <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80&auto=format&fit=crop" alt="Barbershop" className="rounded-2xl w-full h-48 object-cover mt-8" />
+            <img src="https://images.unsplash.com/photo-1588776814546-1ffbb7df4a58?w=400&q=80&auto=format&fit=crop" alt="Dental" className="rounded-2xl w-full h-48 object-cover" />
+            <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80&auto=format&fit=crop" alt="Doctor" className="rounded-2xl w-full h-48 object-cover mt-8" />
+          </div>
+          <div>
+            <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4">COMPARISON</p>
+            <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Why businesses switch to AppointEase</h2>
+            <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="text-left py-4 px-6 text-slate-500 font-medium">Feature</th>
+                    <th className="py-4 px-4 text-indigo-600 font-bold text-center">AppointEase</th>
+                    <th className="py-4 px-4 text-slate-400 font-medium text-center">Google Cal</th>
+                    <th className="py-4 px-4 text-slate-400 font-medium text-center">Vagaro</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {[
+                    ['Auto SMS reminders', true, false, true],
+                    ['Auto email reminders', true, false, true],
+                    ['Custom reminder timing', true, false, false],
+                    ['Personal booking link', true, false, true],
+                    ['Works for any business', true, true, false],
+                    ['Setup in 2 minutes', true, true, false],
+                    ['Affordable pricing', true, true, false],
+                  ].map(([feature, us, google, vagaro], i) => (
+                    <tr key={i} className="border-b border-slate-50">
+                      <td className="py-3 px-6 text-slate-700 font-medium">{feature}</td>
+                      <td className="py-3 px-4 text-center">{us ? <span className="text-emerald-500 text-lg">✓</span> : <span className="text-slate-200 text-lg">✕</span>}</td>
+                      <td className="py-3 px-4 text-center">{google ? <span className="text-emerald-500 text-lg">✓</span> : <span className="text-slate-200 text-lg">✕</span>}</td>
+                      <td className="py-3 px-4 text-center">{vagaro ? <span className="text-emerald-500 text-lg">✓</span> : <span className="text-slate-200 text-lg">✕</span>}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
@@ -189,22 +240,22 @@ export default function Landing({ setShowLogin }) {
       </section>
 
       <section className="bg-indigo-600 py-20 px-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-4xl font-extrabold text-white mb-4">Ready to stop losing money to no-shows?</h2>
-          <p className="text-indigo-200 mb-8 text-lg">Join businesses already using AppointEase to fill their calendars.</p>
-          <button onClick={() => navigate('/pricing')} className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold px-10 py-4 rounded-full text-lg transition">Start your 7-day free trial</button>
-          <p className="text-indigo-300 text-sm mt-4">No credit card required · Cancel anytime</p>
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-4xl font-extrabold text-white mb-4">Ready to stop losing money to no-shows?</h2>
+            <p className="text-indigo-200 mb-8 text-lg">Join businesses already using AppointEase to fill their calendars.</p>
+            <button onClick={() => navigate('/pricing')} className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold px-10 py-4 rounded-full text-lg transition">Start your 7-day free trial</button>
+            <p className="text-indigo-300 text-sm mt-4">No credit card required · Cancel anytime</p>
+          </div>
+          <div className="relative">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80&auto=format&fit=crop" alt="Happy business owner" className="rounded-3xl w-full object-cover h-72 shadow-2xl opacity-90" />
+          </div>
         </div>
       </section>
 
       <footer className="bg-slate-900 py-8 px-6">
         <div className="max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2"><Logo />
-            <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">A</span>
-            </div>
-            <span className="font-semibold text-white">AppointEase</span>
-          </div>
+          <Logo dark={true} />
           <div className="flex gap-6 text-sm text-slate-500">
             <button onClick={() => setShowLogin(true)} className="hover:text-white transition">Business login</button>
             <button onClick={() => navigate('/businesses')} className="hover:text-white transition">Find a business</button>
