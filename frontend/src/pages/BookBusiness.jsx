@@ -219,7 +219,7 @@ export default function BookBusiness() {
               {(business.city || business.state) && (
                 <p className="text-slate-400 text-xs mt-1">📍 {[business.city, business.state].filter(Boolean).join(', ')}</p>
               )}
-              {business.phone {business.phone && <p className="text-slate-400 text-xs mt-0.5">📞 {business.phone}</p>}{business.phone && <p className="text-slate-400 text-xs mt-0.5">📞 {business.phone}</p>} <a href={"tel:" + business.phone} className="flex items-center gap-1 text-xs mt-0.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-semibold px-3 py-1.5 rounded-full transition w-fit">📞 Call {business.name}</a>}
+              {business.phone && <a href={"tel:" + business.phone} className="flex items-center gap-1 text-xs mt-0.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-semibold px-3 py-1.5 rounded-full transition w-fit">📞 Call {business.name}</a>}
             </div>
           </div>
         </div>
