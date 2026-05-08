@@ -8,7 +8,7 @@ export default function Landing({ setShowLogin }) {
     <div className="min-h-screen bg-white font-sans">
 
       <nav className="px-6 py-4 flex items-center justify-between sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-slate-100">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2"><Logo />
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/businesses')} className="text-sm text-slate-600 font-medium hidden md:block hover:text-indigo-600 transition">Find a business</button>
@@ -199,7 +199,7 @@ export default function Landing({ setShowLogin }) {
 
       <footer className="bg-slate-900 py-8 px-6">
         <div className="max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2"><Logo />
             <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white text-xs font-bold">A</span>
             </div>
