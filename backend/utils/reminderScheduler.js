@@ -98,7 +98,7 @@ const checkReminders = async () => {
 
 const startScheduler = () => {
   console.log('Reminder scheduler started!')
-  cron.schedule('0 * * * *', checkReminders)
+  cron.schedule('* * * * *', checkReminders)
   checkReminders()
 }
 
