@@ -1,7 +1,6 @@
 import Logo from '../Logo'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Logo from '../Logo'
 
 export default function Businesses() {
   const navigate = useNavigate()
@@ -61,8 +60,8 @@ export default function Businesses() {
     <div className="min-h-screen bg-slate-50">
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
+          
+            
           </div>
           <span className="font-semibold text-slate-800">AppointEase</span>
         </div>
