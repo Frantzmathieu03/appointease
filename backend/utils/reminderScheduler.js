@@ -2,56 +2,46 @@ const cron = require('node-cron')
 const Appointment = require('../models/Appointment')
 const Business = require('../models/Business')
 const User = require('../models/User')
-const nodemailer = require('nodemailer')
 const twilio = require('twilio')
+const { Resend } = require('resend')
 
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const sendEmail = async (to, subject, message) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  })
-
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to,
-    subject,
-    text: message
-  })
-  console.log(`Email sent to ${to}`)
+  try {
+    await resend.emails.send({
+      from: 'AppointEase <onboarding@resend.dev>',
+      to,
+      subject,
+      html: '<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;"><div style="background: #4f46e5; padding: 20px; border-radius: 12px 12px 0 0;"><h2 style="color: white; margin: 0;">AppointEase</h2></div><div style="background: white; padding: 24px; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px;"><p style="color: #334155; font-size: 16px;">' + message + '</p><p style="color: #94a3b8; font-size: 12px; margin-top: 24px;">AppointEase — Appointment reminders made easy</p></div></div>'
+    })
+    console.log('Email sent to', to)
+  } catch (err) {
+    console.log('Email error:', err.message)
+  }
 }
 
 const sendSMS = async (to, message) => {
-  await twilioClient.messages.create({
-    body: message,
-    from: process.env.TWILIO_PHONE,
-    to
-  })
-  console.log(`SMS sent to ${to}`)
-}
-
-const formatMessage = (template, data) => {
-  return template
-    .replace('{client_name}', data.clientName)
-    .replace('{business_name}', data.businessName)
-    .replace('{date}', data.date)
-    .replace('{time}', data.time)
-    .replace('{service}', data.service)
-}
-
-const checkAndSendReminders = async () => {
   try {
-    const now = new Date()
-
-    const appointments = await Appointment.find({
-      status: { $in: ['confirmed', 'rescheduled'] }
+    await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE,
+      to
     })
-    .populate('business')
-    .populate('client')
+    console.log('SMS sent to', to)
+  } catch (err) {
+    console.log('SMS error:', err.message)
+  }
+}
+
+const checkReminders = async () => {
+  try {
+    console.log('Running reminder check...')
+    const now = new Date()
+    const appointments = await Appointment.find({ status: 'confirmed' })
+      .populate('business')
+      .populate('client')
 
     for (const appointment of appointments) {
       const apptTime = new Date(appointment.date)
@@ -60,62 +50,56 @@ const checkAndSendReminders = async () => {
 
       const business = appointment.business
       const client = appointment.client
-      const reminders = business.notifications.reminders
-      const channels = business.notifications.channels
-      const customMessage = business.notifications.customMessage
 
-      const messageData = {
-        clientName: client.name,
-        businessName: business.name,
-        date: apptTime.toLocaleDateString(),
-        time: apptTime.toLocaleTimeString(),
-        service: appointment.service
-      }
+      if (!business || !client) continue
 
-      const finalMessage = formatMessage(customMessage, messageData)
+      const reminders = business.notifications?.reminders || [{ value: 24, unit: 'hours' }]
 
       for (const reminder of reminders) {
         let reminderHours = reminder.value
         if (reminder.unit === 'days') reminderHours = reminder.value * 24
         if (reminder.unit === 'minutes') reminderHours = reminder.value / 60
 
-        const isTime = diffHours <= reminderHours && diffHours > reminderHours - 1
+        const isWithinWindow = diffHours > 0 && diffHours <= reminderHours && diffHours > (reminderHours - 1)
 
-        if (isTime) {
-          if (channels.email && client.email) {
+        if (isWithinWindow) {
+          const dateStr = apptTime.toLocaleDateString()
+          const timeStr = apptTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+          let msg = business.notifications?.customMessage ||
+            'Hi {client_name}, reminder for your appointment at {business_name} on {date} at {time}.'
+
+          msg = msg
+            .replace('{client_name}', client.name)
+            .replace('{business_name}', business.name)
+            .replace('{date}', dateStr)
+            .replace('{time}', timeStr)
+
+          if (business.notifications?.channels?.email !== false && client.email) {
             await sendEmail(
               client.email,
-              `Reminder: Your appointment at ${business.name}`,
-              finalMessage
+              'Appointment Reminder - ' + business.name,
+              msg
             )
           }
 
-          if (channels.sms && client.phone) {
-            await sendSMS(client.phone, finalMessage)
+          if (business.notifications?.channels?.sms !== false && client.phone) {
+            await sendSMS(client.phone, msg + ' - AppointEase')
           }
 
-          if (reminder.value === 24 && reminder.unit === 'hours') {
-            appointment.remindersSent.twentyFourHour = true
-          }
-          if (reminder.value === 2 && reminder.unit === 'hours') {
-            appointment.remindersSent.twoHour = true
-          }
-
-          await appointment.save()
+          console.log('Reminder sent for appointment:', appointment._id)
         }
       }
     }
   } catch (err) {
-    console.log('Scheduler error:', err.message)
+    console.log('Reminder error:', err.message)
   }
 }
 
 const startScheduler = () => {
-  cron.schedule('0 * * * *', () => {
-    console.log('Running reminder check...')
-    checkAndSendReminders()
-  })
   console.log('Reminder scheduler started!')
+  cron.schedule('0 * * * *', checkReminders)
+  checkReminders()
 }
 
 module.exports = startScheduler
