@@ -63,7 +63,7 @@ export default function Businesses() {
           
             
           </div>
-          <span className="font-semibold text-slate-800">AppointEase</span>
+          <Logo />
         </div>
         <button onClick={() => navigate('/client')} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2 rounded-lg transition">
           Sign in to book
