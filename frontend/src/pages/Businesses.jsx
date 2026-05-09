@@ -59,24 +59,9 @@ export default function Businesses() {
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-          
-            
-          </div>
-          <Logo />
-        </div>
-        <button onClick={() => navigate('/client')} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2 rounded-lg transition">
-          Sign in to book
-        </button>
+        <div className="cursor-pointer" onClick={() => navigate("/")}><Logo /></div>
+        <button onClick={() => navigate("/client")} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2 rounded-lg transition">Sign in to book</button>
       </nav>
-
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-slate-800 mb-3">Find a business near you</h1>
-          <p className="text-slate-500">Search by name, city, or zip code to find and book appointments instantly</p>
-        </div>
-
-        <form onSubmit={handleSearch} className="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
           <div className="grid md:grid-cols-4 gap-4">
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Business name..."
               className="border border-slate-300 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
