@@ -19,7 +19,7 @@ export default function Landing({ setShowLogin }) {
       {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
+          <div className="text-center md:text-left">
             <div className="inline-block bg-indigo-50 text-indigo-600 text-xs font-semibold px-4 py-1.5 rounded-full mb-6">Built for local service businesses in Boston & beyond</div>
             <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 leading-tight mb-5">
               Reduce no-shows by <span className="text-indigo-600">80% with automated reminders</span>
@@ -27,12 +27,12 @@ export default function Landing({ setShowLogin }) {
             <p className="text-slate-500 text-xl mb-10 leading-relaxed">
               AppointEase automatically texts and emails your clients before every appointment. Set up in 2 minutes. No technical skills needed.
             </p>
-            <div className="flex flex-wrap gap-3 mb-10">
+            <div className="flex flex-wrap gap-3 mb-10 justify-center md:justify-start">
               <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>📅</span> Automated reminders</div>
               <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>📱</span> SMS + Email</div>
               <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>⚡</span> 2 min setup</div>
             </div>
-            <div className="flex flex-wrap gap-4 mb-4">
+            <div className="flex flex-wrap gap-4 mb-4 justify-center md:justify-start">
               <button onClick={() => navigate('/pricing')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-full text-lg transition shadow-lg shadow-indigo-200">Start Free Trial — 7 Days Free</button>
               <button onClick={() => navigate('/book/frantz-business')} className="border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold px-8 py-4 rounded-full text-lg transition">See Live Demo →</button>
             </div>
