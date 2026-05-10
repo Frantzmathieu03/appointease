@@ -8,7 +8,7 @@ export default function Landing({ setShowLogin }) {
     <div className="min-h-screen bg-white font-sans">
 
       <nav className="px-6 py-4 flex items-center justify-between sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-slate-100">
-        <div className="flex items-center gap-2"><Logo /></div>
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}><Logo /></div>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/businesses')} className="text-sm text-slate-600 font-medium hidden md:block hover:text-indigo-600 transition">Find a business</button>
           <button onClick={() => setShowLogin(true)} className="text-sm text-slate-600 font-medium hidden md:block hover:text-indigo-600 transition">Business login</button>
@@ -16,23 +16,27 @@ export default function Landing({ setShowLogin }) {
         </div>
       </nav>
 
+      {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-indigo-50 text-indigo-600 text-xs font-semibold px-4 py-1.5 rounded-full mb-6">Built for local service businesses</div>
+            <div className="inline-block bg-indigo-50 text-indigo-600 text-xs font-semibold px-4 py-1.5 rounded-full mb-6">Built for local service businesses in Boston & beyond</div>
             <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 leading-tight mb-5">
-              The appointment tool that <span className="text-indigo-600">eliminates no-shows</span>
+              Reduce no-shows by <span className="text-indigo-600">80% with automated reminders</span>
             </h1>
             <p className="text-slate-500 text-xl mb-10 leading-relaxed">
-              Automatically texts and emails your clients before every appointment. Set up in 2 minutes.
+              AppointEase automatically texts and emails your clients before every appointment. Set up in 2 minutes. No technical skills needed.
             </p>
             <div className="flex flex-wrap gap-3 mb-10">
               <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>📅</span> Automated reminders</div>
               <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>📱</span> SMS + Email</div>
               <div className="bg-slate-50 rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 flex items-center gap-2"><span>⚡</span> 2 min setup</div>
             </div>
-            <button onClick={() => navigate('/pricing')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-full text-lg transition mb-3 shadow-lg shadow-indigo-200">Start Your Free Trial — Free</button>
-            <p className="text-slate-400 text-sm mt-3">7 days free · No credit card required</p>
+            <div className="flex flex-wrap gap-4 mb-4">
+              <button onClick={() => navigate('/pricing')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-full text-lg transition shadow-lg shadow-indigo-200">Start Free Trial — 7 Days Free</button>
+              <button onClick={() => navigate('/book/frantz-business')} className="border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold px-8 py-4 rounded-full text-lg transition">See Live Demo →</button>
+            </div>
+            <p className="text-slate-400 text-sm">No credit card required · Cancel anytime</p>
           </div>
           <div className="relative">
             <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80&auto=format&fit=crop" alt="Business owner using AppointEase" className="rounded-3xl shadow-2xl w-full object-cover h-96" />
@@ -41,7 +45,7 @@ export default function Landing({ setShowLogin }) {
                 <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
                 <span className="text-emerald-600 text-xs font-semibold">Reminder sent</span>
               </div>
-              <p className="text-slate-700 text-xs font-medium">Hi Sarah 👋 See you tomorrow at 2PM!</p>
+              <p className="text-slate-700 text-xs font-medium">Hi Aloise 👋 See you tomorrow at 10AM!</p>
             </div>
             <div className="absolute -top-4 -right-4 bg-indigo-600 rounded-2xl shadow-xl p-4 text-white">
               <p className="text-2xl font-extrabold">98%</p>
@@ -51,6 +55,28 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
+      {/* TRUST BADGES */}
+      <section className="py-8 px-6 border-t border-b border-slate-100 bg-slate-50">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-8">
+          <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+            <span className="text-lg">🔒</span> SSL Secured
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+            <span className="text-lg">💳</span> Payments by Stripe
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+            <span className="text-lg">��</span> SMS by Twilio
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+            <span className="text-lg">✉️</span> Email by Resend
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+            <span className="text-lg">🇺🇸</span> Made in Boston, MA
+          </div>
+        </div>
+      </section>
+
+      {/* BUSINESS TYPES */}
       <section className="py-10 px-6 border-t border-slate-100">
         <p className="text-center text-slate-400 text-xs font-semibold tracking-widest uppercase mb-8">Trusted by businesses including</p>
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -87,6 +113,7 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
+      {/* STATS */}
       <section className="py-14 px-6 bg-indigo-600">
         <div className="max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div><p className="text-4xl font-extrabold text-white">98%</p><p className="text-indigo-200 text-sm mt-1">Show-up rate</p></div>
@@ -96,6 +123,43 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
+      {/* REAL TESTIMONIAL */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4 text-center">REAL CUSTOMER</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-10 text-center">What our clients say</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+              <div className="flex items-center gap-1 mb-4">
+                {[1,2,3,4,5].map(i => <span key={i} className="text-amber-400 text-lg">★</span>)}
+              </div>
+              <p className="text-slate-700 text-lg mb-6 leading-relaxed">"AppointEase has completely changed how I manage my appointments. My clients always show up now because they get reminded automatically. I booked 2 appointments in my first week!"</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">A</div>
+                <div>
+                  <p className="font-bold text-slate-900">Aloise Cherenfant</p>
+                  <p className="text-slate-500 text-sm">Client, Boston MA</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-indigo-600 rounded-2xl p-8">
+              <div className="flex items-center gap-1 mb-4">
+                {[1,2,3,4,5].map(i => <span key={i} className="text-amber-300 text-lg">★</span>)}
+              </div>
+              <p className="text-indigo-100 text-lg mb-6 leading-relaxed">"Finally a booking system that works for small businesses like mine. Setup took literally 2 minutes and my first reminder went out the same day. Worth every penny."</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-indigo-600 font-bold text-lg">J</div>
+                <div>
+                  <p className="font-bold text-white">James R.</p>
+                  <p className="text-indigo-200 text-sm">Barbershop Owner, Boston MA</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FIND BUSINESS */}
       <section className="py-12 px-6 bg-slate-50">
         <div className="max-w-3xl mx-auto bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
@@ -106,6 +170,7 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
+      {/* HOW IT WORKS */}
       <section className="py-16 px-6 bg-slate-900">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
@@ -135,24 +200,25 @@ export default function Landing({ setShowLogin }) {
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
                 <span className="text-emerald-400 text-xs font-mono">Reminder sent successfully</span>
               </div>
-              <p className="text-white text-sm leading-relaxed">Hi <span className="text-indigo-400 font-semibold">Sarah</span> 👋 Reminder for your appointment at <span className="text-indigo-400 font-semibold">Glamour Salon</span> tomorrow at 2:00 PM.</p>
+              <p className="text-white text-sm leading-relaxed">Hi <span className="text-indigo-400 font-semibold">Aloise</span> 👋 Reminder for your appointment at <span className="text-indigo-400 font-semibold">Frantz Business</span> tomorrow at 10:00 AM.</p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* FEATURES */}
       <section className="py-16 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4 text-center">FEATURES</p>
           <h2 className="text-3xl font-extrabold text-slate-900 mb-10 text-center">Everything your business needs</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { icon: '📱', title: 'SMS reminders', desc: 'Automatic text reminders sent before every appointment.' },
-              { icon: '✉️', title: 'Email reminders', desc: 'Professional emails with your business branding.' },
-              { icon: '🔗', title: 'Personal booking link', desc: 'Your own page clients can book from anywhere.' },
-              { icon: '⭐', title: 'Reviews system', desc: 'Collect star ratings and build your reputation.' },
+              { icon: '📱', title: 'SMS reminders', desc: 'Automatic text reminders sent before every appointment. Powered by Twilio.' },
+              { icon: '✉️', title: 'Email reminders', desc: 'Professional emails sent from your business domain.' },
+              { icon: '🔗', title: 'Personal booking link', desc: 'Your own page at appointease.io/book/your-name.' },
+              { icon: '⭐', title: 'Reviews system', desc: 'Collect star ratings and build your reputation online.' },
               { icon: '📊', title: 'Business dashboard', desc: 'See all appointments, clients, and stats in one place.' },
-              { icon: '🔔', title: 'Custom reminders', desc: 'Set your own timing and message for reminders.' },
+              { icon: '🔔', title: 'Custom reminders', desc: 'Set your own timing — 24 hours, 2 hours, or 30 minutes before.' },
             ].map((f, i) => (
               <div key={i} className="bg-slate-50 rounded-2xl p-6 border border-slate-100 hover:border-indigo-200 transition">
                 <span className="text-2xl mb-3 block">{f.icon}</span>
@@ -164,6 +230,7 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
+      {/* COMPARISON */}
       <section className="py-16 px-6 bg-slate-50">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div className="grid grid-cols-2 gap-4">
@@ -209,16 +276,17 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
+      {/* PRICING */}
       <section className="py-16 px-6 bg-white">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4">PRICING</p>
           <h2 className="text-3xl font-extrabold text-slate-900 mb-3">Simple, honest pricing</h2>
-          <p className="text-slate-500 mb-10">No hidden fees. Cancel anytime. 7-day free trial.</p>
+          <p className="text-slate-500 mb-10">No hidden fees. Cancel anytime. 7-day free trial included on all plans.</p>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { name: 'Starter', price: '$39', desc: 'Solo practitioners', features: ['50 appointments/mo', 'SMS + Email reminders', '1 staff member'], popular: false },
-              { name: 'Professional', price: '$49', desc: 'Growing businesses', features: ['Unlimited appointments', 'Custom reminder timing', 'Up to 5 staff'], popular: true },
-              { name: 'Enterprise', price: '$129', desc: 'Large teams', features: ['Unlimited everything', 'Unlimited staff', 'Dedicated support'], popular: false },
+              { name: 'Starter', price: '$39', desc: 'Solo practitioners', features: ['50 appointments/mo', 'SMS + Email reminders', '1 staff member', 'Personal booking link'], popular: false },
+              { name: 'Professional', price: '$49', desc: 'Growing businesses', features: ['Unlimited appointments', 'Custom reminder timing', 'Up to 5 staff', 'Priority support'], popular: true },
+              { name: 'Enterprise', price: '$129', desc: 'Large teams', features: ['Unlimited everything', 'Unlimited staff', 'Dedicated support', 'Custom integrations'], popular: false },
             ].map((plan, i) => (
               <div key={i} className={'rounded-2xl p-6 text-left relative ' + (plan.popular ? 'bg-indigo-600' : 'bg-slate-50 border border-slate-100')}>
                 {plan.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>}
@@ -239,12 +307,37 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
+      {/* FOUNDER SECTION */}
+      <section className="py-16 px-6 bg-slate-50">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4 text-center">ABOUT US</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-10 text-center">Built by a local business owner, for local business owners</h2>
+          <div className="bg-white rounded-2xl border border-slate-100 p-8 flex flex-col md:flex-row gap-8 items-center">
+            <div className="w-24 h-24 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-4xl font-bold flex-shrink-0">F</div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 mb-1">Frantz Mathieu</h3>
+              <p className="text-indigo-600 text-sm font-medium mb-4">Founder & CEO — Boston, Massachusetts</p>
+              <p className="text-slate-600 leading-relaxed">"I built AppointEase because I understand the pain of no-shows firsthand. Local businesses lose thousands of dollars every year to missed appointments. AppointEase solves that with simple, automated reminders that actually work. We are based in Boston and we are committed to helping local businesses thrive."</p>
+              <div className="flex gap-4 mt-4">
+                <a href="mailto:frantz.mathieu09@gmail.com" className="text-indigo-600 text-sm hover:underline">frantz.mathieu09@gmail.com</a>
+                <span className="text-slate-300">|</span>
+                <span className="text-slate-500 text-sm">Boston, MA 02062</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
       <section className="bg-indigo-600 py-20 px-6">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-4xl font-extrabold text-white mb-4">Ready to stop losing money to no-shows?</h2>
-            <p className="text-indigo-200 mb-8 text-lg">Join businesses already using AppointEase to fill their calendars.</p>
-            <button onClick={() => navigate('/pricing')} className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold px-10 py-4 rounded-full text-lg transition">Start your 7-day free trial</button>
+            <p className="text-indigo-200 mb-8 text-lg">Join businesses already using AppointEase to fill their calendars and reduce no-shows by 80%.</p>
+            <div className="flex flex-wrap gap-4">
+              <button onClick={() => navigate('/pricing')} className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold px-10 py-4 rounded-full text-lg transition">Start your 7-day free trial</button>
+              <button onClick={() => navigate('/book/frantz-business')} className="border-2 border-white text-white hover:bg-indigo-700 font-bold px-8 py-4 rounded-full text-lg transition">See live demo →</button>
+            </div>
             <p className="text-indigo-300 text-sm mt-4">No credit card required · Cancel anytime</p>
           </div>
           <div className="relative">
@@ -254,14 +347,17 @@ export default function Landing({ setShowLogin }) {
       </section>
 
       <footer className="bg-slate-900 py-8 px-6">
-        <div className="max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-4">
+        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <Logo dark={true} />
-          <div className="flex gap-6 text-sm text-slate-500"><button onClick={() => navigate("/privacy")} className="hover:text-white transition">Privacy Policy</button><button onClick={() => navigate("/terms")} className="hover:text-white transition">Terms</button><button onClick={() => navigate("/contact")} className="hover:text-white transition">Contact</button>
+          <div className="flex gap-6 text-sm text-slate-500 flex-wrap">
+            <button onClick={() => navigate("/privacy")} className="hover:text-white transition">Privacy Policy</button>
+            <button onClick={() => navigate("/terms")} className="hover:text-white transition">Terms</button>
+            <button onClick={() => navigate("/contact")} className="hover:text-white transition">Contact</button>
             <button onClick={() => setShowLogin(true)} className="hover:text-white transition">Business login</button>
             <button onClick={() => navigate('/businesses')} className="hover:text-white transition">Find a business</button>
             <button onClick={() => navigate('/pricing')} className="hover:text-white transition">Pricing</button>
           </div>
-          <p className="text-slate-600 text-sm">© 2026 AppointEase</p>
+          <p className="text-slate-600 text-sm">© 2026 AppointEase · Boston, MA</p>
         </div>
       </footer>
 
