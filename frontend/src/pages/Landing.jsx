@@ -76,6 +76,55 @@ export default function Landing({ setShowLogin }) {
         </div>
       </section>
 
+
+      {/* STORY SECTION */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4 text-center">THE PROBLEM WE SOLVE</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-4 text-center">From frustrated to fully booked</h2>
+          <p className="text-slate-500 text-center mb-12">See how AppointEase transforms your business in minutes.</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="text-center">
+              <div className="relative mb-4">
+                <img src="https://images.unsplash.com/photo-1541199249251-f713e6145474?w=400&q=80&auto=format&fit=crop" alt="Stressed business owner" className="rounded-2xl shadow-xl w-full h-48 object-cover" />
+                <div className="absolute top-3 left-3 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded-full">BEFORE</div>
+              </div>
+              <p className="text-slate-800 font-bold text-sm">Empty calendar</p>
+              <p className="text-slate-400 text-xs mt-1">Clients not showing up. Money lost.</p>
+            </div>
+            <div className="text-center">
+              <div className="relative mb-4">
+                <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80&auto=format&fit=crop" alt="Discovering AppointEase" className="rounded-2xl shadow-xl w-full h-48 object-cover" />
+                <div className="absolute top-3 left-3 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-full">STEP 1</div>
+              </div>
+              <p className="text-slate-800 font-bold text-sm">Discovers AppointEase</p>
+              <p className="text-slate-400 text-xs mt-1">Signs up in 2 minutes. No tech skills needed.</p>
+            </div>
+            <div className="text-center">
+              <div className="relative mb-4">
+                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80&auto=format&fit=crop" alt="Full calendar" className="rounded-2xl shadow-xl w-full h-48 object-cover" />
+                <div className="absolute top-3 left-3 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-full">STEP 2</div>
+              </div>
+              <p className="text-slate-800 font-bold text-sm">Reminders go out</p>
+              <p className="text-slate-400 text-xs mt-1">Clients get SMS + email automatically.</p>
+            </div>
+            <div className="text-center">
+              <div className="relative mb-4">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80&auto=format&fit=crop" alt="Happy business owner" className="rounded-2xl shadow-xl w-full h-48 object-cover" />
+                <div className="absolute top-3 left-3 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full">AFTER</div>
+              </div>
+              <p className="text-slate-800 font-bold text-sm">Fully booked</p>
+              <p className="text-slate-400 text-xs mt-1">80% fewer no-shows. More revenue.</p>
+            </div>
+          </div>
+          <div className="mt-12 bg-indigo-50 rounded-2xl p-6 text-center border border-indigo-100">
+            <p className="text-2xl font-extrabold text-slate-900 mb-2">Ready to fill your calendar?</p>
+            <p className="text-slate-500 mb-6">Join businesses already using AppointEase to eliminate no-shows.</p>
+            <button onClick={() => window.location.href='/pricing'} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-full text-lg transition shadow-lg shadow-indigo-200">Start free for 7 days →</button>
+          </div>
+        </div>
+      </section>
+
       {/* BUSINESS TYPES */}
       <section className="py-10 px-6 border-t border-slate-100">
         <p className="text-center text-slate-400 text-xs font-semibold tracking-widest uppercase mb-8">Trusted by businesses including</p>
