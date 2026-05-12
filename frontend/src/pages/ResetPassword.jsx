@@ -39,9 +39,6 @@ export default function ResetPassword() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl border border-slate-200 p-8 w-full max-w-md">
         <div className="flex items-center gap-3 mb-8 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
-          </div>
           <Logo />
         </div>
 

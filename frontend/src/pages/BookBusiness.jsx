@@ -194,11 +194,7 @@ export default function BookBusiness() {
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
-          </div>
-          <Logo />
+        <div className="cursor-pointer" onClick={() => navigate('/')}><Logo />
         </div>
         {client && (
           <div className="flex items-center gap-3">
