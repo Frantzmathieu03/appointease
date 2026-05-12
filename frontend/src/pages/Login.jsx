@@ -83,11 +83,7 @@ export default function Login({ setToken, setShowLogin }) {
   if (isForgot) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl border border-slate-200 p-8 w-full max-w-md">
-        <div className="flex items-center gap-3 mb-8 cursor-pointer" onClick={() => setShowLogin(false)}>
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
-          </div>
-          <Logo />
+        <div className="cursor-pointer mb-8" onClick={() => setShowLogin(false)}><Logo />
         </div>
         <h2 className="text-2xl font-bold text-slate-800 mb-2">Forgot password</h2>
         <p className="text-slate-500 text-sm mb-6">Enter your email and we will send a reset link to your phone.</p>
@@ -112,11 +108,7 @@ export default function Login({ setToken, setShowLogin }) {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl border border-slate-200 p-8 w-full max-w-md">
-        <div className="flex items-center gap-3 mb-8 cursor-pointer" onClick={() => setShowLogin(false)}>
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">A</span>
-          </div>
-          <Logo />
+        <div className="cursor-pointer mb-8" onClick={() => setShowLogin(false)}><Logo />
         </div>
 
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
