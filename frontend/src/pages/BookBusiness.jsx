@@ -122,15 +122,24 @@ export default function BookBusiness() {
   }
 
   const handleCancel = async (appointmentId) => {
+    if (!window.confirm('Are you sure you want to cancel this appointment?')) return
     setCancelling(appointmentId)
     try {
       const token = localStorage.getItem('clientToken')
-      await fetch('https://appointease-03wm.onrender.com/api/appointments/cancel/' + appointmentId, {
+      const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/cancel/' + appointmentId, {
         method: 'PUT',
-        headers: { Authorization: 'Bearer ' + token }
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: '' })
       })
-      fetchMyAppointments()
-    } catch (err) {}
+      const data = await res.json()
+      if (res.ok) {
+        fetchMyAppointments()
+      } else {
+        alert(data.message || 'Could not cancel appointment')
+      }
+    } catch (err) {
+      alert('Something went wrong')
+    }
     setCancelling(null)
   }
 
