@@ -80,6 +80,24 @@ export default function Landing({ setShowLogin }) {
       {/* STORY SECTION */}
       <section className="py-16 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
+          <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4 text-center">SEE IT IN ACTION</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-4 text-center">Everything your business needs</h2>
+          <p className="text-slate-500 text-center mb-12">Real screenshots from AppointEase — reminders, calendar, bookings and more.</p>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="rounded-3xl overflow-hidden shadow-2xl">
+              <img src="/all_in_one.png" alt="AppointEase in action" className="w-full" />
+            </div>
+            <div className="rounded-3xl overflow-hidden shadow-2xl">
+              <img src="/texte_remin.png" alt="AppointEase app screens" className="w-full" />
+            </div>
+          </div>
+          <div className="text-center mt-10">
+            <button onClick={() => window.location.href='/pricing'} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-full text-lg transition shadow-lg shadow-indigo-200">Start free for 7 days →</button>
+          </div>
+        </div>
+      </section>
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
           <p className="text-indigo-600 text-xs font-semibold tracking-widest uppercase mb-4 text-center">THE PROBLEM WE SOLVE</p>
           <h2 className="text-3xl font-extrabold text-slate-900 mb-4 text-center">From frustrated to fully booked</h2>
           <p className="text-slate-500 text-center mb-12">See how AppointEase transforms your business in minutes.</p>
