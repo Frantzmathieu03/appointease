@@ -53,7 +53,13 @@ export default function BookBusiness() {
 
   const fetchBusiness = async () => {
     try {
-      const res = await fetch('https://appointease-03wm.onrender.com/api/auth/businesses?search=' + slug.replace(/-/g, ' '))
+      const parts = slug.split('-')
+      const lastPart = parts[parts.length - 1]
+      const isId = lastPart.length === 6
+      const url = isId
+        ? 'https://appointease-03wm.onrender.com/api/auth/businesses?id=' + lastPart
+        : 'https://appointease-03wm.onrender.com/api/auth/businesses?search=' + slug.replace(/-/g, ' ')
+      const res = await fetch(url)
       const data = await res.json()
       if (data.length > 0) setBusiness(data[0])
       setLoading(false)

@@ -13,7 +13,7 @@ export default function Dashboard({ setToken, setShowLogin }) {
   const urlParams = new URLSearchParams(window.location.search)
   const paymentSuccess = urlParams.get('success')
 
-  const bookingLink = 'https://appointease.io/book/' + (business.name || '').toLowerCase().replace(/\s+/g, '-')
+  const bookingLink = 'https://appointease.io/book/' + (business.name || '').toLowerCase().replace(/\s+/g, '-') + '-' + (business._id || '').slice(-6)
 
   useEffect(() => {
     fetchAppointments()

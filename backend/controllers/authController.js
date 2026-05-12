@@ -105,8 +105,19 @@ exports.resetPassword = async (req, res) => {
 
 exports.getBusinesses = async (req, res) => {
   try {
-    const { search, category, city, zipCode } = req.query
+    const { search, category, city, zipCode, id } = req.query
     let filter = {}
+    if (id) {
+      const businesses = await Business.find({}, '_id name category phone email city state zipCode address')
+      const matched = businesses.filter(b => b._id.toString().slice(-6) === id)
+      const Review = require('../models/Review')
+      const result = await Promise.all(matched.map(async (b) => {
+        const reviews = await Review.find({ business: b._id })
+        const avgRating = reviews.length > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10 : 0
+        return { _id: b._id, name: b.name, category: b.category, phone: b.phone, email: b.email, city: b.city, state: b.state, zipCode: b.zipCode, address: b.address, avgRating, totalReviews: reviews.length }
+      }))
+      return res.status(200).json(result)
+    }
     if (search) filter.name = { $regex: search, $options: 'i' }
     if (category && category !== 'all') filter.category = category
     if (city) filter.city = { $regex: city, $options: 'i' }
