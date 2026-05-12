@@ -59,7 +59,7 @@ exports.cancelAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' })
     }
 
-    if (appointment.client.toString() !== req.user.id) {
+    if (appointment.client.toString() !== req.user.id && appointment.business.toString() !== req.user.id) {
       return res.status(401).json({ message: 'Not authorized' })
     }
 

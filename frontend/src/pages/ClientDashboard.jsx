@@ -35,7 +35,9 @@ export default function ClientDashboard() {
   }
 
   const handleCancel = async (id) => {
-    const reason = prompt('Reason for cancellation (optional):')
+    const confirmed = window.confirm('Are you sure you want to cancel this appointment?')
+    if (!confirmed) return
+    const reason = ''
     try {
       const res = await fetch('https://appointease-03wm.onrender.com/api/appointments/cancel/' + id, {
         method: 'PUT',
