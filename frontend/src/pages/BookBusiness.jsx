@@ -53,12 +53,10 @@ export default function BookBusiness() {
 
   const fetchBusiness = async () => {
     try {
-      const parts = slug.split('-')
-      const lastPart = parts[parts.length - 1]
-      const isId = lastPart.length === 6
-      const url = isId
-        ? 'https://appointease-03wm.onrender.com/api/auth/businesses?id=' + lastPart
-        : 'https://appointease-03wm.onrender.com/api/auth/businesses?search=' + cleanSlug.replace(/-/g, ' ')
+      const isMongoId = /^[a-f0-9]{24}$/.test(slug)
+      const url = isMongoId
+        ? 'https://appointease-03wm.onrender.com/api/auth/businesses?fullid=true&id=' + slug
+        : 'https://appointease-03wm.onrender.com/api/auth/businesses?search=' + slug.replace(/-/g, ' ')
       const res = await fetch(url)
       const data = await res.json()
       if (data.length > 0) setBusiness(data[0])
