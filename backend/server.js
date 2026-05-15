@@ -22,6 +22,7 @@ const paymentRoutes = require('./routes/payments')
 const startScheduler = require('./utils/reminderScheduler')
 
 app.use('/api/auth', authRoutes)
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }))
 app.use('/api/appointments', appointmentRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/reviews', reviewRoutes)
@@ -44,3 +45,13 @@ mongoose.connect(process.env.MONGO_URI)
   .catch((err) => {
     console.log('Connection error:', err)
   })
+
+// Keep server alive - ping every 14 minutes
+const https = require('https')
+setInterval(() => {
+  https.get('https://appointease-03wm.onrender.com/api/health', (res) => {
+    console.log('Keep-alive ping sent:', res.statusCode)
+  }).on('error', (err) => {
+    console.log('Keep-alive ping failed:', err.message)
+  })
+}, 14 * 60 * 1000)
