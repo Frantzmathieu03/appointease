@@ -59,9 +59,12 @@ export default function BookBusiness() {
         : 'https://appointease-03wm.onrender.com/api/auth/businesses?search=' + slug.replace(/-/g, ' ')
       const res = await fetch(url)
       const data = await res.json()
-      if (data.length > 0) setBusiness(data[0])
+      console.log('BookBusiness fetch result:', JSON.stringify(data))
+      if (data && data.length > 0) setBusiness(data[0])
+      else console.log('No business found for slug:', slug)
       setLoading(false)
     } catch (err) {
+      console.log('BookBusiness fetch error:', err)
       setLoading(false)
     }
   }
