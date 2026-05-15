@@ -61,7 +61,7 @@ export default function Businesses() {
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {businesses.map(b => (
-              <div key={b._id} className='bg-white rounded-2xl border border-slate-100 p-6 hover:shadow-md transition cursor-pointer' onClick={() => navigate('/book/' + b._id).replace(/s+/g, '-'))}>
+              <div key={b._id} className='bg-white rounded-2xl border border-slate-100 p-6 hover:shadow-md transition cursor-pointer' onClick={() => navigate('/book/' + b._id)}>
                 <div className='flex items-center gap-3 mb-4'>
                   <div className='w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl'>
                     {b.category === 'salon' ? '💇' : b.category === 'barbershop' ? '✂️' : b.category === 'dental' ? '🦷' : b.category === 'doctor' ? '🩺' : b.category === 'lawyer' ? '⚖️' : '🏢'}
