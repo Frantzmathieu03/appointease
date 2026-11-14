@@ -1,31 +1,20 @@
-const mongoose = require('mongoose')
+// Reviews — Postgres table: public.reviews
+const { makeModel } = require('./_pg')
 
-const reviewSchema = new mongoose.Schema({
-  business: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Business',
-    required: true
+module.exports = makeModel({
+  table: 'reviews',
+  fields: {
+    business: 'business_id',
+    client: 'client_id',
+    appointment: 'appointment_id',
+    rating: 'rating',
+    comment: 'comment',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   },
-  client: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  appointment: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Appointment',
-    required: true
-  },
-  rating: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 5
-  },
-  comment: {
-    type: String,
-    default: ''
+  populates: {
+    business: () => require('./Business'),
+    client: () => require('./User'),
+    appointment: () => require('./Appointment')
   }
-}, { timestamps: true })
-
-module.exports = mongoose.model('Review', reviewSchema)
+})

@@ -1,5 +1,5 @@
 const express = require('express')
-const mongoose = require('mongoose')
+const { pool } = require('./db')
 const cors = require('cors')
 const dotenv = require('dotenv')
 
@@ -34,9 +34,9 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 8000
 
-mongoose.connect(process.env.MONGO_URI)
+pool.query('SELECT 1')
   .then(() => {
-    console.log('MongoDB connected!')
+    console.log('PostgreSQL connected!')
     startScheduler()
     app.listen(PORT, () => {
       console.log('Server running on port ' + PORT)
@@ -44,12 +44,14 @@ mongoose.connect(process.env.MONGO_URI)
   })
   .catch((err) => {
     console.log('Connection error:', err)
+    process.exit(1)
   })
 
 // Keep server alive - ping every 14 minutes
 const https = require('https')
+const keepAliveUrl = process.env.KEEP_ALIVE_URL || 'https://appointease-03wm.onrender.com/api/health'
 setInterval(() => {
-  https.get('https://appointease-03wm.onrender.com/api/health', (res) => {
+  https.get(keepAliveUrl, (res) => {
     console.log('Keep-alive ping sent:', res.statusCode)
   }).on('error', (err) => {
     console.log('Keep-alive ping failed:', err.message)

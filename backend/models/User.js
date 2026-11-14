@@ -1,23 +1,14 @@
-const mongoose = require('mongoose')
+// Users (booking clients) — Postgres table: public.users
+const { makeModel } = require('./_pg')
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  phone: {
-    type: String,
-    required: true
+module.exports = makeModel({
+  table: 'users',
+  fields: {
+    name: 'name',
+    email: 'email',
+    password: 'password_hash',
+    phone: 'phone',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   }
-}, { timestamps: true })
-
-module.exports = mongoose.model('User', userSchema)
+})
