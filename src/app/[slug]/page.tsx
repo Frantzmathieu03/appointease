@@ -16,6 +16,30 @@ export default async function BusinessPage({
   const { business, services } = page;
   const tz = business.timezone;
 
+  // Reviews (carried over from the old app): average + latest few, public.
+  let reviewSummary: { avg: number; total: number; latest: { rating: number; comment: string | null; name: string }[] } | null = null;
+  if (!page.demoMode && isSupabaseConfigured()) {
+    const supabase = await createServerSupabase();
+    const { data: revs } = await supabase
+      .from("reviews")
+      .select("rating, comment, created_at, customers:customer_id ( full_name )")
+      .eq("business_id", business.id)
+      .order("created_at", { ascending: false });
+    if (revs && revs.length > 0) {
+      const avg = revs.reduce((s, r) => s + r.rating, 0) / revs.length;
+      reviewSummary = {
+        avg: Math.round(avg * 10) / 10,
+        total: revs.length,
+        latest: revs.slice(0, 3).map((r) => ({
+          rating: r.rating,
+          comment: r.comment,
+          name:
+            (r as unknown as { customers: { full_name: string } }).customers?.full_name ?? "Customer",
+        })),
+      };
+    }
+  }
+
   // If the signed-in customer has a next appointment here, it sits on top —
   // with Reschedule / Cancel one tap away (owner spec).
   let nextAppt: { starts_at: string; manage_token: string; serviceName: string } | null = null;
@@ -100,6 +124,24 @@ export default async function BusinessPage({
           </div>
         ))}
       </div>
+
+      {reviewSummary && (
+        <div className="card">
+          <h2>
+            {reviewSummary.avg} ★ <span className="small">· {reviewSummary.total} review{reviewSummary.total === 1 ? "" : "s"}</span>
+          </h2>
+          {reviewSummary.latest.map((r, i) => (
+            <div key={i} style={{ padding: "8px 0", borderBottom: i < reviewSummary!.latest.length - 1 ? "1px solid var(--line)" : "none" }}>
+              <div style={{ fontWeight: 600 }}>
+                {"★".repeat(r.rating)}
+                <span style={{ color: "var(--line)" }}>{"★".repeat(5 - r.rating)}</span>
+                <span className="small" style={{ fontWeight: 400 }}> — {r.name}</span>
+              </div>
+              {r.comment && <p className="small" style={{ margin: "2px 0 0" }}>{r.comment}</p>}
+            </div>
+          ))}
+        </div>
+      )}
 
       <p className="small center">
         <Link href="/login">Sign in</Link> · <Link href="/signup">Create an account</Link> ·{" "}

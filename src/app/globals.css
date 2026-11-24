@@ -172,6 +172,14 @@ textarea { min-height: 84px; resize: vertical; }
 }
 .check-dot.done { background: var(--green); color: #fff; }
 
+.badge {
+  display: inline-grid; place-items: center;
+  min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: 999px; background: var(--red); color: #fff;
+  font-size: 12px; font-weight: 800; line-height: 1;
+  vertical-align: super; margin-left: 5px;
+}
+
 .thread { display: flex; flex-direction: column; gap: 8px; }
 .bubble {
   max-width: 82%; padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.45;

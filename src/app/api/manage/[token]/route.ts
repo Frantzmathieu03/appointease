@@ -3,9 +3,30 @@ import { createAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { cancelReminders, rescheduleReminders } from "@/lib/reminders";
 
 // Secure manage link from reminder messages: /manage/<token>
-// POST { action: "cancel" }            — frees the slot, stops reminders
+// GET                                  — appointment details for the page
+// POST { action: "cancel", reason? }   — frees the slot, stops reminders
 // POST { action: "reschedule", startsAt } — moves the appointment,
 //      re-times its reminders. The token itself is the credential.
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ error: "Demo mode — nothing to manage yet." }, { status: 400 });
+  }
+  const { token } = await params;
+  const admin = createAdminSupabase();
+  const { data: appt } = await admin
+    .from("appointments")
+    .select(
+      "id, starts_at, ends_at, status, staff_id, service_id, businesses:business_id ( name, slug, address, timezone ), services:service_id ( name, duration_minutes ), customers:customer_id ( full_name )"
+    )
+    .eq("manage_token", token)
+    .single();
+  if (!appt) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
+  return NextResponse.json({ appointment: appt });
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
@@ -30,7 +51,10 @@ export async function POST(
   if (body?.action === "cancel") {
     const { error } = await admin
       .from("appointments")
-      .update({ status: "cancelled" })
+      .update({
+        status: "cancelled",
+        cancellation_reason: body.reason ? String(body.reason).slice(0, 200) : null,
+      })
       .eq("id", appt.id);
     if (error) return NextResponse.json({ error: "Cancel failed" }, { status: 500 });
     await cancelReminders(admin, appt.id);

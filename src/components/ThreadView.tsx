@@ -1,0 +1,151 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createBrowserSupabase } from "@/lib/supabase-browser";
+import type { Message } from "@/lib/types";
+
+/**
+ * Two-way in-app chat between one customer and one business.
+ * - Loads the thread, subscribes to Supabase Realtime inserts, and polls
+ *   every 15 seconds as a fallback — a message sent on one side appears
+ *   on the other without a manual refresh.
+ * - Opening/reading the thread marks the other side's messages read,
+ *   which clears the unread badges.
+ * - Sending goes through POST /api/messages so the server can run the
+ *   notification dispatcher (email / SMS / push alerts + audit log).
+ */
+export default function ThreadView({
+  businessId,
+  customerId,
+  viewer,
+}: {
+  businessId: string;
+  customerId: string;
+  viewer: "customer" | "business";
+}) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const otherSender = viewer === "customer" ? "business" : "customer";
+
+  const markRead = useCallback(async () => {
+    const supabase = createBrowserSupabase();
+    await supabase
+      .from("messages")
+      .update({ read_at: new Date().toISOString() })
+      .eq("business_id", businessId)
+      .eq("customer_id", customerId)
+      .eq("sender", otherSender)
+      .is("read_at", null);
+  }, [businessId, customerId, otherSender]);
+
+  const load = useCallback(async () => {
+    const supabase = createBrowserSupabase();
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("business_id", businessId)
+      .eq("customer_id", customerId)
+      .order("created_at", { ascending: true })
+      .limit(200);
+    if (data) {
+      setMessages(data as Message[]);
+      if ((data as Message[]).some((m) => m.sender === otherSender && !m.read_at)) {
+        await markRead();
+      }
+    }
+  }, [businessId, customerId, otherSender, markRead]);
+
+  useEffect(() => {
+    load();
+    const supabase = createBrowserSupabase();
+    const channel = supabase
+      .channel(`thread-${businessId}-${customerId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `business_id=eq.${businessId}`,
+        },
+        (payload) => {
+          const m = payload.new as Message;
+          if (m.customer_id === customerId) load();
+        }
+      )
+      .subscribe();
+    const t = setInterval(load, 15000); // polling fallback
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(t);
+    };
+  }, [load, businessId, customerId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length]);
+
+  async function send(e: React.FormEvent) {
+    e.preventDefault();
+    const body = draft.trim();
+    if (!body || sending) return;
+    setSending(true);
+    setError("");
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId, customerId, body }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Message failed to send.");
+      } else {
+        setDraft("");
+        await load();
+      }
+    } catch {
+      setError("Message failed to send.");
+    }
+    setSending(false);
+  }
+
+  return (
+    <div>
+      <div className="thread" style={{ marginBottom: 12 }}>
+        {messages.length === 0 && (
+          <p className="small">No messages yet — say hello below.</p>
+        )}
+        {messages.map((m) => (
+          <div key={m.id} className={m.sender === viewer ? "bubble mine" : "bubble"}>
+            <div>{m.body}</div>
+            <div className="small">
+              {new Date(m.created_at).toLocaleString([], {
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </div>
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+      {error && <div className="error">{error}</div>}
+      <form onSubmit={send} style={{ display: "flex", gap: 8 }}>
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Write a message…"
+          aria-label="Write a message"
+        />
+        <button className="btn btn-primary" type="submit" disabled={sending || !draft.trim()}>
+          Send
+        </button>
+      </form>
+    </div>
+  );
+}
