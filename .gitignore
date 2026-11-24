@@ -1,4 +1,29 @@
-node_modules
+# dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# environment — never commit secrets; .env.example is the template
 .env
-backend/.env
-frontend/.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel
+
+# logs & OS noise
+*.log
+.DS_Store
+
+# local build tooling / scratch from the rebuild process (not part of the app)
+tools/
+work/
+test/
+mirror/
+commits.json
+tree.json
+push_result.json
+REBUILD_PLAN.md
+SUPABASE_SETUP.md
