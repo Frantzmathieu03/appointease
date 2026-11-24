@@ -78,6 +78,26 @@ export interface Message {
 export type ReminderKind = "confirmation" | "before_24h" | "before_2h";
 export type ReminderChannel = "email" | "sms";
 
+export interface Review {
+  id: string;
+  business_id: string;
+  customer_id: string;
+  appointment_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+}
+
+export interface PushSubscriptionRow {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  user_agent: string | null;
+  created_at: string;
+}
+
 export function formatPrice(priceCents: number): string {
   if (priceCents === 0) return "Free";
   return `$${(priceCents / 100).toFixed(priceCents % 100 === 0 ? 0 : 2)}`;

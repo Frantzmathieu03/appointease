@@ -17,7 +17,7 @@
 // supabase/functions/reminders/ for projects that prefer it there.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { sendEmail, sendSms } from "./notify";
+import { dispatchEmail, dispatchSms } from "./dispatch";
 import { formatDateInZone, formatTimeInZone } from "./slots";
 
 const HOUR = 3600000;
@@ -174,10 +174,9 @@ export async function processDueReminders(admin: SupabaseClient) {
         if (!to) {
           detail = "Customer has no email on file.";
         } else {
-          const r = await sendEmail({ to, subject, text: body });
-          status = r.delivered ? "sent" : "skipped";
+          const r = await dispatchEmail({ to, subject, text: body });
+          status = r.status === "failed" ? "failed" : r.delivered ? "sent" : "skipped";
           detail = r.detail;
-          if (!r.delivered && r.detail.includes("responded")) status = "failed";
         }
       } else {
         const to = appt.customers?.phone;
@@ -185,10 +184,14 @@ export async function processDueReminders(admin: SupabaseClient) {
           detail = "Customer has no phone on file.";
         } else {
           // SMS gets the short form of the same copy.
-          const r = await sendSms({ to, body: `${subject}. ${body.split("\n\n")[2] ?? ""} Manage: ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://appointease.io"}/manage/${appt.manage_token}` });
-          status = r.delivered ? "sent" : "skipped";
-          detail = r.detail;
-          if (!r.delivered && r.detail.includes("responded")) status = "failed";
+          const r = await dispatchSms({ to, body: `${subject}. ${body.split("\n\n")[2] ?? ""} Manage: ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://appointease.io"}/manage/${appt.manage_token}` });
+          if (r.status === "sms_pending_provider") {
+            status = "skipped";
+            detail = `sms_pending_provider — ${r.detail}`;
+          } else {
+            status = r.status === "failed" ? "failed" : r.delivered ? "sent" : "skipped";
+            detail = r.detail;
+          }
         }
       }
     }

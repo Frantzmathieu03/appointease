@@ -4,10 +4,13 @@ import { processDueReminders } from "@/lib/reminders";
 
 // GET /api/cron/reminders?key=<CRON_SECRET>
 // Sends every due confirmation / 24h / 2h reminder.
-// Point a scheduler at it every few minutes: Vercel Cron (see vercel.json),
-// Supabase pg_cron, or any external pinger.
+// Point a scheduler at it every few minutes: Vercel Cron (see vercel.json —
+// Vercel sends the secret as an Authorization: Bearer header), Supabase
+// pg_cron, or any external pinger.
 export async function GET(req: NextRequest) {
-  const key = req.nextUrl.searchParams.get("key") ?? req.headers.get("x-cron-secret");
+  const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const key =
+    req.nextUrl.searchParams.get("key") ?? req.headers.get("x-cron-secret") ?? bearer;
   if (!process.env.CRON_SECRET || key !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
