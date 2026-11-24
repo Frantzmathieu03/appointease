@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBusinessPageData, hoursSummary } from "@/lib/data";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getBillingState } from "@/lib/plans";
 import { formatPrice } from "@/lib/types";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
@@ -15,6 +16,42 @@ export default async function BusinessPage({
   if (!page) notFound();
   const { business, services } = page;
   const tz = business.timezone;
+
+  // Billing gate: a business whose trial ended with no active subscription
+  // (or whose subscription lapsed past its grace window) shows a paused
+  // notice instead of the booking page. Nothing is deleted — existing
+  // appointments stay manageable and the owner dashboard stays open.
+  if (!getBillingState(business).bookingLive) {
+    return (
+      <main className="column">
+        <div className="hero-card">
+          <p className="eyebrow">{business.type}</p>
+          <h1>{business.name}</h1>
+          {business.address && <p className="lede">{business.address}</p>}
+        </div>
+        <div className="card center">
+          <h2>Online booking is temporarily unavailable</h2>
+          <p className="lede">
+            {business.name} isn&apos;t taking online bookings right now.
+            {business.phone && (
+              <>
+                {" "}You can still reach them at{" "}
+                <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{business.phone}</a>.
+              </>
+            )}
+          </p>
+          <p className="small">
+            Already have an appointment? You can still view, reschedule or
+            cancel it from <Link href="/my-appointments">My appointments</Link>.
+          </p>
+          <p className="small">
+            Business owner? <Link href="/owner">Sign in</Link> to reactivate
+            your booking page.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   // Reviews (carried over from the old app): average + latest few, public.
   let reviewSummary: { avg: number; total: number; latest: { rating: number; comment: string | null; name: string }[] } | null = null;
@@ -42,7 +79,7 @@ export default async function BusinessPage({
 
   // If the signed-in customer has a next appointment here, it sits on top —
   // with Reschedule / Cancel one tap away (owner spec).
-  let nextAppt: { starts_at: string; manage_token: string; serviceName: string } | null = null;
+  let nextAppt: { starts_at: string; manage_token: string; serviceName: string; confirmationCode: string | null } | null = null;
   if (!page.demoMode && isSupabaseConfigured()) {
     const supabase = await createServerSupabase();
     const {
@@ -51,7 +88,7 @@ export default async function BusinessPage({
     if (user) {
       const { data } = await supabase
         .from("appointments")
-        .select("starts_at, manage_token, services:service_id ( name )")
+        .select("starts_at, manage_token, confirmation_code, services:service_id ( name )")
         .eq("business_id", business.id)
         .eq("customer_id", user.id)
         .eq("status", "confirmed")
@@ -63,6 +100,7 @@ export default async function BusinessPage({
         nextAppt = {
           starts_at: data.starts_at,
           manage_token: data.manage_token,
+          confirmationCode: data.confirmation_code ?? null,
           serviceName:
             (data as unknown as { services: { name: string } }).services?.name ?? "Appointment",
         };
@@ -77,10 +115,26 @@ export default async function BusinessPage({
       )}
 
       <div className="hero-card">
+        {business.logo_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={business.logo_url}
+            alt={`${business.name} logo`}
+            style={{
+              width: 76,
+              height: 76,
+              objectFit: "cover",
+              borderRadius: "50%",
+              border: "2px solid rgba(255,255,255,0.65)",
+              marginBottom: 10,
+              background: "#fff",
+            }}
+          />
+        )}
         <p className="eyebrow">{business.type}</p>
         <h1>{business.name}</h1>
         <p className="lede" style={{ marginBottom: 6 }}>
-          {business.address} · {hoursSummary(page.availability)}
+          {hoursSummary(page.availability)}
         </p>
         {business.description && <p className="lede" style={{ marginBottom: 0 }}>{business.description}</p>}
       </div>
@@ -92,6 +146,11 @@ export default async function BusinessPage({
             {nextAppt.serviceName} — {formatDateInZone(new Date(nextAppt.starts_at), tz)} at{" "}
             {formatTimeInZone(new Date(nextAppt.starts_at), tz)}
           </h3>
+          {nextAppt.confirmationCode && (
+            <p className="small" style={{ margin: "0 0 4px" }}>
+              Confirmation #: <strong>{nextAppt.confirmationCode}</strong>
+            </p>
+          )}
           <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
             <Link href={`/manage/${nextAppt.manage_token}`} className="btn">Reschedule</Link>
             <Link href={`/manage/${nextAppt.manage_token}`} className="btn">Cancel</Link>
@@ -109,6 +168,38 @@ export default async function BusinessPage({
         )}
       </div>
 
+      {(business.address || business.phone || business.email) && (
+        <div className="card">
+          <h2>Visit us</h2>
+          {business.address && (
+            <p style={{ margin: "4px 0" }}>
+              📍{" "}
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(business.address)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {business.address}
+              </a>{" "}
+              <span className="small">— tap for directions</span>
+            </p>
+          )}
+          {business.phone && (
+            <p style={{ margin: "4px 0" }}>
+              📞 <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{business.phone}</a>
+            </p>
+          )}
+          {business.email && (
+            <p style={{ margin: "4px 0" }}>
+              ✉️ <a href={`mailto:${business.email}`}>{business.email}</a>
+            </p>
+          )}
+          <p className="small" style={{ margin: "6px 0 0" }}>
+            Hours: {hoursSummary(page.availability)}
+          </p>
+        </div>
+      )}
+
       <div className="card">
         <h2>Services</h2>
         {services.length === 0 && <p className="small">Services coming soon.</p>}
@@ -124,6 +215,36 @@ export default async function BusinessPage({
           </div>
         ))}
       </div>
+
+      {page.photos.length > 0 && (
+        <div className="card">
+          <h2>Our work</h2>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 10,
+            }}
+          >
+            {page.photos.map((p) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={p.id}
+                src={p.url}
+                alt={`Work by ${business.name}`}
+                style={{
+                  width: "100%",
+                  aspectRatio: "4 / 3",
+                  objectFit: "cover",
+                  borderRadius: 14,
+                  border: "1px solid var(--line)",
+                  display: "block",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {reviewSummary && (
         <div className="card">

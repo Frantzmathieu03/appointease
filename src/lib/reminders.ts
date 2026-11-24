@@ -27,6 +27,7 @@ interface AppointmentRow {
   starts_at: string;
   status: string;
   manage_token: string;
+  confirmation_code: string | null;
   businesses: {
     name: string;
     address: string | null;
@@ -107,6 +108,7 @@ function reminderCopy(kind: string, a: AppointmentRow): { subject: string; body:
   const manageUrl = `${site}/manage/${a.manage_token}`;
   const service = a.services?.name ?? "appointment";
   const firstName = (a.customers?.full_name ?? "").split(" ")[0] || "there";
+  const refLine = a.confirmation_code ? `\nConfirmation #: ${a.confirmation_code}` : "";
 
   if (kind === "confirmation") {
     return {
@@ -114,7 +116,7 @@ function reminderCopy(kind: string, a: AppointmentRow): { subject: string; body:
       body:
         `Hi ${firstName},\n\n` +
         `Your appointment is confirmed.\n\n` +
-        `${service} at ${biz?.name}\n${when}\n${biz?.address ?? ""}\n\n` +
+        `${service} at ${biz?.name}\n${when}\n${biz?.address ?? ""}${refLine}\n\n` +
         `Need to change it? Reschedule or cancel here: ${manageUrl}\n\n` +
         `We look forward to seeing you.\n— ${biz?.name} (via AppointEase)`,
     };
@@ -125,7 +127,7 @@ function reminderCopy(kind: string, a: AppointmentRow): { subject: string; body:
     body:
       `Hi ${firstName},\n\n` +
       `Just a friendly reminder — you have an appointment ${lead}.\n\n` +
-      `${service} at ${biz?.name}\n${when}\n${biz?.address ?? ""}\n\n` +
+      `${service} at ${biz?.name}\n${when}\n${biz?.address ?? ""}${refLine}\n\n` +
       `Please arrive a few minutes early. If something has come up, you can ` +
       `reschedule or cancel here: ${manageUrl}\n\n` +
       `We look forward to seeing you.\n— ${biz?.name} (via AppointEase)`,
@@ -142,7 +144,7 @@ export async function processDueReminders(admin: SupabaseClient) {
     .select(
       `id, kind, channel,
        appointments:appointment_id (
-         id, starts_at, status, manage_token,
+         id, starts_at, status, manage_token, confirmation_code,
          businesses:business_id ( name, address, timezone, slug ),
          customers:customer_id ( full_name, email, phone ),
          services:service_id ( name )

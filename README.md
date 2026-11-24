@@ -76,6 +76,7 @@ annotated list). The important ones:
 | `RESEND_API_KEY`, `EMAIL_FROM` | Email sending (reminders + message alerts) |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | SMS sending. Until set, SMS attempts are honestly logged as `sms_pending_provider` and email still sends |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Web Push. Until set, push is recorded as skipped (env-gated) |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_SOLO/TEAM/BUSINESS` | Business subscription billing. Until set, billing runs in a clearly-labeled not-configured mode: trials keep running and subscribe buttons are disabled with a note |
 
 ## Database (Supabase)
 
@@ -86,6 +87,13 @@ Schema lives in `supabase/migrations/`, applied in order:
    constraints), messages, reminders, and all RLS policies.
 2. `0002_messaging_notifications.sql` — notifications audit log, Web Push
    subscriptions, reviews, Realtime on messages.
+3. `0003_grants.sql` — table privileges for the API roles (RLS still guards).
+4. `0004_billing.sql` — Stripe subscription fields on businesses +
+   webhook idempotency table.
+5. `0005_booking_ref.sql` — unique booking confirmation numbers
+   (`AE-XXXXXX`) on appointments, backfilled.
+6. `0006_business_media.sql` — work photos table + the public
+   `business-media` storage bucket with owner-only write policies.
 
 `supabase/seed.sql` loads the Jesus Barber Shop demo business (published,
 Mon–Sat 9–6, three services). Demo owner login for a local project:
@@ -124,13 +132,27 @@ public/             PWA manifest + push service worker
 
 ## Pricing (business plans)
 
-30-day free trial, no card upfront. Then, by team size: **Solo $19/mo**
-(1 team member) · **Team $39/mo** (up to 5) · **Business $79/mo** (up to
-15). Paid checkout (Stripe) is the next phase; trial businesses keep
-running until it lands.
+30-day free trial, no card upfront. Then, by team size: **Solo $29.99/mo**
+(1 team member) · **Team $49.99/mo** (up to 5) · **Business $149.99/mo**
+(up to 15). Annual billing = 2 months free. Customers who book never pay
+anything — only businesses subscribe.
+
+Billing runs on Stripe (Checkout + Customer Portal + webhooks, see
+`src/lib/plans.ts` for the plan config and gating rules). While a business
+is trialing or subscribed, its booking page is live; a lapsed subscription
+gets a 3-day grace window, then the public page shows a paused notice —
+the owner dashboard stays fully open and no data is ever deleted. Until
+the Stripe keys/prices are configured, billing runs in a clearly-labeled
+not-configured mode and trials simply keep running.
+
+Every appointment also carries a short **confirmation number**
+(`AE-XXXXXX`) shown on the confirmation screen, in the email/text
+reminders, in My Appointments, on the manage page, and in the owner
+dashboard.
 
 ## Status
 
 v1: booking, accounts, owner setup + dashboard, reminders, two-way chat
-with notifications, reviews. Phase 2: Stripe billing, per-staff hours &
-service assignment in the UI, intake forms, automated after-hours reply.
+with notifications, reviews, Stripe subscription billing, confirmation
+numbers, business logo + work photos. Phase 2: per-staff hours & service
+assignment in the UI, intake forms, automated after-hours reply.

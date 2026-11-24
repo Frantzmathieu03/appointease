@@ -12,6 +12,7 @@ interface ApptRow {
   starts_at: string;
   status: string;
   manage_token: string;
+  confirmation_code: string | null;
   business_id: string;
   businesses: { name: string; slug: string; address: string | null; timezone: string } | null;
   services: { name: string } | null;
@@ -42,7 +43,7 @@ export default async function MyAppointmentsPage() {
   const { data } = await supabase
     .from("appointments")
     .select(
-      "id, starts_at, status, manage_token, business_id, businesses:business_id ( name, slug, address, timezone ), services:service_id ( name )"
+      "id, starts_at, status, manage_token, confirmation_code, business_id, businesses:business_id ( name, slug, address, timezone ), services:service_id ( name )"
     )
     .eq("customer_id", user.id)
     .order("starts_at", { ascending: true });
@@ -74,6 +75,12 @@ export default async function MyAppointmentsPage() {
           {formatDateInZone(new Date(a.starts_at), tz)} at {formatTimeInZone(new Date(a.starts_at), tz)}
           {a.businesses?.address ? ` · ${a.businesses.address}` : ""}
           {a.status !== "confirmed" ? ` · ${a.status.replace("_", " ")}` : ""}
+          {a.confirmation_code ? (
+            <>
+              <br />
+              Confirmation #: <strong>{a.confirmation_code}</strong>
+            </>
+          ) : null}
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {a.status === "confirmed" && new Date(a.starts_at).getTime() >= now && (

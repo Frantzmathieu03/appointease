@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getBusinessPageData } from "@/lib/data";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { scheduleReminders } from "@/lib/reminders";
+import { getBillingState } from "@/lib/plans";
+import { generateConfirmationCode } from "@/lib/confirmation";
 
 // POST /api/book
 // Body: { slug, serviceId, staffId, startsAt, name, phone, email, password?, notes? }
@@ -20,6 +22,15 @@ export async function POST(req: NextRequest) {
   const service = page.services.find((s) => s.id === serviceId);
   if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
 
+  // Billing gate (defense in depth — the pages hide booking too): a paused
+  // business takes no new bookings. Existing appointments are unaffected.
+  if (!getBillingState(page.business).bookingLive) {
+    return NextResponse.json(
+      { error: "Online booking is temporarily unavailable for this business." },
+      { status: 403 }
+    );
+  }
+
   const start = new Date(startsAt);
   if (isNaN(start.getTime()) || start.getTime() <= Date.now()) {
     return NextResponse.json({ error: "Pick a future time" }, { status: 400 });
@@ -35,6 +46,7 @@ export async function POST(req: NextRequest) {
         serviceName: service.name,
         startsAt: start.toISOString(),
         businessName: page.business.name,
+        confirmationCode: generateConfirmationCode(),
       },
     });
   }
@@ -84,19 +96,40 @@ export async function POST(req: NextRequest) {
       { onConflict: "business_id,customer_id", ignoreDuplicates: true }
     );
 
-  const { data: appt, error: apptErr } = await admin
-    .from("appointments")
-    .insert({
-      business_id: page.business.id,
-      customer_id: customerId,
-      service_id: service.id,
-      staff_id: staffId || null,
-      starts_at: start.toISOString(),
-      ends_at: end.toISOString(),
-      notes: notes ?? null,
-    })
-    .select("id, manage_token")
-    .single();
+  // Insert with a fresh confirmation code per attempt: the unique
+  // constraint on confirmation_code makes collisions come back as 23505,
+  // and we simply draw a new code (the slot exclusion constraint is a
+  // different code — 23P01 — and is NOT retried).
+  interface BookedAppt {
+    id: string;
+    manage_token: string;
+    confirmation_code: string;
+  }
+  let appt: BookedAppt | null = null;
+  let apptErr: { code?: string } | null = null;
+  for (let attempt = 0; attempt < 5 && !appt; attempt++) {
+    const { data, error } = await admin
+      .from("appointments")
+      .insert({
+        business_id: page.business.id,
+        customer_id: customerId,
+        service_id: service.id,
+        staff_id: staffId || null,
+        starts_at: start.toISOString(),
+        ends_at: end.toISOString(),
+        notes: notes ?? null,
+        confirmation_code: generateConfirmationCode(),
+      })
+      .select("id, manage_token, confirmation_code")
+      .single();
+    if (data) {
+      appt = data as BookedAppt;
+      apptErr = null;
+    } else {
+      apptErr = error as { code?: string } | null;
+      if (apptErr?.code !== "23505") break;
+    }
+  }
 
   if (apptErr || !appt) {
     // 23P01 = exclusion violation → the slot was just taken.
@@ -117,6 +150,7 @@ export async function POST(req: NextRequest) {
     appointment: {
       id: appt.id,
       manageToken: appt.manage_token,
+      confirmationCode: appt.confirmation_code,
       serviceName: service.name,
       startsAt: start.toISOString(),
       businessName: page.business.name,

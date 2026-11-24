@@ -6,6 +6,7 @@ interface Row {
   id: string;
   starts_at: string;
   status: string;
+  confirmation_code: string | null;
   customers: { full_name: string; phone: string | null } | null;
   services: { name: string } | null;
   staff: { name: string } | null;
@@ -28,7 +29,7 @@ export default async function DashboardTodayPage() {
   const { data } = await supabase
     .from("appointments")
     .select(
-      "id, starts_at, status, customers:customer_id ( full_name, phone ), services:service_id ( name ), staff:staff_id ( name )"
+      "id, starts_at, status, confirmation_code, customers:customer_id ( full_name, phone ), services:service_id ( name ), staff:staff_id ( name )"
     )
     .eq("business_id", business.id)
     .gte("starts_at", dayStart.toISOString())
@@ -83,6 +84,7 @@ export default async function DashboardTodayPage() {
               {r.services?.name ?? "Appointment"}
               {r.staff?.name ? ` · with ${r.staff.name}` : ""}
               {r.customers?.phone ? ` · ${r.customers.phone}` : ""}
+              {r.confirmation_code ? ` · # ${r.confirmation_code}` : ""}
             </p>
           </div>
           <span className={r.status === "confirmed" ? "chip" : "chip chip-grey"}>
@@ -99,6 +101,7 @@ export default async function DashboardTodayPage() {
               <p className="small" style={{ margin: 0 }}>
                 {formatTimeInZone(new Date(r.starts_at), tz)} — {r.customers?.full_name ?? "Customer"} ·{" "}
                 {r.services?.name ?? "Appointment"}
+                {r.confirmation_code ? ` · # ${r.confirmation_code}` : ""}
               </p>
             </div>
           ))}

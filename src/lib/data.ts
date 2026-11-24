@@ -2,13 +2,14 @@
 // demo data (mirroring supabase/seed.sql) while the project is a placeholder.
 import { createServerSupabase, isSupabaseConfigured } from "./supabase";
 import { DEMO_AVAILABILITY, DEMO_BUSINESS, DEMO_SERVICES, DEMO_STAFF } from "./demo-data";
-import type { Availability, Business, Service, StaffMember } from "./types";
+import type { Availability, Business, BusinessPhoto, Service, StaffMember } from "./types";
 
 export interface BusinessPageData {
   business: Business;
   services: Service[];
   staff: StaffMember[];
   availability: Availability[];
+  photos: BusinessPhoto[];
   demoMode: boolean;
 }
 
@@ -20,6 +21,7 @@ export async function getBusinessPageData(slug: string): Promise<BusinessPageDat
       services: DEMO_SERVICES,
       staff: DEMO_STAFF,
       availability: DEMO_AVAILABILITY,
+      photos: [],
       demoMode: true,
     };
   }
@@ -33,17 +35,25 @@ export async function getBusinessPageData(slug: string): Promise<BusinessPageDat
     .single();
   if (!business) return null;
 
-  const [{ data: services }, { data: staff }, { data: availability }] = await Promise.all([
-    supabase.from("services").select("*").eq("business_id", business.id).eq("active", true),
-    supabase.from("staff").select("*").eq("business_id", business.id).eq("active", true),
-    supabase.from("availability").select("*").eq("business_id", business.id),
-  ]);
+  const [{ data: services }, { data: staff }, { data: availability }, { data: photos }] =
+    await Promise.all([
+      supabase.from("services").select("*").eq("business_id", business.id).eq("active", true),
+      supabase.from("staff").select("*").eq("business_id", business.id).eq("active", true),
+      supabase.from("availability").select("*").eq("business_id", business.id),
+      supabase
+        .from("business_photos")
+        .select("*")
+        .eq("business_id", business.id)
+        .order("position", { ascending: true })
+        .order("created_at", { ascending: true }),
+    ]);
 
   return {
     business: business as Business,
     services: (services ?? []) as Service[],
     staff: (staff ?? []) as StaffMember[],
     availability: (availability ?? []) as Availability[],
+    photos: (photos ?? []) as BusinessPhoto[],
     demoMode: false,
   };
 }

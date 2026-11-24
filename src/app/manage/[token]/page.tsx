@@ -12,6 +12,7 @@ interface ManageData {
   status: string;
   staff_id: string | null;
   service_id: string;
+  confirmation_code: string | null;
   businesses: { name: string; slug: string; address: string | null; timezone: string };
   services: { name: string; duration_minutes: number };
   customers: { full_name: string } | null;
@@ -106,6 +107,12 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
     <main className="column">
       <p className="eyebrow">{data.businesses.name}</p>
       <h1 style={{ fontSize: 27 }}>Manage your appointment</h1>
+      {data.confirmation_code && (
+        <p className="small" style={{ marginTop: -6 }}>
+          Confirmation #: <strong>{data.confirmation_code}</strong> — this is
+          the booking you&apos;re changing.
+        </p>
+      )}
 
       <div className="card">
         <h3>{data.services.name}</h3>

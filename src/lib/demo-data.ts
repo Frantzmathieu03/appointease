@@ -18,6 +18,12 @@ export const DEMO_BUSINESS: Business = {
   published: true,
   trial_ends_at: new Date(Date.now() + 30 * 864e5).toISOString(),
   created_at: new Date().toISOString(),
+  plan: "solo",
+  stripe_customer_id: null,
+  stripe_subscription_id: null,
+  subscription_status: null,
+  subscription_current_period_end: null,
+  billing_lapsed_at: null,
 };
 
 export const DEMO_SERVICES: Service[] = [

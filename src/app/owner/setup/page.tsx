@@ -7,8 +7,9 @@ import ServicesManager from "@/components/owner/ServicesManager";
 import HoursManager from "@/components/owner/HoursManager";
 import StaffManager from "@/components/owner/StaffManager";
 import PublishButton from "@/components/owner/PublishButton";
+import BusinessMediaManager from "@/components/owner/BusinessMediaManager";
 import CopyLinkButton from "@/components/CopyLinkButton";
-import type { Availability } from "@/lib/types";
+import type { Availability, BusinessPhoto } from "@/lib/types";
 
 export default async function OwnerSetupPage() {
   if (!isSupabaseConfigured()) {
@@ -40,11 +41,13 @@ export default async function OwnerSetupPage() {
     );
   }
 
-  const [{ count: serviceCount }, { data: availability }, { count: staffCount }] = await Promise.all([
+  const [{ count: serviceCount }, { data: availability }, { count: staffCount }, { data: photoRows }] = await Promise.all([
     supabase.from("services").select("id", { count: "exact", head: true }).eq("business_id", business.id).eq("active", true),
     supabase.from("availability").select("*").eq("business_id", business.id),
     supabase.from("staff").select("id", { count: "exact", head: true }).eq("business_id", business.id).eq("active", true),
+    supabase.from("business_photos").select("*").eq("business_id", business.id).order("position", { ascending: true }).order("created_at", { ascending: true }),
   ]);
+  const photos = (photoRows ?? []) as BusinessPhoto[];
   const hours = (availability ?? []) as Availability[];
   const detailsDone = Boolean(business.name && business.address && business.phone);
   const servicesDone = (serviceCount ?? 0) >= 1;
@@ -56,6 +59,7 @@ export default async function OwnerSetupPage() {
     { label: "Business details (address + office phone)", done: detailsDone },
     { label: "At least one service", done: servicesDone },
     { label: "Opening hours", done: hoursDone },
+    { label: "Add your logo and photos (optional)", done: Boolean(business.logo_url) || photos.length > 0 },
     { label: "Publish your booking page", done: business.published },
   ];
 
@@ -88,6 +92,16 @@ export default async function OwnerSetupPage() {
       <div className="card">
         <h2>Business details</h2>
         <BusinessDetailsForm business={business} />
+      </div>
+
+      <div className="card">
+        <h2>Logo &amp; photos</h2>
+        <p className="small" style={{ marginBottom: 10 }}>
+          Optional — your logo and up to four photos of your work make your
+          booking page feel like your shop. You can add them now or anytime
+          later in Settings.
+        </p>
+        <BusinessMediaManager businessId={business.id} initialLogoUrl={business.logo_url} initialPhotos={photos} />
       </div>
 
       <div className="card">

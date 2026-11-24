@@ -48,6 +48,7 @@ export default function BookingFlow({
     demoMode: boolean;
     manageToken?: string;
     accountCreated?: boolean;
+    confirmationCode?: string;
   } | null>(null);
 
   const service = services.find((s) => s.id === serviceId);
@@ -121,6 +122,7 @@ export default function BookingFlow({
         demoMode: !!data.demoMode,
         manageToken: data.appointment?.manageToken,
         accountCreated: !!data.accountCreated,
+        confirmationCode: data.appointment?.confirmationCode,
       });
       setStep(5);
     } catch {
@@ -143,6 +145,13 @@ export default function BookingFlow({
             </>
           )}
         </p>
+        {result?.confirmationCode && (
+          <p style={{ fontSize: 18, margin: "4px 0 10px" }}>
+            Confirmation #: <strong>{result.confirmationCode}</strong>
+            <br />
+            <span className="small">Keep it handy — quote it if you call the business.</span>
+          </p>
+        )}
         {result?.demoMode ? (
           <p className="small">
             Demo mode: this confirmed on sample data — nothing was saved, and no

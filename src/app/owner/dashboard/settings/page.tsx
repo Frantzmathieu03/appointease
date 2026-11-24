@@ -4,8 +4,12 @@ import ServicesManager from "@/components/owner/ServicesManager";
 import HoursManager from "@/components/owner/HoursManager";
 import StaffManager from "@/components/owner/StaffManager";
 import PublishButton from "@/components/owner/PublishButton";
+import BillingPanel from "@/components/owner/BillingPanel";
+import BusinessMediaManager from "@/components/owner/BusinessMediaManager";
 import PushOptIn from "@/components/PushOptIn";
-import type { Availability } from "@/lib/types";
+import { getBillingState, planById } from "@/lib/plans";
+import { isAnnualBillingConfigured, isBillingConfigured } from "@/lib/stripe";
+import type { Availability, BusinessPhoto } from "@/lib/types";
 
 export default async function DashboardSettingsPage() {
   const { supabase, business } = await requireBusiness();
@@ -19,28 +23,35 @@ export default async function DashboardSettingsPage() {
     .select("id", { count: "exact", head: true })
     .eq("business_id", business.id)
     .eq("active", true);
+  const { data: photoRows } = await supabase
+    .from("business_photos")
+    .select("*")
+    .eq("business_id", business.id)
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: true });
   const hours = (availability ?? []) as Availability[];
 
-  const trialEnd = new Date(business.trial_ends_at).toLocaleDateString([], {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" });
+  const billing = getBillingState(business);
 
   return (
     <div>
       <h1 style={{ fontSize: 26 }}>Settings</h1>
 
       <div className="card">
-        <h2>Plan</h2>
-        <p className="lede" style={{ marginBottom: 6 }}>
-          Free trial until <strong>{trialEnd}</strong> — no card required.
-        </p>
-        <p className="small">
-          After the trial: Solo $19/mo (1 team member) · Team $39/mo (up to 5) ·
-          Business $79/mo (up to 15). Paid checkout (Stripe) arrives in the next
-          phase; until then your page simply keeps running.
-        </p>
+        <h2>Plan &amp; billing</h2>
+        <BillingPanel
+          billingConfigured={isBillingConfigured()}
+          annualConfigured={isAnnualBillingConfigured()}
+          currentPlanId={planById(business.plan).id}
+          phase={billing.phase}
+          subscriptionStatus={billing.subscriptionStatus}
+          hasStripeCustomer={!!business.stripe_customer_id}
+          trialEndLabel={fmtDate(business.trial_ends_at)}
+          periodEndLabel={billing.currentPeriodEnd ? fmtDate(billing.currentPeriodEnd) : null}
+          pausesAtLabel={billing.pausesAt ? fmtDate(billing.pausesAt) : null}
+        />
       </div>
 
       <div className="card">
@@ -55,6 +66,15 @@ export default async function DashboardSettingsPage() {
       <div className="card">
         <h2>Business details</h2>
         <BusinessDetailsForm business={business} />
+      </div>
+
+      <div className="card">
+        <h2>Logo &amp; photos</h2>
+        <BusinessMediaManager
+          businessId={business.id}
+          initialLogoUrl={business.logo_url}
+          initialPhotos={(photoRows ?? []) as BusinessPhoto[]}
+        />
       </div>
 
       <div className="card">

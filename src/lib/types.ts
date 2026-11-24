@@ -15,6 +15,21 @@ export interface Business {
   published: boolean;
   trial_ends_at: string;
   created_at: string;
+  // Billing (migration 0004) — the business's AppointEase subscription.
+  plan: string; // PlanId from src/lib/plans.ts
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_status: string | null;
+  subscription_current_period_end: string | null;
+  billing_lapsed_at: string | null;
+}
+
+export interface BusinessPhoto {
+  id: string;
+  business_id: string;
+  url: string;
+  position: number;
+  created_at: string;
 }
 
 export interface Service {
@@ -62,6 +77,7 @@ export interface Appointment {
   status: AppointmentStatus;
   notes: string | null;
   manage_token: string;
+  confirmation_code: string; // "AE-XXXXXX" (migration 0005)
   created_at: string;
 }
 
