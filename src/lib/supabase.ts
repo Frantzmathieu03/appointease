@@ -1,4 +1,3 @@
-import { createBrowserClient } from "@supabase/ssr";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
@@ -11,19 +10,9 @@ const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
  * AppointEase accounts, the .env ships with placeholder values and the site
  * runs in DEMO MODE: public pages render the seeded demo business from
  * src/lib/demo-data.ts and nothing is persisted.
+ * (Implementation lives in supabase-config.ts so middleware can share it.)
  */
-export function isSupabaseConfigured(): boolean {
-  return (
-    url.startsWith("https://") &&
-    !url.includes("placeholder") &&
-    anonKey.length > 20 &&
-    !anonKey.includes("placeholder")
-  );
-}
-
-export function createBrowserSupabase() {
-  return createBrowserClient(url, anonKey);
-}
+export { isSupabaseConfigured } from "./supabase-config";
 
 export async function createServerSupabase() {
   const cookieStore = await cookies();
@@ -32,7 +21,13 @@ export async function createServerSupabase() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(
+        cookiesToSet: {
+          name: string;
+          value: string;
+          options?: Parameters<typeof cookieStore.set>[2];
+        }[]
+      ) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options)

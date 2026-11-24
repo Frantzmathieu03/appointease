@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import UnreadBadge from "@/components/UnreadBadge";
 
 export const metadata: Metadata = {
   title: "AppointEase — Let customers book. Get back to work.",
   description:
     "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment-based businesses.",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -19,7 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="logo-word">AppointEase</span>
             </Link>
             <nav className="header-links">
-              <Link href="/my-appointments">My appointments</Link>
+              <Link href="/my-appointments">
+                My appointments
+                <UnreadBadge variant="customer" />
+              </Link>
               <Link href="/owner">Business sign-in</Link>
               <Link href="/owner/signup" className="btn btn-primary" style={{ padding: "9px 15px" }}>
                 Create booking page
