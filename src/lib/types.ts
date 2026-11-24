@@ -1,0 +1,93 @@
+// Shared types matching the Supabase schema in supabase/migrations/0001_schema.sql
+
+export interface Business {
+  id: string;
+  owner_id: string;
+  slug: string;
+  name: string;
+  type: string;
+  logo_url: string | null;
+  description: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  timezone: string;
+  published: boolean;
+  trial_ends_at: string;
+  created_at: string;
+}
+
+export interface Service {
+  id: string;
+  business_id: string;
+  name: string;
+  duration_minutes: number;
+  price_cents: number;
+  active: boolean;
+}
+
+export interface StaffMember {
+  id: string;
+  business_id: string;
+  name: string;
+  active: boolean;
+}
+
+export interface Availability {
+  id: string;
+  business_id: string;
+  staff_id: string | null;
+  weekday: number; // 0 = Sunday … 6 = Saturday
+  open_time: string; // "09:00:00"
+  close_time: string;
+}
+
+export interface Customer {
+  id: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+}
+
+export type AppointmentStatus = "confirmed" | "cancelled" | "completed" | "no_show";
+
+export interface Appointment {
+  id: string;
+  business_id: string;
+  customer_id: string;
+  service_id: string;
+  staff_id: string | null;
+  starts_at: string;
+  ends_at: string;
+  status: AppointmentStatus;
+  notes: string | null;
+  manage_token: string;
+  created_at: string;
+}
+
+export interface Message {
+  id: string;
+  business_id: string;
+  customer_id: string;
+  sender: "customer" | "business";
+  body: string;
+  read_at: string | null;
+  created_at: string;
+}
+
+export type ReminderKind = "confirmation" | "before_24h" | "before_2h";
+export type ReminderChannel = "email" | "sms";
+
+export function formatPrice(priceCents: number): string {
+  if (priceCents === 0) return "Free";
+  return `$${(priceCents / 100).toFixed(priceCents % 100 === 0 ? 0 : 2)}`;
+}
+
+export function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
