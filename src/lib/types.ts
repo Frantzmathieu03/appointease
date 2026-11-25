@@ -40,7 +40,9 @@ export interface Service {
   business_id: string;
   name: string;
   duration_minutes: number;
-  price_cents: number;
+  /** Null = no public price; the price is confirmed with the business
+      (migration 0009). 0 = explicitly free. */
+  price_cents: number | null;
   active: boolean;
 }
 
@@ -117,7 +119,8 @@ export interface PushSubscriptionRow {
   created_at: string;
 }
 
-export function formatPrice(priceCents: number): string {
+export function formatPrice(priceCents: number | null): string {
+  if (priceCents === null) return "Price confirmed with the business";
   if (priceCents === 0) return "Free";
   return `$${(priceCents / 100).toFixed(priceCents % 100 === 0 ? 0 : 2)}`;
 }

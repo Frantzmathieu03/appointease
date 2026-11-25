@@ -18,6 +18,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
   const [type, setType] = useState(BUSINESS_TYPES[0]);
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
   const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -44,6 +45,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         name: name.trim(),
         type,
         phone: phone.trim() || null,
+        address: address.trim() || null,
         email: user.email ?? null,
       });
       if (!error) {
@@ -97,6 +99,10 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
       <label className="field">
         <span>Office phone (customers will tap to call)</span>
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" />
+      </label>
+      <label className="field">
+        <span>Business address (optional — customers tap it for directions)</span>
+        <input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" placeholder="25 Main St, Boston, MA" />
       </label>
       <button className="btn btn-primary btn-block" type="submit" disabled={busy || !name.trim()}>
         {busy ? "Reserving your link…" : "Create my business"}

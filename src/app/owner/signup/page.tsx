@@ -20,6 +20,20 @@ export default function OwnerSignupPage() {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [k]: e.target.value });
 
+  async function google() {
+    setError("");
+    const supabase = createBrowserSupabase();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/owner/setup")}`,
+      },
+    });
+    if (error) {
+      setError("Google sign-in is unavailable right now — please use email and password, or try again shortly.");
+    }
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -73,6 +87,10 @@ export default function OwnerSignupPage() {
         <div className="card">
           <h2>1 — Your login</h2>
           {error && <div className="error">{error}</div>}
+          <button className="btn btn-primary btn-block" type="button" onClick={google}>
+            Continue with Google
+          </button>
+          <p className="small center" style={{ margin: "12px 0 14px" }}>or use email</p>
           <form onSubmit={onSubmit}>
             <label className="field">
               <span>Your name</span>
@@ -86,7 +104,7 @@ export default function OwnerSignupPage() {
               <span>Password</span>
               <input type="password" required minLength={8} value={form.password} onChange={set("password")} autoComplete="new-password" />
             </label>
-            <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
+            <button className="btn btn-block" type="submit" disabled={busy}>
               {busy ? "Creating…" : "Continue"}
             </button>
           </form>

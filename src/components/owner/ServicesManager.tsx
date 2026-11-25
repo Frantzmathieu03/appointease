@@ -28,11 +28,14 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
     e.preventDefault();
     setBusy(true);
     const supabase = createBrowserSupabase();
+    const priceTrim = form.price.trim();
     await supabase.from("services").insert({
       business_id: businessId,
       name: form.name.trim(),
       duration_minutes: Math.max(5, parseInt(form.duration, 10) || 30),
-      price_cents: Math.round((parseFloat(form.price) || 0) * 100),
+      // Blank price = no public price (null) — the customer confirms the
+      // price with the business. A typed 0 stays an explicit "Free".
+      price_cents: priceTrim === "" ? null : Math.round((parseFloat(priceTrim) || 0) * 100),
     });
     setForm({ name: "", duration: "30", price: "" });
     setBusy(false);
@@ -71,10 +74,14 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
             <input type="number" min={5} step={5} required value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} />
           </label>
           <label className="field" style={{ flex: 1 }}>
-            <span>Price ($)</span>
+            <span>Price ($) — optional</span>
             <input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="35" />
           </label>
         </div>
+        <p className="small" style={{ margin: "0 0 10px" }}>
+          Leave the price blank if customers confirm it with you directly —
+          your page will say &ldquo;Price confirmed with the business.&rdquo;
+        </p>
         <button className="btn btn-primary" type="submit" disabled={busy || !form.name.trim()}>
           Add service
         </button>

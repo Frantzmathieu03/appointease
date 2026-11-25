@@ -5,6 +5,7 @@ import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getBillingState } from "@/lib/plans";
 import { formatPrice } from "@/lib/types";
+import AddressDirections from "@/components/AddressDirections";
 import { categoryLabel } from "@/lib/categories";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
@@ -191,14 +192,7 @@ export default async function BusinessPage({
           <h2>Visit us</h2>
           {business.address && (
             <p style={{ margin: "4px 0" }}>
-              📍{" "}
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(business.address)}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {business.address}
-              </a>{" "}
+              📍 <AddressDirections address={business.address} />{" "}
               <span className="small">— tap for directions</span>
             </p>
           )}
