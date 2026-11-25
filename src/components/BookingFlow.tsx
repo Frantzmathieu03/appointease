@@ -268,8 +268,8 @@ export default function BookingFlow({
           <p className="small">
             Demo mode: this confirmed on sample data — nothing was saved, and no
             reminder was sent. Once the live database is connected, bookings save
-            for real and the confirmation + 24 h + 2 h reminders go out by text
-            and email.
+            for real and the confirmation + 24 h + 2 h reminders (when the
+            booking is made far enough ahead) go out by text and email.
           </p>
         ) : (
           <p className="small">
