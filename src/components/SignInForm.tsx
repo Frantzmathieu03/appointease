@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
+import GoogleLogo from "@/components/GoogleLogo";
 
 export default function SignInForm({
   nextPath = "/my-appointments",
@@ -100,6 +101,7 @@ export default function SignInForm({
       <p className="lede" style={{ marginBottom: 16 }}>{subtitle}</p>
       {error && <div className="error">{error}</div>}
       <button className="btn btn-primary btn-block" type="button" onClick={google}>
+        <GoogleLogo />
         Continue with Google
       </button>
       <p className="small center" style={{ margin: "12px 0 14px" }}>or use email</p>

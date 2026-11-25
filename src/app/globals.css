@@ -99,6 +99,13 @@ h3 { font-size: 16px; margin: 0 0 6px; }
 .btn-primary:hover { background: var(--green-dark); }
 .btn-danger { background: var(--red); border-color: var(--red); color: #fff; }
 .btn-block { display: flex; width: 100%; }
+/* Google button badge: a small white rounded square holding the
+   multicolor G, so the logo stands out on the green button. */
+.g-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 7px; background: #fff;
+  flex: 0 0 auto;
+}
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .action-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 14px 0; }

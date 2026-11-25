@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import CreateBusinessForm from "@/components/owner/CreateBusinessForm";
+import GoogleLogo from "@/components/GoogleLogo";
 
 // Owner signup: create the login first, then the business (its link is
 // reserved the moment the business row lands). If email confirmation is
@@ -88,6 +89,7 @@ export default function OwnerSignupPage() {
           <h2>1 — Your login</h2>
           {error && <div className="error">{error}</div>}
           <button className="btn btn-primary btn-block" type="button" onClick={google}>
+            <GoogleLogo />
             Continue with Google
           </button>
           <p className="small center" style={{ margin: "12px 0 14px" }}>or use email</p>

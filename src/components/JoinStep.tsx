@@ -31,11 +31,7 @@ export default function JoinStep({
     <div className="card">
       <h2>Create your account or log in</h2>
       <p className="lede" style={{ marginBottom: 16 }}>
-        You are signed in to AppointEase, but you are not a customer of{" "}
-        {businessName} yet. Each business keeps its own customers, so
-        join {businessName} here — your appointments, messages and
-        history with {businessName} will live together in your
-        dashboard for this business, safe and secure.
+        You are not a customer of {businessName} yet — join to continue.
       </p>
       {ownerView ? (
         <p className="small" style={{ marginBottom: 0 }}>

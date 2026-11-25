@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
+import GoogleLogo from "@/components/GoogleLogo";
 
 // Per-business customer accounts (Frantz, 2026-11-25): a customer
 // signs up WITH a business, on that business's page — the membership,
@@ -13,8 +14,10 @@ import { createBrowserSupabase } from "@/lib/supabase-browser";
 // email + password below.
 export default function SignupForm({
   nextPath = "/my-appointments",
+  businessName,
 }: {
   nextPath?: string;
+  businessName?: string;
 }) {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
@@ -85,13 +88,13 @@ export default function SignupForm({
     <div className="card">
       <h2>Create your account</h2>
       <p className="lede" style={{ marginBottom: 16 }}>
-        Your account lives with the business you&apos;re signing up with —
-        your appointments, messages and history there stay in that
-        business&apos;s dashboard, and nowhere else. Joining another
-        business happens on its own page, with the same email.
+        {businessName
+          ? `Your account is only with ${businessName}.`
+          : "Your account is only with this business."}
       </p>
       {error && <div className="error">{error}</div>}
       <button className="btn btn-primary btn-block" type="button" onClick={google}>
+        <GoogleLogo />
         Continue with Google
       </button>
       <p className="small center" style={{ margin: "12px 0 14px" }}>or use email</p>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
+import GoogleLogo from "@/components/GoogleLogo";
 
 /**
  * Account step at the front of booking from a business's page
@@ -49,12 +50,11 @@ export default function AccountGate({
     <div className="card">
       <h2>Create your account or log in</h2>
       <p className="lede" style={{ marginBottom: 16 }}>
-        To book with {businessName}, use your free account with them.
-        Your appointments, messages and history with {businessName} stay
-        together in your dashboard — safe and secure.
+        Your account is only with {businessName}.
       </p>
       {error && <div className="error">{error}</div>}
       <button className="btn btn-primary btn-block" type="button" onClick={google}>
+        <GoogleLogo />
         Continue with Google
       </button>
       <p className="small center" style={{ margin: "12px 0 14px" }}>
@@ -77,9 +77,7 @@ export default function AccountGate({
         </Link>
       </div>
       <p className="small center" style={{ marginTop: 14 }}>
-        New here? Creating your account takes a few seconds — then you
-        book, message {businessName} any time, and see your visits in
-        one place.
+        New here? Creating your account takes a few seconds.
       </p>
     </div>
   );
