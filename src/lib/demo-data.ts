@@ -9,11 +9,12 @@ export const DEMO_BUSINESS: Business = {
   slug: "main-street-barbers",
   name: "Main Street Barbers",
   type: "Barbershop",
+  category: "barbershops",
   logo_url: null,
   description: "Walk-ins welcome. Book ahead to skip the wait.",
   address: "25 Main St, Boston, MA",
   phone: "617-555-0142",
-  email: "owner@jesusbarber.example",
+  email: "owner@mainstreetbarber.example",
   timezone: "America/New_York",
   published: true,
   trial_ends_at: new Date(Date.now() + 30 * 864e5).toISOString(),
@@ -33,7 +34,7 @@ export const DEMO_SERVICES: Service[] = [
 ];
 
 export const DEMO_STAFF: StaffMember[] = [
-  { id: "33333333-3333-3333-3333-333333333333", business_id: DEMO_BUSINESS.id, name: "Jesus", active: true },
+  { id: "33333333-3333-3333-3333-333333333333", business_id: DEMO_BUSINESS.id, name: "Marcus", active: true },
 ];
 
 export const DEMO_AVAILABILITY: Availability[] = [1, 2, 3, 4, 5, 6].map((weekday) => ({

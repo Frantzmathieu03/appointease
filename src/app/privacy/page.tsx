@@ -44,7 +44,7 @@ export default function PrivacyPage() {
       <h2>3. How we use information</h2>
       <ul>
         <li>To provide the service: create and display booking pages, take bookings, and show each business only its own customers, appointments and messages.</li>
-        <li>To send appointment confirmations and reminders by text message and email (at booking, 24 hours before, and 2 hours before), including secure reschedule/cancel links.</li>
+        <li>To send appointment confirmations and reminders by text message and email (at booking, 24 hours before, and 2 hours before, when the booking is made far enough ahead), including secure reschedule/cancel links.</li>
         <li>To let businesses and customers message each other, and to notify you about new messages.</li>
         <li>To process subscriptions, prevent fraud and abuse, and keep the platform secure.</li>
         <li>To respond to support requests and improve the service.</li>

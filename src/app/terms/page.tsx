@@ -53,7 +53,7 @@ export default function TermsPage() {
 
       <h2>4. Bookings, reminders and messages</h2>
       <ul>
-        <li>When a customer books, AppointEase sends a confirmation and reminders before the appointment by text message and email — at booking, 24 hours before, and 2 hours before — each with a secure link to reschedule or cancel.</li>
+        <li>When a customer books, AppointEase sends a confirmation and reminders before the appointment by text message and email — at booking, 24 hours before, and 2 hours before (when the booking is made far enough ahead) — each with a secure link to reschedule or cancel.</li>
         <li>By providing a phone number and email address when booking, the customer agrees to receive these transactional messages about their appointments. Message and data rates may apply. Reply STOP to a text to stop text reminders for that number; appointment emails can be managed through the business.</li>
         <li>Businesses are responsible for honoring appointments booked through their page, for the accuracy of their services, prices and hours, and for responding to customer messages.</li>
         <li>Customers are responsible for showing up on time or using the reschedule/cancel link as early as possible when plans change.</li>

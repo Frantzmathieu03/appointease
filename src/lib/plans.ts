@@ -30,7 +30,7 @@ export const PLANS: Plan[] = [
     features: [
       "1 staff calendar",
       "Your own booking page & link",
-      "Confirmation, 24-hour & 2-hour reminders — by text and email",
+      "Confirmation, 24-hour & 2-hour reminders — by text and email (when the booking is made far enough ahead)",
       "Two-way messaging with your customers",
       "Listed in Find-a-Business search",
     ],

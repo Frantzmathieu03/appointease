@@ -12,10 +12,10 @@ const BENEFITS = [
   { icon: "🗂️", title: "Every customer in one place", line: "Bookings, history and messages for each customer, kept together." },
   { icon: "💬", title: "Message right in the app", line: "Customers message you from their booking — unread badges mean nothing slips by." },
   { icon: "🔁", title: "Reschedules handle themselves", line: "Every reminder carries a secure link to reschedule or cancel." },
-  { icon: "📩", title: "Text and email, every time", line: "Confirmation, 24-hour and 2-hour reminders go out on both channels." },
+  { icon: "📩", title: "Text and email, every time", line: "Confirmation, 24-hour and 2-hour reminders go out on both channels (when the booking is made far enough ahead)." },
   { icon: "👥", title: "Your whole team, one calendar", line: "Each staff member gets their own services, hours and bookings." },
   { icon: "🔍", title: "Customers find you", line: "Get discovered by category and location when customers browse." },
-  { icon: "⚡", title: "Set up in minutes", line: "Add your services and hours, publish, and share your link the same day." },
+  { icon: "⚡", title: "Set up the same day", line: "Add your services and hours, publish, and share your link the same day." },
   { icon: "💚", title: "Free for your customers", line: "Booking never costs your customers a cent — only businesses subscribe." },
   { icon: "🤝", title: "Support from real people", line: "Questions? A human answers — by email, whenever you need help." },
 ];
@@ -89,7 +89,7 @@ export default function HomePage() {
             <div className="step">
               <span className="step-num">2</span>
               <h3>Share your link</h3>
-              <p>Put it on Google, Instagram, your website, or send it by text. Customers pick a time and book in under a minute.</p>
+              <p>Put it on Google, Instagram, your website, or send it by text. Customers pick a time and book in a few taps.</p>
             </div>
             <div className="step">
               <span className="step-num">3</span>
@@ -128,7 +128,7 @@ export default function HomePage() {
           <div className="section-head">
             <p className="eyebrow">Automatic reminders</p>
             <h2>Reminders that bring people in</h2>
-            <p className="lede">Every appointment gets a confirmation, a 24-hour reminder, and a 2-hour reminder — by text and email.</p>
+            <p className="lede">Every appointment gets a confirmation, a 24-hour reminder, and a 2-hour reminder — by text and email (when the booking is made far enough ahead).</p>
           </div>
           <div className="showcase-photo">
             {/* Animated loop of the real product: the confirmation
@@ -369,8 +369,8 @@ export default function HomePage() {
               <p className="eyebrow" style={{ color: "#bcd8c2" }}>Try it as a customer</p>
               <h2>Meet Main Street Barbers</h2>
               <p>
-                This is a real AppointEase booking page. Look through the services,
-                pick a time, and book — the way your own customers will.
+                This is a live demo of an AppointEase booking page — look through
+                the services and try booking, the way your own customers will.
               </p>
               <div style={{ marginTop: 20 }}>
                 <Link href="/main-street-barbers" className="btn btn-white btn-lg">Visit the shop</Link>
@@ -409,6 +409,9 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+          <p className="pricing-note">
+            Annual billing: 2 months free — Solo $299.90/yr · Team $499.90/yr · Business $1,499.90/yr
+          </p>
 
           {/* Plan comparison — only what the product actually delivers
               (staff limits from plans.ts; everything else is core
@@ -441,7 +444,7 @@ export default function HomePage() {
                   <td>✓</td>
                 </tr>
                 <tr>
-                  <th scope="row">Confirmation, 24-hour &amp; 2-hour reminders by text and email</th>
+                  <th scope="row">Confirmation, 24-hour &amp; 2-hour reminders by text and email (when the booking is made far enough ahead)</th>
                   <td>✓</td>
                   <td>✓</td>
                   <td>✓</td>
@@ -496,7 +499,7 @@ export default function HomePage() {
             </details>
             <details className="faq-item">
               <summary>How do reminders work?</summary>
-              <p>Each appointment gets a confirmation, then a reminder 24 hours before and another 2 hours before — by text message and email at the same time, each with a link to reschedule or cancel.</p>
+              <p>Each appointment gets a confirmation, then a reminder 24 hours before and another 2 hours before (when the booking is made far enough ahead) — by text message and email at the same time, each with a link to reschedule or cancel.</p>
             </details>
             <details className="faq-item">
               <summary>Can my staff have their own calendars?</summary>

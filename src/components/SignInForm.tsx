@@ -40,13 +40,17 @@ export default function SignInForm({
   }
 
   async function google() {
+    setError("");
     const supabase = createBrowserSupabase();
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
     });
+    if (error) {
+      setError("Google sign-in is unavailable right now — please use email and password, or try again shortly.");
+    }
   }
 
   return (

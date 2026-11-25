@@ -18,13 +18,17 @@ export default function SignupPage() {
     setForm({ ...form, [k]: e.target.value });
 
   async function google() {
+    setError("");
     const supabase = createBrowserSupabase();
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/my-appointments")}`,
       },
     });
+    if (error) {
+      setError("Google sign-in is unavailable right now — please use email and password, or try again shortly.");
+    }
   }
 
   async function onSubmit(e: React.FormEvent) {

@@ -4,9 +4,26 @@ import "./globals.css";
 import UnreadBadge from "@/components/UnreadBadge";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.appointease.io"),
   title: "AppointEase — Let customers book. Get back to work.",
   description:
     "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment-based businesses.",
+  openGraph: {
+    title: "AppointEase — Let customers book. Get back to work.",
+    description:
+      "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment-based businesses.",
+    url: "https://www.appointease.io",
+    siteName: "AppointEase",
+    images: [{ url: "/hero/hero-poster.jpg" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AppointEase — Let customers book. Get back to work.",
+    description:
+      "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment-based businesses.",
+    images: ["/hero/hero-poster.jpg"],
+  },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icon.png",

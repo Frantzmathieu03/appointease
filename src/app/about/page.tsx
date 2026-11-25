@@ -14,10 +14,9 @@ export default function AboutPage() {
       <div className="mkt-container">
         <div className="section-head" style={{ paddingTop: 42 }}>
           <p className="eyebrow">About</p>
-          <h1 style={{ fontSize: "clamp(30px, 4.6vw, 42px)" }}>Hi, I&apos;m Frantz.</h1>
-          <p className="lede">
-            I built AppointEase, and I run it — from Boston, Massachusetts.
-          </p>
+          <h1 style={{ fontSize: "clamp(30px, 4.6vw, 42px)" }}>
+            Hi, I&apos;m Frantz — I built AppointEase, and I run it, from Boston, Massachusetts.
+          </h1>
         </div>
 
         <div style={{ maxWidth: 680, margin: "0 auto", paddingBottom: 56 }}>
@@ -46,10 +45,11 @@ export default function AboutPage() {
             <p style={{ lineHeight: 1.65, margin: "0 0 14px" }}>
               So I built the fix I wished they had. AppointEase gives a
               business its own booking page — customers pick a service and a
-              time in under a minute — and then confirmations and reminders
+              time in a few taps — and then confirmations and reminders
               go out automatically, by text and email at the same time:
-              right away, 24 hours before, and 2 hours before, each with a
-              link to reschedule or cancel. Fewer empty chairs, less time on
+              right away, 24 hours before, and 2 hours before (when the
+              booking is made far enough ahead), each with a link to
+              reschedule or cancel. Fewer empty chairs, less time on
               the phone, and a page that looks like your business, not a
               template.
             </p>

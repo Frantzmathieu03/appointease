@@ -5,6 +5,7 @@ import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getBillingState } from "@/lib/plans";
 import { formatPrice } from "@/lib/types";
+import { categoryLabel } from "@/lib/categories";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
 export default async function BusinessPage({
@@ -29,7 +30,7 @@ export default async function BusinessPage({
     return (
       <main className="column">
         <div className="hero-card">
-          <p className="eyebrow">{business.type}</p>
+          <p className="eyebrow">{business.category ? categoryLabel(business.category) : business.type}</p>
           <h1>{business.name}</h1>
           {business.address && <p className="lede">{business.address}</p>}
         </div>
@@ -142,7 +143,7 @@ export default async function BusinessPage({
             }}
           />
         )}
-        <p className="eyebrow">{business.type}</p>
+        <p className="eyebrow">{business.category ? categoryLabel(business.category) : business.type}</p>
         <h1>{business.name}</h1>
         {demoShop && (
           <p style={{ margin: "0 0 8px" }}>
