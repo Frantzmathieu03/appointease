@@ -20,8 +20,7 @@ const QUESTION_TYPES: { value: FormQuestionType; label: string }[] = [
   { value: "file", label: "File upload" },
 ];
 
-const NOT_READY =
-  "Forms aren't available yet — they turn on with the next database update.";
+const NOT_READY = "Forms aren't ready yet — please check back soon.";
 
 /** The PDF §4 law-firm intake starter: case type, a description of the
  *  matter, the opposing party (for the conflict check), and documents. */
@@ -163,7 +162,7 @@ export default function FormsManager({
     setBusy(true);
     setMsg("");
     const form = await createForm(
-      "Law firm intake",
+      "Law firm client form",
       "Tell us about your case before your consultation."
     );
     if (form) {
@@ -179,7 +178,7 @@ export default function FormsManager({
         }))
       );
       setSelectedId(form.id);
-      setMsg("Law firm intake created — attach it to a service in Settings → Services.");
+      setMsg("Your law firm form is ready — now attach it to a service in Settings → Services.");
     }
     setBusy(false);
   }
@@ -190,13 +189,13 @@ export default function FormsManager({
     );
     if (!ok) return;
     const supabase = createBrowserSupabase();
-    // Submissions reference the form; keep them readable by detaching
-    // first is not possible (FK is not null) — so deletion is refused
-    // by the database when submissions exist, and we say so plainly.
+    // A form customers have already answered can't be deleted — the
+    // database refuses (submissions reference it), and we say so
+    // plainly instead of letting the answers vanish.
     const { error } = await supabase.from("forms").delete().eq("id", f.id);
     if (error) {
       setMsg(
-        "That form already has submissions, so it can't be deleted — it stays as the record of what customers were asked."
+        "Customers have already answered this form, so it can't be deleted — it stays as the record of what they were asked."
       );
       return;
     }
@@ -295,9 +294,9 @@ export default function FormsManager({
         <h2 style={{ marginTop: 0 }}>Your forms</h2>
         {forms.length === 0 && (
           <p className="small">
-            No forms yet. Create one below, or start from the law-firm
-            intake template. Attach a form to a service in Settings →
-            Services, and customers complete it before their visit.
+            No forms yet — create one below, or start from the ready-made
+            law firm form. Then attach it to a service in Settings →
+            Services, and customers will fill it in before their visit.
           </p>
         )}
         {forms.map((f) => (
@@ -308,7 +307,7 @@ export default function FormsManager({
             </div>
             <span style={{ display: "flex", gap: 6 }}>
               <button className="btn" style={{ padding: "7px 13px" }} onClick={() => setSelectedId(f.id)}>
-                {selectedId === f.id ? "Building…" : "Build"}
+                {selectedId === f.id ? "Editing…" : "Edit form"}
               </button>
               <button className="btn" style={{ padding: "7px 13px" }} onClick={() => deleteForm(f)}>
                 Delete
@@ -322,7 +321,7 @@ export default function FormsManager({
             <input
               value={newForm.name}
               onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
-              placeholder="New client intake"
+              placeholder="New client form"
               required
             />
           </label>
@@ -339,7 +338,7 @@ export default function FormsManager({
               Create form
             </button>
             <button className="btn" type="button" onClick={createLawTemplate} disabled={busy}>
-              Start from the law-firm intake template
+              Use the ready-made law firm form
             </button>
           </div>
         </form>
@@ -347,7 +346,7 @@ export default function FormsManager({
 
       {selected && (
         <div className="card">
-          <h2 style={{ marginTop: 0 }}>Building: {selected.name}</h2>
+          <h2 style={{ marginTop: 0 }}>Editing: {selected.name}</h2>
           {questions.length === 0 && (
             <p className="small">No questions yet — add the first one below.</p>
           )}
@@ -466,12 +465,16 @@ export default function FormsManager({
       )}
 
       <div className="card">
-        <h2 style={{ marginTop: 0 }}>Visit-note templates</h2>
+        <h2 style={{ marginTop: 0 }}>Note templates</h2>
         <p className="small" style={{ marginTop: 0 }}>
-          A template pre-fills a new visit note with starter text, so
-          notes stay fast and consistent. Templates for a specific service
-          are offered first on that service&apos;s appointments.
+          Pick a template when writing a visit note and the note starts
+          with this text already filled in — you just edit it. A template
+          made for one service shows first on that service&apos;s
+          appointments.
         </p>
+        {templates.length === 0 && (
+          <p className="small">No templates yet — add your first one below.</p>
+        )}
         {templates.map((t) => (
           <div key={t.id} className="service-row">
             <div>

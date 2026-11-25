@@ -59,7 +59,7 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
       // form_id arrives with migration 0012 — retry without it.
       delete row.form_id;
       ({ error } = await supabase.from("services").insert(row));
-      if (!error) setMsg("Service added. Form attaching turns on with the next database update.");
+      if (!error) setMsg("Service added. Attaching a form isn't ready yet — check back soon.");
     }
     setForm({ name: "", duration: "30", price: "", formId: "" });
     setBusy(false);
@@ -73,7 +73,7 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
       .update({ form_id: formId || null })
       .eq("id", s.id);
     if (error) {
-      setMsg("Form attaching turns on with the next database update.");
+      setMsg("Attaching a form isn't ready yet — check back soon.");
       return;
     }
     load();
@@ -101,11 +101,11 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
             <div className="service-meta">{s.duration_minutes} min · {formatPrice(s.price_cents)}</div>
             {forms.length > 0 && (
               <div className="service-meta" style={{ marginTop: 4 }}>
-                Intake form:{" "}
+                Form:{" "}
                 <select
                   value={s.form_id ?? ""}
                   onChange={(e) => attachForm(s, e.target.value)}
-                  aria-label={`Intake form for ${s.name}`}
+                  aria-label={`Form for ${s.name}`}
                 >
                   <option value="">None</option>
                   {forms.map((f) => (
@@ -139,7 +139,7 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
         </div>
         {forms.length > 0 && (
           <label className="field">
-            <span>Intake form (optional)</span>
+            <span>Form (optional) — customers fill it in before the visit</span>
             <select value={form.formId} onChange={(e) => setForm({ ...form, formId: e.target.value })}>
               <option value="">None — no form for this service</option>
               {forms.map((f) => (

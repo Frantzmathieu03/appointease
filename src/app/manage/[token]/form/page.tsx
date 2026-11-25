@@ -122,11 +122,11 @@ export default function ManageFormPage({ params }: { params: Promise<{ token: st
 
       {!data.form ? (
         <div className="card">
-          <h2 style={{ marginTop: 0 }}>No intake form</h2>
+          <h2 style={{ marginTop: 0 }}>No form to fill in</h2>
           <p className="small" style={{ margin: 0 }}>
-            {biz?.name} hasn&apos;t attached an intake form to your{" "}
-            {data.appointment.service_name} appointment ({when}) — nothing
-            to complete here.
+            {biz?.name} doesn&apos;t have a form for your{" "}
+            {data.appointment.service_name} appointment ({when}) — there&apos;s
+            nothing to fill in here.
           </p>
         </div>
       ) : done || data.submission ? (

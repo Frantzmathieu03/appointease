@@ -336,14 +336,14 @@ export default function BookingFlow({
         </div>
         {!result?.demoMode && result?.manageToken && result?.intakeFormName && (
           <div className="card center">
-            <h2>One more step: your intake form</h2>
+            <h2>One more step: a short form</h2>
             <p className="small">
-              {businessName} asks customers to complete the{" "}
+              {businessName} asks customers to fill in the{" "}
               <strong>{result.intakeFormName}</strong> form before their
               visit — it only takes a couple of minutes.
             </p>
             <Link href={`/manage/${result.manageToken}/form`} className="btn btn-primary">
-              Complete your intake form
+              Fill in the form
             </Link>
           </div>
         )}

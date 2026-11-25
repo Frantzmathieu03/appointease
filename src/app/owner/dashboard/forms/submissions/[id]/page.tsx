@@ -72,9 +72,9 @@ export default async function DashboardSubmissionPage({
           ← {customer?.full_name ?? "Customer profile"}
         </Link>
       </p>
-      <h1 style={{ fontSize: 25 }}>{formRow?.name ?? "Intake form"}</h1>
+      <h1 style={{ fontSize: 25 }}>{formRow?.name ?? "Form"}</h1>
       <p className="small" style={{ marginTop: 0 }}>
-        Submitted by {customer?.full_name ?? "the customer"} · {submittedWhen}
+        Filled in by {customer?.full_name ?? "the customer"} · {submittedWhen}
         {submission.appointment_id && (
           <>
             {" · "}

@@ -237,16 +237,16 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
           <h3 style={{ marginTop: 0 }}>{intake.formName}</h3>
           {intake.submitted ? (
             <p className="small" style={{ margin: 0 }}>
-              ✓ You&apos;ve sent your intake form — {biz.name} has your answers.
+              ✓ You&apos;ve sent your form — {biz.name} has your answers.
             </p>
           ) : (
             <>
               <p className="small" style={{ margin: "0 0 10px" }}>
-                {biz.name} asks customers to complete this short form before
-                their visit.
+                {biz.name} asks you to fill in this short form before your
+                visit.
               </p>
               <Link href={`/manage/${token}/form`} className="btn btn-primary">
-                Complete your intake form
+                Fill in the form
               </Link>
             </>
           )}

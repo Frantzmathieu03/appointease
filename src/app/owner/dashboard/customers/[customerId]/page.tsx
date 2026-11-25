@@ -258,9 +258,8 @@ export default async function DashboardCustomerProfilePage({
         <h2 style={{ marginTop: 0 }}>Forms &amp; files</h2>
         {submissions.length === 0 && (
           <p className="small" style={{ margin: 0 }}>
-            No intake forms submitted yet. When a service with a form
-            attached is booked, the customer completes it before the
-            visit and it appears here.
+            No forms yet. When this customer books a service that has a
+            form, they fill it in before the visit and it shows up here.
           </p>
         )}
         {submissions.map((s) => {
@@ -269,11 +268,11 @@ export default async function DashboardCustomerProfilePage({
           return (
             <p key={s.id} className="small" style={{ margin: "0 0 8px" }}>
               <Link href={`/owner/dashboard/forms/submissions/${s.id}`}>
-                <strong>{s.forms?.name ?? "Intake form"}</strong>
+                <strong>{s.forms?.name ?? "Form"}</strong>
               </Link>{" "}
-              — submitted {fmtDT(s.submitted_at)} · {answerCount} answer
+              — filled in {fmtDT(s.submitted_at)} · {answerCount} answer
               {answerCount === 1 ? "" : "s"}
-              {fileCount > 0 ? ` · ${fileCount} file upload${fileCount === 1 ? "" : "s"}` : ""}
+              {fileCount > 0 ? ` · ${fileCount} file${fileCount === 1 ? "" : "s"}` : ""}
             </p>
           );
         })}

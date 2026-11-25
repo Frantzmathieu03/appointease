@@ -208,8 +208,8 @@ export default async function DashboardTodayPage() {
           )}
           {intakesMissing > 0 && (
             <p className="small" style={{ margin: "2px 0" }}>
-              {intakesMissing} upcoming appointment{intakesMissing === 1 ? " is" : "s are"}{" "}
-              missing an intake form —{" "}
+              {intakesMissing} upcoming appointment{intakesMissing === 1 ? " still needs" : "s still need"}{" "}
+              their form filled in —{" "}
               <Link href="/owner/dashboard/calendar">see them on the calendar</Link>.
             </p>
           )}

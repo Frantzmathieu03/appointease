@@ -277,19 +277,19 @@ export default async function DashboardAppointmentPage({
 
       {intake && (
         <div className="card">
-          <h2 style={{ marginTop: 0 }}>Intake form</h2>
+          <h2 style={{ marginTop: 0 }}>Form</h2>
           {intake.submissionId ? (
             <p className="small" style={{ margin: 0 }}>
-              <strong>{intake.formName}</strong> — Submitted{" "}
+              <strong>{intake.formName}</strong> — filled in{" "}
               {intake.submittedAt ? fmtWhen(intake.submittedAt) : ""}.{" "}
               <Link href={`/owner/dashboard/forms/submissions/${intake.submissionId}`}>
-                View answers
+                See the answers
               </Link>
             </p>
           ) : (
             <p className="small" style={{ margin: 0 }}>
-              <strong>{intake.formName}</strong> — Intake missing. The
-              customer can complete it from the link in their confirmation
+              <strong>{intake.formName}</strong> — not filled in yet. The
+              customer can fill it in from the link in their confirmation,
               or from My Appointments.
             </p>
           )}

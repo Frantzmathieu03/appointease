@@ -75,7 +75,7 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> }
 ) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — nothing to complete yet." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode — nothing to fill in yet." }, { status: 400 });
   }
   const { token } = await params;
   const { admin, appt } = await loadAppt(token);
@@ -113,21 +113,21 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — nothing to complete yet." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode — nothing to fill in yet." }, { status: 400 });
   }
   const { token } = await params;
   const { admin, appt } = await loadAppt(token);
   if (!appt) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
   if (appt.status === "cancelled") {
     return NextResponse.json(
-      { error: "This appointment was cancelled — there's nothing to complete." },
+      { error: "This appointment was cancelled — there's nothing to fill in." },
       { status: 409 }
     );
   }
 
   const loaded = await loadForm(admin, appt.service_id);
   if (!loaded) {
-    return NextResponse.json({ error: "No intake form is attached to this appointment." }, { status: 404 });
+    return NextResponse.json({ error: "There's no form attached to this appointment." }, { status: 404 });
   }
   const { form, questions } = loaded;
 

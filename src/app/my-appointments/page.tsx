@@ -199,11 +199,11 @@ export default async function MyAppointmentsPage() {
           {intakeByAppt.has(a.id) &&
             (intakeByAppt.get(a.id)!.submitted ? (
               <span className="btn" aria-disabled="true" style={{ opacity: 0.75 }}>
-                ✓ Intake form sent
+                ✓ Form sent
               </span>
             ) : (
               <Link href={`/manage/${a.manage_token}/form`} className="btn btn-primary">
-                Complete your intake form
+                Fill in the form
               </Link>
             ))}
           {a.businesses && (

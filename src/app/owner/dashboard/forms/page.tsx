@@ -22,11 +22,10 @@ export default async function DashboardFormsPage() {
     <div>
       <h1 style={{ fontSize: 26 }}>Forms</h1>
       <p className="small" style={{ marginTop: 0, maxWidth: 560 }}>
-        Intake forms are completed by the customer before their visit.
-        Build a form here, then attach it to a service in Settings →
-        Services — the customer gets a “Complete your intake form” step
-        on their booking, and their answers land on the appointment and
-        on their profile.
+        Forms are what customers fill in before their visit. Build a form
+        here, then attach it to a service in Settings → Services.
+        Customers see a “Fill in the form” step when they book, and their
+        answers show up on the appointment and on their profile page.
       </p>
       <FormsManager businessId={business.id} services={services} />
     </div>
