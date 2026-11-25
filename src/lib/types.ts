@@ -329,6 +329,21 @@ export interface PushSubscriptionRow {
   created_at: string;
 }
 
+/**
+ * Display-only US phone format (Frantz, 2026-11-25): 2958532555 shows
+ * as 295-853-2555. An 11-digit number with a leading 1 (US country
+ * code) formats on its last 10 digits. Anything else renders exactly
+ * as stored. Storage and validation are untouched — format at render.
+ */
+export function formatPhone(phone: string | null | undefined): string {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  const ten =
+    digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  if (ten.length !== 10) return phone;
+  return `${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`;
+}
+
 export function formatPrice(priceCents: number | null): string {
   if (priceCents === null) return "Price confirmed with the business";
   if (priceCents === 0) return "Free";

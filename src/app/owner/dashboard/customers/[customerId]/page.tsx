@@ -11,6 +11,7 @@ import type {
   StaffMember,
   VisitNote,
 } from "@/lib/types";
+import { formatPhone } from "@/lib/types";
 
 interface ApptRow {
   id: string;
@@ -161,7 +162,7 @@ export default async function DashboardCustomerProfilePage({
       </p>
       <h1 style={{ fontSize: 26, marginBottom: 2 }}>{customer.full_name || "Customer"}</h1>
       <p className="small" style={{ margin: "0 0 4px" }}>
-        {[customer.phone, customer.email].filter(Boolean).join(" · ")}
+        {[customer.phone ? formatPhone(customer.phone) : null, customer.email].filter(Boolean).join(" · ")}
         {relCreatedAt ? ` · Customer since ${formatDateInZone(new Date(relCreatedAt), tz)}` : ""}
       </p>
       <p style={{ margin: "0 0 14px" }}>

@@ -4,7 +4,7 @@ import { getBusinessPageData, hoursSummary } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getBillingState } from "@/lib/plans";
-import { formatPrice, visitTypeLabel } from "@/lib/types";
+import { formatPhone, formatPrice, visitTypeLabel } from "@/lib/types";
 import AddressDirections from "@/components/AddressDirections";
 import { categoryLabel } from "@/lib/categories";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
@@ -46,7 +46,7 @@ export default async function BusinessPage({
             {business.phone && !demoShop && (
               <>
                 {" "}You can still reach them at{" "}
-                <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{business.phone}</a>.
+                <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{formatPhone(business.phone)}</a>.
               </>
             )}
           </p>
@@ -199,7 +199,7 @@ export default async function BusinessPage({
                 className="btn"
                 style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
               >
-                Call {business.phone}
+                Call {formatPhone(business.phone)}
               </a>
             ) : (
               <span
@@ -275,7 +275,7 @@ export default async function BusinessPage({
           {business.phone && !demoShop && (
             <p style={{ margin: "6px 0", display: "flex", alignItems: "center", gap: 8 }}>
               <span aria-hidden="true">📞</span>
-              <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{business.phone}</a>
+              <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{formatPhone(business.phone)}</a>
             </p>
           )}
           {business.email && !demoShop && (
@@ -302,7 +302,7 @@ export default async function BusinessPage({
                   {loc.phone && !demoShop && (
                     <>
                       {" · "}
-                      <a href={`tel:${loc.phone.replace(/[^+\d]/g, "")}`}>{loc.phone}</a>
+                      <a href={`tel:${loc.phone.replace(/[^+\d]/g, "")}`}>{formatPhone(loc.phone)}</a>
                     </>
                   )}
                 </p>

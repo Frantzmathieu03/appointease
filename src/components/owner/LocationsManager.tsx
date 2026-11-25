@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import type { Location } from "@/lib/types";
+import { formatPhone } from "@/lib/types";
 
 // Settings → Locations. A business can have more than one branch.
 // Locations are optional: with none added, the booking page just shows
@@ -101,7 +102,7 @@ export default function LocationsManager({ businessId }: { businessId: string })
           <div>
             <div className="service-name">{loc.name}</div>
             <div className="service-meta">
-              {[loc.address, loc.phone].filter(Boolean).join(" · ") || "No address yet"}
+              {[loc.address, loc.phone ? formatPhone(loc.phone) : null].filter(Boolean).join(" · ") || "No address yet"}
             </div>
           </div>
           <div style={{ display: "flex", gap: 6 }}>

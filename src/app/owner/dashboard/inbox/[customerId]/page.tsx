@@ -6,6 +6,7 @@ import AssignControl from "@/components/owner/AssignControl";
 import InboxShell from "@/components/owner/InboxShell";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import type { StaffMember } from "@/lib/types";
+import { formatPhone } from "@/lib/types";
 
 // One open thread inside the two-column inbox (PDF §4): header carries
 // the customer's next appointment, their assignment, and a profile
@@ -83,7 +84,7 @@ export default async function DashboardThreadPage({
             Conversation with {customer.full_name || "Customer"}
           </h2>
           <p className="small" style={{ marginTop: 0, marginBottom: 4 }}>
-            {[customer.phone, customer.email].filter(Boolean).join(" · ")}
+            {[customer.phone ? formatPhone(customer.phone) : null, customer.email].filter(Boolean).join(" · ")}
           </p>
           {next && (
             <p className="small" style={{ margin: "0 0 4px" }}>

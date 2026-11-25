@@ -7,6 +7,7 @@ import BusinessMediaManager from "@/components/owner/BusinessMediaManager";
 import PublishButton from "@/components/owner/PublishButton";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import type { Business, BusinessPhoto } from "@/lib/types";
+import { formatPhone } from "@/lib/types";
 
 // The booking-page editor: one form for the words on the public page,
 // the logo & photos manager, the publish switch, and a live preview
@@ -176,7 +177,7 @@ export default function BookingPageEditor({
                 className="btn"
                 style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
               >
-                Call {form.phone || "office"}
+                Call {form.phone ? formatPhone(form.phone) : "office"}
               </span>
             </div>
           </div>

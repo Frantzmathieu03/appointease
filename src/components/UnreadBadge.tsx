@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { isSupabaseConfigured } from "@/lib/supabase-config";
 
@@ -20,6 +20,13 @@ export default function UnreadBadge({
   businessId?: string;
 }) {
   const [count, setCount] = useState(0);
+  // Unique channel name per mounted instance: the browser Supabase
+  // client is a singleton, so every badge asking for the same channel
+  // name gets the SAME channel back — and realtime-js throws when a
+  // second instance adds callbacks after the first one subscribed.
+  // The dashboard renders three owner badges for one business, which
+  // crashed every dashboard page until each instance got its own name.
+  const instanceId = useId().replace(/[^a-zA-Z0-9]/g, "");
 
   const load = useCallback(async () => {
     if (!isSupabaseConfigured()) return;
@@ -50,7 +57,7 @@ export default function UnreadBadge({
     if (!isSupabaseConfigured()) return;
     const supabase = createBrowserSupabase();
     const channel = supabase
-      .channel(`unread-${variant}-${businessId ?? "all"}`)
+      .channel(`unread-${variant}-${businessId ?? "all"}-${instanceId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "messages" },
@@ -62,7 +69,7 @@ export default function UnreadBadge({
       supabase.removeChannel(channel);
       clearInterval(t);
     };
-  }, [load, variant, businessId]);
+  }, [load, variant, businessId, instanceId]);
 
   if (count === 0) return null;
   return <span className="badge">{count}</span>;

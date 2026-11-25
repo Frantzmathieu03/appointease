@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireBusiness } from "@/lib/owner";
 import OwnerBookingForm, { type OwnerBookingCustomer } from "@/components/owner/OwnerBookingForm";
 import type { Service, StaffMember } from "@/lib/types";
+import { formatPhone } from "@/lib/types";
 
 // "New appointment" (PDF §4): reached from the Today page button and by
 // clicking an empty calendar slot (which pre-fills date/time/staff).
@@ -40,7 +41,7 @@ export default async function DashboardNewAppointmentPage({
     return {
       id: row.customer_id,
       name: row.customers?.full_name || "Customer",
-      detail: [row.customers?.phone, row.customers?.email].filter(Boolean).join(" · "),
+      detail: [row.customers?.phone ? formatPhone(row.customers.phone) : null, row.customers?.email].filter(Boolean).join(" · "),
     };
   });
 

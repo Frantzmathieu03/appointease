@@ -5,6 +5,7 @@ import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import AssignControl from "@/components/owner/AssignControl";
 import VisitNotes, { type NoteBundle } from "@/components/owner/VisitNotes";
 import type { NextStep, NoteTemplate, StaffMember, VisitNote, VisitNoteAddendum } from "@/lib/types";
+import { formatPhone } from "@/lib/types";
 
 interface Appt {
   id: string;
@@ -221,7 +222,7 @@ export default async function DashboardAppointmentPage({
         )}
         {(appt.customers?.phone || appt.customers?.email) && (
           <p className="small" style={{ margin: "4px 0" }}>
-            {[appt.customers?.phone, appt.customers?.email].filter(Boolean).join(" · ")}
+            {[appt.customers?.phone ? formatPhone(appt.customers.phone) : null, appt.customers?.email].filter(Boolean).join(" · ")}
           </p>
         )}
         <p style={{ margin: "8px 0 0" }}>

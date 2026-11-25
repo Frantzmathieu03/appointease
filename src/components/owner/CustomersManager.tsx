@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import type { StaffMember } from "@/lib/types";
+import { formatPhone } from "@/lib/types";
 
 export interface CustomerRow {
   id: string;
@@ -149,7 +150,7 @@ export default function CustomersManager({
             <div>
               <h3 style={{ marginBottom: 2 }}>{c.full_name || "Customer"}</h3>
               <p className="small" style={{ margin: 0 }}>
-                {[c.phone, c.email].filter(Boolean).join(" · ")}
+                {[c.phone ? formatPhone(c.phone) : null, c.email].filter(Boolean).join(" · ")}
                 {c.total > 0
                   ? ` · ${c.total} appointment${c.total === 1 ? "" : "s"}` +
                     (c.lastLabel ? ` · last ${c.lastLabel}` : "")

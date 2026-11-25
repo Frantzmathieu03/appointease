@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import type { Message } from "@/lib/types";
 
@@ -32,6 +32,10 @@ export default function ThreadView({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  // Unique realtime channel per mounted instance (same singleton-client
+  // collision as UnreadBadge: a shared channel name throws when a second
+  // instance adds callbacks after the first subscribed).
+  const instanceId = useId().replace(/[^a-zA-Z0-9]/g, "");
   const otherSender = viewer === "customer" ? "business" : "customer";
 
   const markRead = useCallback(async () => {
@@ -66,7 +70,7 @@ export default function ThreadView({
     load();
     const supabase = createBrowserSupabase();
     const channel = supabase
-      .channel(`thread-${businessId}-${customerId}`)
+      .channel(`thread-${businessId}-${customerId}-${instanceId}`)
       .on(
         "postgres_changes",
         {
@@ -86,7 +90,7 @@ export default function ThreadView({
       supabase.removeChannel(channel);
       clearInterval(t);
     };
-  }, [load, businessId, customerId]);
+  }, [load, businessId, customerId, instanceId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

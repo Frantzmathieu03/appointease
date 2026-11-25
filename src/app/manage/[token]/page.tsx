@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { BOOKING_WINDOW_DAYS, formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
+import { formatPhone } from "@/lib/types";
 import DatePicker from "@/components/DatePicker";
 
 // Secure manage page — the link from every confirmation/reminder.
@@ -174,7 +175,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
           <p className="eyebrow" style={{ margin: 0 }}>{biz.name}</p>
           {biz.phone && (
             <p className="small" style={{ margin: 0 }}>
-              <a href={`tel:${biz.phone}`}>{biz.phone}</a>
+              <a href={`tel:${biz.phone}`}>{formatPhone(biz.phone)}</a>
             </p>
           )}
         </div>

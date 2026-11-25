@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import FormFields from "@/components/FormFields";
 import type { FormAnswers, FormQuestion } from "@/lib/types";
+import { formatPhone } from "@/lib/types";
 
 // The customer's intake form, behind the same secure manage link as
 // reschedule/cancel — the token is the credential, no account needed.
@@ -114,7 +115,7 @@ export default function ManageFormPage({ params }: { params: Promise<{ token: st
           <p className="eyebrow" style={{ margin: 0 }}>{biz?.name}</p>
           {biz?.phone && (
             <p className="small" style={{ margin: 0 }}>
-              <a href={`tel:${biz.phone}`}>{biz.phone}</a>
+              <a href={`tel:${biz.phone}`}>{formatPhone(biz.phone)}</a>
             </p>
           )}
         </div>

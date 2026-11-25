@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import {
+  formatPhone,
   formatPrice,
   visitTypeLabel,
   type Availability,
@@ -518,7 +519,7 @@ export default function BookingFlow({
             {service && ` · ${service.duration_minutes} min · ${formatPrice(service.price_cents)}`}
           </p>
           <p className="small">
-            {form.name} · {form.phone} · {form.email}
+            {form.name} · {formatPhone(form.phone)} · {form.email}
           </p>
           {isDemo ? (
             <p className="small">
