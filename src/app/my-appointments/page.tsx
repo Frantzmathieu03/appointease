@@ -19,7 +19,12 @@ interface ApptRow {
   services: { name: string } | null;
 }
 
-export default async function MyAppointmentsPage() {
+export default async function MyAppointmentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ business?: string }>;
+}) {
+  const { business: focusSlug } = await searchParams;
   if (!isSupabaseConfigured()) {
     return (
       <main className="column">
@@ -38,7 +43,10 @@ export default async function MyAppointmentsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/my-appointments");
+  if (!user) {
+    const dest = focusSlug ? `/my-appointments?business=${focusSlug}` : "/my-appointments";
+    redirect(`/login?next=${encodeURIComponent(dest)}`);
+  }
   await ensureCustomerProfile(supabase, user);
 
   const { data } = await supabase
@@ -158,6 +166,20 @@ export default async function MyAppointmentsPage() {
   const next = upcoming[0];
   const rest = upcoming.slice(1);
 
+  // Arriving from a business's page (?business=<slug> — the business
+  // header's My appointments link): that business's appointments come
+  // first, under its name, so the customer lands in that business's
+  // area. The account stays the one global customer account — this is
+  // framing only (Frantz, 2026-11-25).
+  const focusBiz = focusSlug
+    ? (appts.find((a) => a.businesses?.slug === focusSlug)?.businesses ?? null)
+    : null;
+  const focusAppts = focusBiz ? appts.filter((a) => a.businesses?.slug === focusSlug) : [];
+  const focusUpcoming = focusAppts.filter(isUpcoming);
+  const focusPast = focusAppts.filter((a) => !isUpcoming(a)).reverse();
+  const otherUpcoming = focusBiz ? upcoming.filter((a) => a.businesses?.slug !== focusSlug) : [];
+  const otherPast = focusBiz ? past.filter((a) => a.businesses?.slug !== focusSlug) : [];
+
   const card = (a: ApptRow, big = false) => {
     const tz = a.businesses?.timezone ?? "America/New_York";
     return (
@@ -254,13 +276,46 @@ export default async function MyAppointmentsPage() {
         </div>
       )}
 
-      {next && card(next, true)}
-      {rest.map((a) => card(a))}
-
-      {past.length > 0 && (
+      {focusBiz && focusAppts.length > 0 ? (
         <>
-          <h2 style={{ marginTop: 22 }}>Past appointments</h2>
-          {past.map((a) => card(a))}
+          <h2 style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
+            {focusBiz.logo_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={focusBiz.logo_url}
+                alt=""
+                width={34}
+                height={34}
+                style={{ borderRadius: 9, objectFit: "cover" }}
+              />
+            )}
+            <span>{focusBiz.name}</span>
+          </h2>
+          {focusUpcoming.map((a) => card(a, a.id === next?.id))}
+          {focusPast.map((a) => card(a))}
+
+          {(otherUpcoming.length > 0 || otherPast.length > 0) && (
+            <h2 style={{ marginTop: 22 }}>Your other appointments</h2>
+          )}
+          {otherUpcoming.map((a) => card(a, a.id === next?.id))}
+          {otherPast.length > 0 && (
+            <>
+              <h3 style={{ marginTop: 16 }}>Past appointments</h3>
+              {otherPast.map((a) => card(a))}
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          {next && card(next, true)}
+          {rest.map((a) => card(a))}
+
+          {past.length > 0 && (
+            <>
+              <h2 style={{ marginTop: 22 }}>Past appointments</h2>
+              {past.map((a) => card(a))}
+            </>
+          )}
         </>
       )}
 

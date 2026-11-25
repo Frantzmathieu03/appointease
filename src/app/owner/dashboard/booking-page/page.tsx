@@ -13,7 +13,7 @@ export default async function DashboardBookingPageEditor() {
   const { supabase, business, role } = await requireBusiness();
   if (role === "staff") redirect("/owner/dashboard");
 
-  const [{ data: photoRows }, { data: availability }, { count: serviceCount }] = await Promise.all([
+  const [{ data: photoRows }, { data: availability }] = await Promise.all([
     supabase
       .from("business_photos")
       .select("*")
@@ -21,11 +21,6 @@ export default async function DashboardBookingPageEditor() {
       .order("position", { ascending: true })
       .order("created_at", { ascending: true }),
     supabase.from("availability").select("*").eq("business_id", business.id),
-    supabase
-      .from("services")
-      .select("id", { count: "exact", head: true })
-      .eq("business_id", business.id)
-      .eq("active", true),
   ]);
   const hours = (availability ?? []) as Availability[];
 
@@ -42,7 +37,7 @@ export default async function DashboardBookingPageEditor() {
         hoursLabel={hoursSummary(hours)}
         categoryText={business.category ? categoryLabel(business.category) : business.type}
         bookingLink={`${siteUrl()}/${business.slug}`}
-        publishReady={(serviceCount ?? 0) >= 1 && hours.length >= 1}
+        publishMissing={hours.length >= 1 ? [] : ["opening hours"]}
       />
     </div>
   );

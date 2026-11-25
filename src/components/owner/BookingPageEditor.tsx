@@ -17,14 +17,14 @@ export default function BookingPageEditor({
   hoursLabel,
   categoryText,
   bookingLink,
-  publishReady,
+  publishMissing,
 }: {
   business: Business;
   initialPhotos: BusinessPhoto[];
   hoursLabel: string;
   categoryText: string;
   bookingLink: string;
-  publishReady: boolean;
+  publishMissing: string[];
 }) {
   const [form, setForm] = useState({
     name: business.name,
@@ -90,8 +90,13 @@ export default function BookingPageEditor({
                 <input required value={form.name} onChange={set("name")} />
               </label>
               <label className="field">
-                <span>Short description (optional)</span>
-                <textarea value={form.description} onChange={set("description")} style={{ minHeight: 56 }} />
+                <span>What does your business do? (optional)</span>
+                <textarea
+                  value={form.description}
+                  onChange={set("description")}
+                  style={{ minHeight: 56 }}
+                  placeholder="Tell customers what you do — for example: Haircuts and beard trims for the whole family. Walk-ins welcome."
+                />
               </label>
               <label className="field">
                 <span>Office phone (the Call button dials this)</span>
@@ -122,7 +127,7 @@ export default function BookingPageEditor({
 
           <div className="card">
             <h2>Publish</h2>
-            <PublishButton businessId={business.id} published={business.published} ready={publishReady} />
+            <PublishButton businessId={business.id} published={business.published} initialMissing={publishMissing} />
           </div>
         </div>
 

@@ -101,8 +101,13 @@ export default function BusinessDetailsForm({ business }: { business: Business }
         <input value={form.address} onChange={set("address")} placeholder="25 Main St, Boston, MA" />
       </label>
       <label className="field">
-        <span>Short description (optional)</span>
-        <textarea value={form.description} onChange={set("description")} style={{ minHeight: 56 }} />
+        <span>What does your business do? (optional)</span>
+        <textarea
+          value={form.description}
+          onChange={set("description")}
+          style={{ minHeight: 56 }}
+          placeholder="Tell customers what you do — for example: Haircuts and beard trims for the whole family. Walk-ins welcome."
+        />
       </label>
       <label className="field">
         <span>Timezone</span>

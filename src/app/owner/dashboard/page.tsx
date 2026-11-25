@@ -71,6 +71,15 @@ export default async function DashboardTodayPage() {
     .eq("sender", "customer")
     .is("read_at", null);
 
+  // No services yet = nothing to book. Show the one clear next step
+  // (Frantz, 2026-11-25): services are added here in the dashboard,
+  // not during account creation.
+  const { count: serviceCount } = await supabase
+    .from("services")
+    .select("id", { count: "exact", head: true })
+    .eq("business_id", business.id)
+    .eq("active", true);
+
   // Needs attention (PDF §3 / migration 0010): past appointments in the
   // last 30 days with no visit note, and customers with no staff
   // assignment. Both queries degrade quietly until the migration lands.
@@ -194,6 +203,20 @@ export default async function DashboardTodayPage() {
           You have {unread} unread customer message{unread === 1 ? "" : "s"} —{" "}
           <Link href="/owner/dashboard/inbox">open your inbox</Link>. (They were also
           emailed to you when they arrived.)
+        </div>
+      )}
+
+      {(serviceCount ?? 0) === 0 && (
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>Add your first service</h3>
+          <p className="small">
+            Customers book a service, so your page is not taking bookings
+            yet. Add one service — just a name and how long it takes — and
+            you are ready.
+          </p>
+          <Link href="/owner/dashboard/settings#services" className="btn btn-primary">
+            Add your first service
+          </Link>
         </div>
       )}
 

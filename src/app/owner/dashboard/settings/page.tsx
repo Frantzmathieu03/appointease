@@ -26,11 +26,6 @@ export default async function DashboardSettingsPage() {
     .from("availability")
     .select("*")
     .eq("business_id", business.id);
-  const { count: serviceCount } = await supabase
-    .from("services")
-    .select("id", { count: "exact", head: true })
-    .eq("business_id", business.id)
-    .eq("active", true);
   const { data: photoRows } = await supabase
     .from("business_photos")
     .select("*")
@@ -103,7 +98,7 @@ export default async function DashboardSettingsPage() {
         <PublishButton
           businessId={business.id}
           published={business.published}
-          ready={(serviceCount ?? 0) >= 1 && hours.length >= 1}
+          initialMissing={hours.length >= 1 ? [] : ["opening hours"]}
         />
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import type { Availability } from "@/lib/types";
 
@@ -12,6 +13,24 @@ interface DayState {
   close: string;
 }
 
+// Build the editor's days from the saved rows. A business with NO
+// saved rows yet starts from the suggested week — Monday to Friday
+// 9:00 AM–5:00 PM open, Saturday and Sunday closed — as a starting
+// point only: nothing is saved until the owner presses Save hours.
+function buildDays(initial: Availability[]): DayState[] {
+  const hasRows = initial.length > 0;
+  return DAYS.map((_, weekday) => {
+    const row = initial.find((a) => a.staff_id === null && a.weekday === weekday);
+    if (row) {
+      return { closed: false, open: row.open_time.slice(0, 5), close: row.close_time.slice(0, 5) };
+    }
+    if (!hasRows && weekday >= 1 && weekday <= 5) {
+      return { closed: false, open: "09:00", close: "17:00" };
+    }
+    return { closed: true, open: "09:00", close: "17:00" };
+  });
+}
+
 /** Business-wide weekly hours (staff-specific hours are a later layer). */
 export default function HoursManager({
   businessId,
@@ -20,26 +39,13 @@ export default function HoursManager({
   businessId: string;
   initial: Availability[];
 }) {
-  const [days, setDays] = useState<DayState[]>(() =>
-    DAYS.map((_, weekday) => {
-      const row = initial.find((a) => a.staff_id === null && a.weekday === weekday);
-      return row
-        ? { closed: false, open: row.open_time.slice(0, 5), close: row.close_time.slice(0, 5) }
-        : { closed: true, open: "09:00", close: "17:00" };
-    })
-  );
+  const router = useRouter();
+  const [days, setDays] = useState<DayState[]>(() => buildDays(initial));
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setDays(
-      DAYS.map((_, weekday) => {
-        const row = initial.find((a) => a.staff_id === null && a.weekday === weekday);
-        return row
-          ? { closed: false, open: row.open_time.slice(0, 5), close: row.close_time.slice(0, 5) }
-          : { closed: true, open: "09:00", close: "17:00" };
-      })
-    );
+    setDays(buildDays(initial));
   }, [initial]);
 
   const setDay = (weekday: number, patch: Partial<DayState>) => {
@@ -68,25 +74,43 @@ export default function HoursManager({
     if (rows.length > 0) await supabase.from("availability").insert(rows);
     setBusy(false);
     setSaved(true);
+    // Refresh the page so anything that depends on the saved hours
+    // (the setup checklist, the publish button) sees them right away.
+    router.refresh();
   }
 
   return (
     <div>
+      {initial.length === 0 && (
+        <p className="small" style={{ marginTop: 0 }}>
+          We filled in a common week to start you off — change anything you
+          like, then press Save hours.
+        </p>
+      )}
       {DAYS.map((name, weekday) => (
         <div
           key={name}
           style={{ display: "flex", gap: 10, alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--line)" }}
         >
           <span style={{ width: 96, fontWeight: 600, fontSize: 14 }}>{name}</span>
-          <label className="small" style={{ display: "flex", gap: 5, alignItems: "center" }}>
-            <input
-              type="checkbox"
-              checked={days[weekday].closed}
-              onChange={(e) => setDay(weekday, { closed: e.target.checked })}
-              style={{ width: "auto" }}
-            />
-            Closed
-          </label>
+          <div style={{ display: "flex", gap: 6 }} role="group" aria-label={`${name}: open or closed`}>
+            <button
+              type="button"
+              className={days[weekday].closed ? "btn" : "btn btn-primary"}
+              style={{ padding: "4px 14px", fontSize: 13 }}
+              onClick={() => setDay(weekday, { closed: false })}
+            >
+              Open
+            </button>
+            <button
+              type="button"
+              className={days[weekday].closed ? "btn btn-primary" : "btn"}
+              style={{ padding: "4px 14px", fontSize: 13 }}
+              onClick={() => setDay(weekday, { closed: true })}
+            >
+              Closed
+            </button>
+          </div>
           {!days[weekday].closed && (
             <>
               <input

@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import type { BusinessPhoto } from "@/lib/types";
 
-// Owner media manager: one logo + up to 4 work photos, stored in the
-// public "business-media" Supabase Storage bucket under <business_id>/.
+// Owner media manager: one logo + up to 4 work photos (owners can pick
+// many photos at once from their gallery), stored in the public
+// "business-media" Supabase Storage bucket under <business_id>/.
 // Writes are owner-only (RLS + storage policies, migration 0006); the
 // public business page reads the URLs. Validation is honest and plain:
 // JPEG/PNG/WebP only, logo ≤ 2 MB, photos ≤ 5 MB each.
@@ -44,34 +45,40 @@ export default function BusinessMediaManager({
   const [photos, setPhotos] = useState(initialPhotos);
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  const [note, setNote] = useState("");
   const logoInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
 
-  async function upload(file: File, kind: "logo" | "photo"): Promise<string | null> {
+  // Returns the public URL, or a plain-words reason it did not work.
+  // The caller decides how to show the reason (one file vs. many).
+  async function upload(
+    file: File,
+    kind: "logo" | "photo"
+  ): Promise<{ url: string } | { problem: string }> {
     const problem = validate(file, kind === "logo" ? LOGO_MAX_BYTES : PHOTO_MAX_BYTES);
-    if (problem) {
-      setError(problem);
-      return null;
-    }
+    if (problem) return { problem };
     const supabase = createBrowserSupabase();
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const path = `${businessId}/${kind}-${Date.now()}.${ext}`;
+    const path = `${businessId}/${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from(BUCKET)
       .upload(path, file, { contentType: file.type });
     if (upErr) {
       console.error("Media upload failed", upErr);
-      setError("That upload didn't go through. Check your connection and try again.");
-      return null;
+      return { problem: "That upload didn't go through. Check your connection and try again." };
     }
-    return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    return { url: supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
   }
 
   async function onLogo(file: File) {
     setBusy("logo");
     setError("");
-    const url = await upload(file, "logo");
-    if (url) {
+    setNote("");
+    const result = await upload(file, "logo");
+    if ("problem" in result) {
+      setError(result.problem);
+    } else {
+      const url = result.url;
       const supabase = createBrowserSupabase();
       const old = logoUrl;
       const { error: dbErr } = await supabase
@@ -113,30 +120,69 @@ export default function BusinessMediaManager({
     setBusy("");
   }
 
-  async function onPhoto(file: File) {
-    if (photos.length >= MAX_PHOTOS) {
+  // Owners can pick many photos at once from their gallery. They are
+  // added one after another; a plain note says how far along it is, and
+  // the note at the end says how many were added. Only the open slots
+  // are filled — the limit is MAX_PHOTOS photos in total.
+  async function onPhotos(picked: File[]) {
+    if (picked.length === 0) return;
+    const open = MAX_PHOTOS - photos.length;
+    if (open <= 0) {
       setError(`You can show up to ${MAX_PHOTOS} photos. Remove one first.`);
       return;
     }
+    const toAdd = picked.slice(0, open);
+    const leftOut = picked.length - toAdd.length;
     setBusy("photo");
     setError("");
-    const url = await upload(file, "photo");
-    if (url) {
-      const supabase = createBrowserSupabase();
+    setNote(toAdd.length > 1 ? `Adding ${toAdd.length} photos…` : "Adding your photo…");
+    const supabase = createBrowserSupabase();
+    const added: BusinessPhoto[] = [];
+    let problem = "";
+    for (let i = 0; i < toAdd.length; i++) {
+      if (toAdd.length > 1) setNote(`Adding photo ${i + 1} of ${toAdd.length}…`);
+      const result = await upload(toAdd[i], "photo");
+      if ("problem" in result) {
+        problem = result.problem;
+        continue;
+      }
       const { data, error: dbErr } = await supabase
         .from("business_photos")
-        .insert({ business_id: businessId, url, position: photos.length })
+        .insert({
+          business_id: businessId,
+          url: result.url,
+          position: photos.length + added.length,
+        })
         .select("*")
         .single();
       if (dbErr || !data) {
         console.error("Photo save failed", dbErr);
-        setError("That photo couldn't be saved. Please try again.");
-        const path = storagePathFromUrl(url);
+        problem = "A photo uploaded but couldn't be saved. Please try again.";
+        const path = storagePathFromUrl(result.url);
         if (path) await supabase.storage.from(BUCKET).remove([path]);
       } else {
-        setPhotos([...photos, data as BusinessPhoto]);
-        router.refresh();
+        added.push(data as BusinessPhoto);
       }
+    }
+    if (added.length > 0) {
+      setPhotos([...photos, ...added]);
+      router.refresh();
+    }
+    const failed = toAdd.length - added.length;
+    let summary =
+      added.length === 1 ? "Added 1 photo." : added.length > 1 ? `Added ${added.length} photos.` : "";
+    if (leftOut > 0) {
+      summary += ` You picked ${picked.length}, but the limit is ${MAX_PHOTOS} photos, so only the ones that fit were added.`;
+    }
+    setNote(summary.trim());
+    if (failed > 0) {
+      setError(
+        (added.length > 0
+          ? failed === 1
+            ? "1 photo could not be added. "
+            : `${failed} photos could not be added. `
+          : "") + problem
+      );
     }
     setBusy("");
   }
@@ -242,22 +288,31 @@ export default function BusinessMediaManager({
           ))}
         </div>
       )}
+      {note && (
+        <p className="small" role="status" style={{ marginBottom: 8 }}>
+          {note}
+        </p>
+      )}
       <button
         className="btn"
         disabled={busy !== "" || photos.length >= MAX_PHOTOS}
         onClick={() => photoInput.current?.click()}
       >
-        {busy === "photo" ? "Uploading…" : "Add a photo"}
+        {busy === "photo" ? "Adding…" : "Add photos"}
       </button>
-      <p className="small">JPG, PNG or WebP, up to 5 MB each, up to {MAX_PHOTOS} photos.</p>
+      <p className="small">
+        JPG, PNG or WebP, up to 5 MB each, up to {MAX_PHOTOS} photos. You can
+        pick more than one at a time.
+      </p>
       <input
         ref={photoInput}
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        multiple
         hidden
         onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) void onPhoto(f);
+          const files = e.target.files ? Array.from(e.target.files) : [];
+          if (files.length) void onPhotos(files);
           e.target.value = "";
         }}
       />

@@ -19,6 +19,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -46,6 +47,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         type,
         phone: phone.trim() || null,
         address: address.trim() || null,
+        description: description.trim() || null,
         email: user.email ?? null,
       });
       if (!error) {
@@ -96,13 +98,25 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
           ))}
         </select>
       </label>
+      <p className="small" style={{ margin: "0 0 10px" }}>
+        The rest is optional — you can add this later.
+      </p>
       <label className="field">
-        <span>Office phone (customers will tap to call)</span>
+        <span>Office phone (optional — customers will tap to call)</span>
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" />
       </label>
       <label className="field">
         <span>Business address (optional — customers tap it for directions)</span>
         <input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" placeholder="25 Main St, Boston, MA" />
+      </label>
+      <label className="field">
+        <span>What does your business do? (optional)</span>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          style={{ minHeight: 56 }}
+          placeholder="Tell customers what you do — for example: Haircuts and beard trims for the whole family. Walk-ins welcome."
+        />
       </label>
       <button className="btn btn-primary btn-block" type="submit" disabled={busy || !name.trim()}>
         {busy ? "Reserving your link…" : "Create my business"}

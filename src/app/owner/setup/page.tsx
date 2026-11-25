@@ -3,13 +3,10 @@ import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getOwnerBusiness, requireUser, siteUrl } from "@/lib/owner";
 import CreateBusinessForm from "@/components/owner/CreateBusinessForm";
 import BusinessDetailsForm from "@/components/owner/BusinessDetailsForm";
-import ServicesManager from "@/components/owner/ServicesManager";
 import HoursManager from "@/components/owner/HoursManager";
-import StaffManager from "@/components/owner/StaffManager";
 import PublishButton from "@/components/owner/PublishButton";
-import BusinessMediaManager from "@/components/owner/BusinessMediaManager";
 import CopyLinkButton from "@/components/CopyLinkButton";
-import type { Availability, BusinessPhoto } from "@/lib/types";
+import type { Availability } from "@/lib/types";
 
 export default async function OwnerSetupPage() {
   if (!isSupabaseConfigured()) {
@@ -41,25 +38,25 @@ export default async function OwnerSetupPage() {
     );
   }
 
-  const [{ count: serviceCount }, { data: availability }, { count: staffCount }, { data: photoRows }] = await Promise.all([
-    supabase.from("services").select("id", { count: "exact", head: true }).eq("business_id", business.id).eq("active", true),
-    supabase.from("availability").select("*").eq("business_id", business.id),
-    supabase.from("staff").select("id", { count: "exact", head: true }).eq("business_id", business.id).eq("active", true),
-    supabase.from("business_photos").select("*").eq("business_id", business.id).order("position", { ascending: true }).order("created_at", { ascending: true }),
-  ]);
-  const photos = (photoRows ?? []) as BusinessPhoto[];
+  const { data: availability } = await supabase
+    .from("availability")
+    .select("*")
+    .eq("business_id", business.id);
   const hours = (availability ?? []) as Availability[];
-  const detailsDone = Boolean(business.name && business.address && business.phone);
-  const servicesDone = (serviceCount ?? 0) >= 1;
+  // Only the name is required to create the business (Frantz,
+  // 2026-11-25) — address, phone and the rest are optional and can be
+  // added anytime, so this step is done once the business exists.
+  const detailsDone = Boolean(business.name);
   const hoursDone = hours.length >= 1;
   const link = `${siteUrl()}/${business.slug}`;
 
+  // Setup stays short on purpose (Frantz, 2026-11-25): business basics,
+  // opening hours, publish. Services, team and photos all live in the
+  // dashboard, after the account exists.
   const steps = [
     { label: "Business created — link reserved", done: true },
-    { label: "Business details (address + office phone)", done: detailsDone },
-    { label: "At least one service", done: servicesDone },
+    { label: "Business details", done: detailsDone },
     { label: "Opening hours", done: hoursDone },
-    { label: "Add your logo and photos (optional)", done: Boolean(business.logo_url) || photos.length > 0 },
     { label: "Publish your booking page", done: business.published },
   ];
 
@@ -95,33 +92,24 @@ export default async function OwnerSetupPage() {
       </div>
 
       <div className="card">
-        <h2>Logo &amp; photos (optional)</h2>
-        <p className="small" style={{ marginBottom: 10 }}>
-          Optional — your logo and up to four photos of your work make your
-          booking page feel like your shop. You can add them now or anytime
-          later in Settings.
-        </p>
-        <BusinessMediaManager businessId={business.id} initialLogoUrl={business.logo_url} initialPhotos={photos} />
-      </div>
-
-      <div className="card">
-        <h2>Services</h2>
-        <ServicesManager businessId={business.id} />
-      </div>
-
-      <div className="card">
-        <h2>Team {(staffCount ?? 0) > 0 ? `(${staffCount})` : ""}</h2>
-        <StaffManager businessId={business.id} />
-      </div>
-
-      <div className="card">
         <h2>Opening hours</h2>
         <HoursManager businessId={business.id} initial={hours} />
       </div>
 
       <div className="card">
         <h2>Publish</h2>
-        <PublishButton businessId={business.id} published={business.published} ready={servicesDone && hoursDone} />
+        <PublishButton
+          businessId={business.id}
+          published={business.published}
+          initialMissing={hoursDone ? [] : ["opening hours"]}
+        />
+        {business.published && (
+          <p className="small" style={{ marginTop: 10 }}>
+            Next, in your dashboard: add your services, your team, and your
+            logo and photos — your page starts taking bookings as soon as
+            your first service is added.
+          </p>
+        )}
       </div>
     </main>
   );

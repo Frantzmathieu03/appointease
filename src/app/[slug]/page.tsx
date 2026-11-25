@@ -19,6 +19,10 @@ export default async function BusinessPage({
   if (!page) notFound();
   const { business, services } = page;
   const tz = business.timezone;
+  // A published business with no services yet is not bookable: the page
+  // says so in one plain line and shows no booking button (Frantz,
+  // 2026-11-25 — services are added later, in the dashboard).
+  const hasServices = services.length > 0;
   // Demo shops (public examples): labeled as demos, contact rows hidden,
   // no call/message actions — booking is a safe simulation (see lib/demo).
   const demoShop = isDemoShop(slug);
@@ -127,49 +131,58 @@ export default async function BusinessPage({
         </div>
       )}
 
-      <div className="hero-card">
-        {business.logo_url && (
+      <div className="hero-card biz-hero">
+        {business.logo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={business.logo_url}
             alt={`${business.name} logo`}
-            style={{
-              width: 76,
-              height: 76,
-              objectFit: "cover",
-              borderRadius: "50%",
-              border: "2px solid rgba(255,255,255,0.65)",
-              marginBottom: 10,
-              background: "#fff",
-            }}
+            className="biz-hero-logo"
           />
+        ) : (
+          <div className="biz-hero-logo biz-hero-initial" aria-hidden="true">
+            {business.name.trim().charAt(0).toUpperCase() || "?"}
+          </div>
         )}
-        <p className="eyebrow">{business.category ? categoryLabel(business.category) : business.type}</p>
-        <h1>{business.name}</h1>
+        <p className="eyebrow" style={{ marginTop: 14 }}>{business.category ? categoryLabel(business.category) : business.type}</p>
+        <h1 style={{ marginBottom: 8 }}>{business.name}</h1>
         {demoShop && (
           <p style={{ margin: "0 0 8px" }}>
             <span className="demo-badge">Demo shop</span>
           </p>
         )}
-        {business.address && (
-          <p className="lede" style={{ marginBottom: 6 }}>📍 {business.address}</p>
+        {business.description && (
+          <p className="biz-hero-about">{business.description}</p>
         )}
-        <p className="lede" style={{ marginBottom: 6 }}>
-          {hoursSummary(page.availability)}
+        <p className="biz-hero-line">
+          {[business.address, hoursSummary(page.availability)].filter(Boolean).join(" · ")}
         </p>
-        {business.description && <p className="lede" style={{ marginBottom: 0 }}>{business.description}</p>}
+        {!hasServices && (
+          <p className="lede" style={{ margin: "10px 0 0" }}>
+            This business is not taking bookings yet.
+          </p>
+        )}
 
         <div
           className="action-row"
-          style={{ margin: "16px 0 0", ...(demoShop ? { gridTemplateColumns: "1fr" } : {}) }}
+          style={{
+            margin: "18px 0 0",
+            ...(demoShop
+              ? { gridTemplateColumns: "1fr" }
+              : !hasServices
+                ? { gridTemplateColumns: "1fr 1fr" }
+                : {}),
+          }}
         >
-          <Link
-            href={`/${slug}/book`}
-            className="btn"
-            style={{ background: "#fff", color: "var(--green)", borderColor: "#fff" }}
-          >
-            Book appointment
-          </Link>
+          {hasServices && (
+            <Link
+              href={`/${slug}/book`}
+              className="btn"
+              style={{ background: "#fff", color: "var(--green)", borderColor: "#fff" }}
+            >
+              Book appointment
+            </Link>
+          )}
           {!demoShop && (
             <Link
               href={`/${slug}/message`}
@@ -219,71 +232,6 @@ export default async function BusinessPage({
         </div>
       )}
 
-      {(business.address || business.phone || business.email) && (
-        <div className="card">
-          <h2>Visit us</h2>
-          {business.address && (
-            <p style={{ margin: "4px 0" }}>
-              📍 <AddressDirections address={business.address} />{" "}
-              <span className="small">— tap for directions</span>
-            </p>
-          )}
-          {business.phone && !demoShop && (
-            <p style={{ margin: "4px 0" }}>
-              📞 <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{business.phone}</a>
-            </p>
-          )}
-          {business.email && !demoShop && (
-            <p style={{ margin: "4px 0" }}>
-              ✉️ <a href={`mailto:${business.email}`}>{business.email}</a>
-            </p>
-          )}
-          <p className="small" style={{ margin: "6px 0 0" }}>
-            Hours: {hoursSummary(page.availability)}
-          </p>
-          {page.locations.length > 0 && (
-            <div style={{ marginTop: 10 }}>
-              <p style={{ margin: "4px 0", fontWeight: 600 }}>Our locations</p>
-              {page.locations.map((loc) => (
-                <p key={loc.id} style={{ margin: "4px 0" }}>
-                  <strong>{loc.name}</strong>
-                  {loc.address && (
-                    <>
-                      {" — "}
-                      <AddressDirections address={loc.address} />
-                    </>
-                  )}
-                  {loc.phone && !demoShop && (
-                    <>
-                      {" · "}
-                      <a href={`tel:${loc.phone.replace(/[^+\d]/g, "")}`}>{loc.phone}</a>
-                    </>
-                  )}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="card">
-        <h2>Services</h2>
-        {services.length === 0 && <p className="small">Services coming soon.</p>}
-        {services.map((s) => (
-          <div key={s.id} className="service-row">
-            <div>
-              <div className="service-name">{s.name}</div>
-              <div className="service-meta">
-                {s.duration_minutes} min · {formatPrice(s.price_cents)} · {visitTypeLabel(s.visit_type)}
-              </div>
-            </div>
-            <Link href={`/${slug}/book?service=${s.id}`} className="btn" style={{ padding: "8px 14px" }}>
-              Select
-            </Link>
-          </div>
-        ))}
-      </div>
-
       {page.photos.length > 0 && (
         <div className="card">
           <h2>Our work</h2>
@@ -314,6 +262,75 @@ export default async function BusinessPage({
         </div>
       )}
 
+      {(business.address || business.phone || business.email) && (
+        <div className="card">
+          <h2>Visit us</h2>
+          {business.address && (
+            <p style={{ margin: "6px 0", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span aria-hidden="true">📍</span>
+              <AddressDirections address={business.address} />
+              <span className="small">— tap for directions</span>
+            </p>
+          )}
+          {business.phone && !demoShop && (
+            <p style={{ margin: "6px 0", display: "flex", alignItems: "center", gap: 8 }}>
+              <span aria-hidden="true">📞</span>
+              <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{business.phone}</a>
+            </p>
+          )}
+          {business.email && !demoShop && (
+            <p style={{ margin: "6px 0", display: "flex", alignItems: "center", gap: 8 }}>
+              <span aria-hidden="true">✉️</span>
+              <a href={`mailto:${business.email}`}>{business.email}</a>
+            </p>
+          )}
+          <p className="small" style={{ margin: "6px 0 0" }}>
+            Hours: {hoursSummary(page.availability)}
+          </p>
+          {page.locations.length > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <p style={{ margin: "4px 0", fontWeight: 600 }}>Our locations</p>
+              {page.locations.map((loc) => (
+                <p key={loc.id} style={{ margin: "4px 0" }}>
+                  <strong>{loc.name}</strong>
+                  {loc.address && (
+                    <>
+                      {" — "}
+                      <AddressDirections address={loc.address} />
+                    </>
+                  )}
+                  {loc.phone && !demoShop && (
+                    <>
+                      {" · "}
+                      <a href={`tel:${loc.phone.replace(/[^+\d]/g, "")}`}>{loc.phone}</a>
+                    </>
+                  )}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {hasServices && (
+        <div className="card">
+          <h2>Services</h2>
+          {services.map((s) => (
+            <div key={s.id} className="service-row">
+              <div>
+                <div className="service-name">{s.name}</div>
+                <div className="service-meta">
+                  {s.duration_minutes} min · {formatPrice(s.price_cents)} · {visitTypeLabel(s.visit_type)}
+                </div>
+              </div>
+              <Link href={`/${slug}/book?service=${s.id}`} className="btn" style={{ padding: "8px 14px" }}>
+                Select
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
+
       {reviewSummary && (
         <div className="card">
           <h2>
@@ -332,10 +349,6 @@ export default async function BusinessPage({
         </div>
       )}
 
-      <p className="small center">
-        <Link href="/login">Sign in</Link> · <Link href="/signup">Create an account</Link> ·{" "}
-        <Link href="/my-appointments">My appointments</Link>
-      </p>
     </main>
   );
 }
