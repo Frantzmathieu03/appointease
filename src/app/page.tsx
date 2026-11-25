@@ -59,8 +59,8 @@ export default function HomePage() {
         <p className="eyebrow">Simple pricing</p>
         <h2>Priced by the size of your team</h2>
         <p className="lede" style={{ marginBottom: 6 }}>
-          <strong>Solo $19/mo</strong> — 1 team member · <strong>Team $39/mo</strong> — up to 5 ·
-          <strong> Business $79/mo</strong> — up to 15. Every plan starts with a
+          <strong>Solo $29.99/mo</strong> — 1 team member · <strong>Team $49.99/mo</strong> — up to 5 ·
+          <strong> Business $149.99/mo</strong> — up to 15. Every plan starts with a
           30-day free trial, no card required.
         </p>
       </div>
