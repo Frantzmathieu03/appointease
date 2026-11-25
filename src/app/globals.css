@@ -952,3 +952,214 @@ footer.site-footer { padding: 0; text-align: left; }
   background: #fff; color: var(--red); border: 1px solid #e5a49f;
 }
 .btn-outline-danger:hover { background: #fbe9e7; }
+
+/* ==========================================================================
+   Homepage refresh (2026-11-25, Calendly-style, Frantz's order):
+   floating hero pills, an animated four-step journey, alternating
+   feature sections with expandable detail rows, a big statement
+   section, and scroll-reveal. All motion is progressive enhancement:
+   content is fully visible with JS off, and prefers-reduced-motion
+   turns everything static.
+   ========================================================================== */
+
+/* Hero microcopy under the CTAs */
+.hero-micro { font-size: 13.5px; margin: 12px 0 0; }
+.hero-desktop .hero-micro { color: #cfe3d3; }
+.hero-mobile .hero-micro { color: var(--muted); }
+.cta-micro { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; }
+.cta-micro-light { color: #d7e8da; }
+
+/* Floating hero pills — three product moments cycle in one spot:
+   a booking lands, a reminder goes out, notes get saved. Pure CSS
+   keyframes on a 9s loop, staggered by delay. */
+.hero-pills {
+  position: absolute; right: 26px; bottom: 26px; z-index: 2;
+  width: 308px; max-width: calc(100% - 32px); height: 54px;
+  pointer-events: none;
+}
+.hero-pill {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; color: var(--ink);
+  border-radius: 999px; padding: 10px 18px 10px 12px;
+  font-size: 14px; font-weight: 500; line-height: 1.3;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.30);
+  opacity: 0; animation: pillCycle 9s ease-in-out infinite;
+}
+.hero-pill:nth-child(2) { animation-delay: 3s; }
+.hero-pill:nth-child(3) { animation-delay: 6s; }
+.hero-pill strong { font-weight: 800; }
+.pill-ico {
+  width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--mint); display: grid; place-items: center; font-size: 16px;
+}
+@keyframes pillCycle {
+  0% { opacity: 0; transform: translateY(12px) scale(0.97); }
+  6% { opacity: 1; transform: none; }
+  29% { opacity: 1; transform: none; }
+  35% { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  100% { opacity: 0; transform: translateY(-10px) scale(0.98); }
+}
+/* Mobile hero: the pills sit over the bottom of the video panel. */
+.hero-media { position: relative; }
+.hero-pills-m { right: auto; left: 12px; bottom: 12px; width: min(308px, calc(100% - 24px)); }
+.hero-pills-m .hero-pill { box-shadow: 0 10px 26px rgba(10, 30, 18, 0.35); }
+
+/* Scroll reveal — hidden state exists ONLY under .home-anim, the
+   class HomeAnimations adds when it runs. No JS = no hiding. */
+.home-anim [data-reveal] {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.home-anim [data-reveal].in { opacity: 1; transform: none; }
+
+/* Journey — four named steps that light up in sequence on scroll.
+   Under .home-anim the steps start soft; .lit (added by the
+   observer) brings them to full strength one after another. */
+.journey2 {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  max-width: 1040px; margin: 0 auto;
+}
+.journey2-step {
+  background: var(--card); border-radius: 18px; box-shadow: var(--shadow);
+  padding: 26px 18px; text-align: center;
+}
+.journey2-icon {
+  width: 50px; height: 50px; border-radius: 14px; background: var(--mint);
+  display: grid; place-items: center; font-size: 24px; margin: 0 auto 12px;
+}
+.journey2-step h3 { font-size: 17px; margin: 0 0 6px; }
+.journey2-step p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+.journey2-step .journey2-note { margin-top: 8px; font-size: 12.5px; }
+.home-anim .journey2-step {
+  opacity: 0.35; transform: translateY(10px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.home-anim [data-journey].lit .journey2-step { opacity: 1; transform: none; }
+.home-anim [data-journey].lit .journey2-step:nth-child(2) { transition-delay: 0.3s; }
+.home-anim [data-journey].lit .journey2-step:nth-child(3) { transition-delay: 0.6s; }
+.home-anim [data-journey].lit .journey2-step:nth-child(4) { transition-delay: 0.9s; }
+@media (max-width: 900px) {
+  .journey2 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .journey2 { grid-template-columns: 1fr; }
+}
+
+/* Feature detail rows — native <details>, styled like the FAQ but
+   left-aligned inside the copy column. First row ships open. */
+.feature-copy { min-width: 0; }
+.feat-visual { min-width: 0; }
+.feat-visual .showcase-photo { max-width: 460px; margin: 0 auto; }
+.feat-details { display: grid; gap: 10px; margin-top: 20px; text-align: left; }
+.feat-detail {
+  background: var(--card); border-radius: 14px; box-shadow: var(--shadow);
+  padding: 2px 18px;
+}
+.feat-detail summary {
+  font-weight: 700; font-size: 15.5px; line-height: 1.35;
+  padding: 13px 0; cursor: pointer; min-height: 48px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  list-style: none;
+}
+.feat-detail summary::-webkit-details-marker { display: none; }
+.feat-detail summary::after {
+  content: "+"; color: var(--green); font-weight: 800; font-size: 19px; flex: 0 0 auto;
+}
+.feat-detail[open ] summary::after { content: "–"; }
+.feat-detail p { color: var(--muted); font-size: 15px; line-height: 1.55; margin: 0 0 15px; }
+@media (max-width: 900px) {
+  .feat-details { max-width: 560px; margin-left: auto; margin-right: auto; }
+}
+
+/* Built UI mocks for the feature sections — same white-card language
+   as the dashboard mock (.dash-* pieces are reused inside). */
+.ui-mock {
+  background: #fff; border-radius: 18px; box-shadow: var(--shadow);
+  padding: 22px; width: 420px; max-width: 100%; text-align: left;
+}
+.ui-mock .dash-head.tight { justify-content: flex-start; }
+
+/* Customer-history timeline mock */
+.tl { display: grid; margin-top: 4px; }
+.tl-item { display: flex; gap: 12px; position: relative; padding-bottom: 16px; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item::before {
+  content: ""; position: absolute; left: 12px; top: 28px; bottom: 0;
+  width: 2px; background: #e3ede4;
+}
+.tl-item:last-child::before { display: none; }
+.tl-dot {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--mint);
+  display: grid; place-items: center; font-size: 13px; flex: 0 0 auto; z-index: 1;
+}
+.tl-what { margin: 2px 0 0; font-weight: 700; font-size: 14.5px; }
+.tl-when { margin: 1px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+.share-strip {
+  margin-top: 16px; background: var(--mint); border-radius: 14px;
+  padding: 12px; display: flex; justify-content: center;
+}
+
+/* Team-day mock */
+.team-group { margin-bottom: 16px; }
+.team-group:last-of-type { margin-bottom: 0; }
+.team-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.team-name { font-weight: 800; font-size: 14.5px; }
+
+/* Before-your-visit form mock */
+.form-field { margin-bottom: 14px; }
+.form-label { margin: 0 0 6px; font-size: 13px; font-weight: 700; }
+.form-input {
+  margin: 0; background: #f4f8f4; border-radius: 10px;
+  padding: 10px 12px; font-size: 14px; color: var(--muted); line-height: 1.45;
+}
+.yn-row { display: flex; gap: 8px; }
+.yn-chip {
+  padding: 8px 18px; border-radius: 999px; background: #f4f8f4;
+  font-size: 14px; font-weight: 700; color: var(--muted);
+}
+.yn-chip.sel { background: var(--green); color: #fff; }
+.form-upload {
+  margin: 0; border: 1.5px dashed #bcd8c2; border-radius: 12px;
+  padding: 12px; text-align: center; font-size: 14px; font-weight: 700;
+  color: var(--green-dark); background: #f7faf7;
+}
+
+/* Inbox mock */
+.inbox-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: #f4f8f4; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;
+}
+.inbox-row:last-child { margin-bottom: 0; }
+.inbox-row.unread { background: var(--mint); }
+.inbox-ava {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--green);
+  color: #fff; display: grid; place-items: center;
+  font-weight: 700; font-size: 14px; flex: 0 0 auto;
+}
+.inbox-main { flex: 1; min-width: 0; }
+.inbox-name {
+  margin: 0; font-weight: 700; font-size: 14.5px;
+  display: flex; justify-content: space-between; gap: 10px;
+}
+.inbox-time { color: var(--muted); font-size: 12px; font-weight: 600; flex: 0 0 auto; }
+.inbox-snip { margin: 1px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.4; }
+
+/* Big statement section */
+.statement { text-align: center; max-width: 780px; margin: 0 auto; padding: 26px 0 10px; }
+.statement h2 { font-size: clamp(30px, 5vw, 44px); line-height: 1.15; margin-bottom: 14px; }
+.statement > p { color: var(--muted); font-size: 17px; line-height: 1.6; max-width: 58ch; margin: 0 auto 24px; }
+.statement .eyebrow { margin-bottom: 10px; }
+.statement .cta-micro { margin-top: 10px; }
+
+/* Reduced motion — everything static and fully visible; the hero
+   shows its first pill as a still card. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-pill { animation: none; opacity: 0; }
+  .hero-pill:first-child { opacity: 1; }
+  .home-anim [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .home-anim .journey2-step { opacity: 1; transform: none; transition: none; }
+}
