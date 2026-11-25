@@ -38,9 +38,13 @@ export default function StaffManager({ businessId }: { businessId: string }) {
     load();
   }
 
-  async function remove(id: string) {
+  async function remove(m: StaffMember) {
+    const ok = window.confirm(
+      `Remove ${m.name} from bookable staff? They'll disappear from your booking page and take no new bookings. Their existing appointments and history stay as they are.`
+    );
+    if (!ok) return;
     const supabase = createBrowserSupabase();
-    await supabase.from("staff").update({ active: false }).eq("id", id);
+    await supabase.from("staff").update({ active: false }).eq("id", m.id);
     load();
   }
 
@@ -55,7 +59,7 @@ export default function StaffManager({ businessId }: { businessId: string }) {
             <div className="service-name">{m.name}</div>
             <div className="service-meta">Bookable staff</div>
           </div>
-          <button className="btn" style={{ padding: "7px 13px" }} onClick={() => remove(m.id)}>
+          <button className="btn" style={{ padding: "7px 13px" }} onClick={() => remove(m)}>
             Remove
           </button>
         </div>

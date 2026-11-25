@@ -14,7 +14,7 @@ interface ApptRow {
   manage_token: string;
   confirmation_code: string | null;
   business_id: string;
-  businesses: { name: string; slug: string; address: string | null; timezone: string } | null;
+  businesses: { name: string; slug: string; address: string | null; timezone: string; logo_url: string | null; phone: string | null } | null;
   services: { name: string } | null;
 }
 
@@ -43,7 +43,7 @@ export default async function MyAppointmentsPage() {
   const { data } = await supabase
     .from("appointments")
     .select(
-      "id, starts_at, status, manage_token, confirmation_code, business_id, businesses:business_id ( name, slug, address, timezone ), services:service_id ( name )"
+      "id, starts_at, status, manage_token, confirmation_code, business_id, businesses:business_id ( name, slug, address, timezone, logo_url, phone ), services:service_id ( name )"
     )
     .eq("customer_id", user.id)
     .order("starts_at", { ascending: true });
@@ -103,8 +103,20 @@ export default async function MyAppointmentsPage() {
     return (
       <div className="card" key={a.id}>
         {big && <p className="eyebrow">Your next appointment</p>}
-        <h3>
-          {a.services?.name ?? "Appointment"} — {a.businesses?.name}
+        <h3 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {a.businesses?.logo_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={a.businesses.logo_url}
+              alt={`${a.businesses.name} logo`}
+              width={34}
+              height={34}
+              style={{ borderRadius: 9, objectFit: "cover" }}
+            />
+          )}
+          <span>
+            {a.services?.name ?? "Appointment"} — {a.businesses?.name}
+          </span>
         </h3>
         <p className="small" style={{ margin: "2px 0 10px" }}>
           {formatDateInZone(new Date(a.starts_at), tz)} at {formatTimeInZone(new Date(a.starts_at), tz)}

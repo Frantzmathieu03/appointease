@@ -42,10 +42,14 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
     load();
   }
 
-  async function remove(id: string) {
+  async function remove(s: Service) {
+    const ok = window.confirm(
+      `Remove ${s.name}? It will disappear from your booking page and take no new bookings. Existing appointments for it stay on the calendar and in customer histories.`
+    );
+    if (!ok) return;
     const supabase = createBrowserSupabase();
     // Soft-remove: appointments keep pointing at the service row.
-    await supabase.from("services").update({ active: false }).eq("id", id);
+    await supabase.from("services").update({ active: false }).eq("id", s.id);
     load();
   }
 
@@ -58,7 +62,7 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
             <div className="service-name">{s.name}</div>
             <div className="service-meta">{s.duration_minutes} min · {formatPrice(s.price_cents)}</div>
           </div>
-          <button className="btn" style={{ padding: "7px 13px" }} onClick={() => remove(s.id)}>
+          <button className="btn" style={{ padding: "7px 13px" }} onClick={() => remove(s)}>
             Remove
           </button>
         </div>

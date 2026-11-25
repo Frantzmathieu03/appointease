@@ -20,7 +20,7 @@ export async function GET(
   const { data: appt } = await admin
     .from("appointments")
     .select(
-      "id, starts_at, ends_at, status, staff_id, service_id, confirmation_code, businesses:business_id ( name, slug, address, timezone ), services:service_id ( name, duration_minutes ), customers:customer_id ( full_name )"
+      "id, starts_at, ends_at, status, staff_id, service_id, confirmation_code, businesses:business_id ( name, slug, address, timezone, logo_url, phone ), services:service_id ( name, duration_minutes ), customers:customer_id ( full_name ), staff:staff_id ( name )"
     )
     .eq("manage_token", token)
     .single();

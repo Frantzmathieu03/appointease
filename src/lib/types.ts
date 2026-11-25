@@ -179,6 +179,33 @@ export interface Message {
   created_at: string;
 }
 
+// Team logins (migration 0011). The business owner is an implicit member
+// with role "owner" — no row required. Rows exist for invited logins.
+export type MemberRole = "owner" | "manager" | "staff";
+
+export interface BusinessMember {
+  id: string;
+  business_id: string;
+  user_id: string;
+  email: string | null;
+  role: MemberRole;
+  staff_id: string | null;
+  status: "active" | "removed";
+  created_at: string;
+}
+
+export interface TeamInvite {
+  id: string;
+  business_id: string;
+  email: string;
+  role: "manager" | "staff";
+  staff_id: string | null;
+  token: string;
+  expires_at: string;
+  accepted_at: string | null;
+  created_at: string;
+}
+
 export type ReminderKind = "confirmation" | "before_24h" | "before_2h";
 export type ReminderChannel = "email" | "sms";
 

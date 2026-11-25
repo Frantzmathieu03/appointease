@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireBusiness, siteUrl } from "@/lib/owner";
 import BusinessDetailsForm from "@/components/owner/BusinessDetailsForm";
 import ServicesManager from "@/components/owner/ServicesManager";
@@ -13,7 +14,12 @@ import { isAnnualBillingConfigured, isBillingConfigured } from "@/lib/stripe";
 import type { Availability, BusinessPhoto } from "@/lib/types";
 
 export default async function DashboardSettingsPage() {
-  const { supabase, business } = await requireBusiness();
+  const { supabase, business, role } = await requireBusiness();
+  // Settings (business details, billing, services, hours) are owner /
+  // manager territory — staff logins work from Today/Calendar/Inbox/
+  // Customers only (PDF §9). Billing changes stay owner-gated inside
+  // the billing API routes as before.
+  if (role === "staff") redirect("/owner/dashboard");
 
   const { data: availability } = await supabase
     .from("availability")
@@ -66,7 +72,7 @@ export default async function DashboardSettingsPage() {
         </p>
       </div>
 
-      <div className="card">
+      <div className="card" id="billing">
         <h2>Plan &amp; billing</h2>
         <BillingPanel
           billingConfigured={isBillingConfigured()}
@@ -90,7 +96,7 @@ export default async function DashboardSettingsPage() {
         />
       </div>
 
-      <div className="card">
+      <div className="card" id="profile">
         <h2>Profile — logo &amp; photos (optional)</h2>
         <p className="small" style={{ marginBottom: 10 }}>
           Optional — your logo and up to four photos of your work make your

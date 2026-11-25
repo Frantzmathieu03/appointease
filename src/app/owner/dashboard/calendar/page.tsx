@@ -1,77 +1,188 @@
+import Link from "next/link";
 import { requireBusiness } from "@/lib/owner";
-import { formatTimeInZone } from "@/lib/slots";
+import { formatTimeInZone, zonedTimeToUtc } from "@/lib/slots";
+import CalendarGrid, { type CalAppt, type CalColumn } from "@/components/owner/CalendarGrid";
 
 interface Row {
   id: string;
   starts_at: string;
+  ends_at: string;
   status: string;
-  confirmation_code: string | null;
+  staff_id: string | null;
   customers: { full_name: string } | null;
   services: { name: string } | null;
   staff: { name: string } | null;
 }
 
-// Next 14 days, grouped by day (agenda-style calendar for v1).
-export default async function DashboardCalendarPage() {
+// Calendar = time grid (PDF §4). Day view: one column per staff member
+// for a single date. Week view: one column per day. Rows span the
+// business's opening hours. Click an empty slot to book there; click a
+// block to open the appointment.
+export default async function DashboardCalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string; date?: string }>;
+}) {
+  const sp = await searchParams;
   const { supabase, business } = await requireBusiness();
   const tz = business.timezone;
-  const now = new Date();
-  const horizon = new Date(now.getTime() + 14 * 86400000);
+  const view = sp.view === "day" ? "day" : "week";
 
-  const { data } = await supabase
-    .from("appointments")
-    .select(
-      "id, starts_at, status, confirmation_code, customers:customer_id ( full_name ), services:service_id ( name ), staff:staff_id ( name )"
-    )
-    .eq("business_id", business.id)
-    .gte("starts_at", now.toISOString())
-    .lt("starts_at", horizon.toISOString())
-    .order("starts_at", { ascending: true });
-  const rows = (data ?? []) as unknown as Row[];
+  const dateFmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const todayStr = dateFmt.format(new Date());
+  const anchor = sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : todayStr;
 
-  const dayKey = (d: Date) =>
-    new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-  const dayLabel = (d: Date) =>
-    new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "long", month: "long", day: "numeric" }).format(d);
-
-  const groups = new Map<string, { label: string; rows: Row[] }>();
-  for (const r of rows) {
-    const d = new Date(r.starts_at);
-    const key = dayKey(d);
-    if (!groups.has(key)) groups.set(key, { label: dayLabel(d), rows: [] });
-    groups.get(key)!.rows.push(r);
+  const dayCount = view === "day" ? 1 : 7;
+  const dates: string[] = [];
+  const anchorUtc = zonedTimeToUtc(anchor, "12:00", tz);
+  for (let i = 0; i < dayCount; i++) {
+    dates.push(dateFmt.format(new Date(anchorUtc.getTime() + i * 86400000)));
   }
+  const rangeStartUtc = zonedTimeToUtc(dates[0], "00:00", tz);
+  const rangeEndUtc = new Date(
+    zonedTimeToUtc(dates[dates.length - 1], "00:00", tz).getTime() + 86400000
+  );
+
+  const [{ data }, { data: staffRows }, { data: availRows }] = await Promise.all([
+    supabase
+      .from("appointments")
+      .select(
+        "id, starts_at, ends_at, status, staff_id, customers:customer_id ( full_name ), services:service_id ( name ), staff:staff_id ( name )"
+      )
+      .eq("business_id", business.id)
+      .gte("starts_at", rangeStartUtc.toISOString())
+      .lt("starts_at", rangeEndUtc.toISOString())
+      .order("starts_at", { ascending: true }),
+    supabase
+      .from("staff")
+      .select("id, name")
+      .eq("business_id", business.id)
+      .eq("active", true)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("availability")
+      .select("open_time, close_time")
+      .eq("business_id", business.id),
+  ]);
+  const rows = (data ?? []) as unknown as Row[];
+  const staffList = (staffRows ?? []) as { id: string; name: string }[];
+
+  // Grid hours: the business's opening span, defaulting to 8 AM–6 PM.
+  let rangeStart = 8 * 60;
+  let rangeEnd = 18 * 60;
+  if (availRows && availRows.length > 0) {
+    const toMin = (t: string) => {
+      const [h, m] = String(t).split(":").map(Number);
+      return h * 60 + m;
+    };
+    rangeStart = Math.min(...availRows.map((a) => toMin(a.open_time as string)));
+    rangeEnd = Math.max(...availRows.map((a) => toMin(a.close_time as string)));
+    rangeStart = Math.floor(rangeStart / 60) * 60;
+    rangeEnd = Math.ceil(rangeEnd / 60) * 60;
+  }
+
+  const minutesOfDay = (iso: string) => {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+        .formatToParts(new Date(iso))
+        .map((p) => [p.type, p.value])
+    );
+    return (Number(parts.hour) % 24) * 60 + Number(parts.minute);
+  };
+
+  const appointments: CalAppt[] = rows.map((r) => ({
+    id: r.id,
+    dateStr: dateFmt.format(new Date(r.starts_at)),
+    staffId: r.staff_id,
+    startMinutes: minutesOfDay(r.starts_at),
+    durationMinutes: Math.max(
+      15,
+      Math.round((new Date(r.ends_at).getTime() - new Date(r.starts_at).getTime()) / 60000)
+    ),
+    title: `${formatTimeInZone(new Date(r.starts_at), tz)} · ${r.customers?.full_name ?? "Customer"}`,
+    sub: r.services?.name ?? "Appointment",
+    status: r.status,
+  }));
+
+  const dayLabel = (dateStr: string) =>
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }).format(zonedTimeToUtc(dateStr, "12:00", tz));
+
+  const columns: CalColumn[] =
+    view === "day"
+      ? [
+          ...staffList.map((s) => ({
+            key: `staff-${s.id}`,
+            label: s.name,
+            dateStr: dates[0],
+            staffId: s.id as string | null,
+          })),
+          { key: "staff-none", label: "First available", dateStr: dates[0], staffId: null },
+        ]
+      : dates.map((d) => ({ key: `day-${d}`, label: dayLabel(d), dateStr: d, staffId: null }));
+
+  const shift = view === "day" ? 1 : 7;
+  const shiftDate = (days: number) => dateFmt.format(new Date(anchorUtc.getTime() + days * 86400000));
+  const qs = (v: string, d: string) => `?view=${v}&date=${d}`;
 
   return (
     <div>
-      <h1 style={{ fontSize: 26 }}>Calendar — next 14 days</h1>
-      {rows.length === 0 && (
-        <div className="card">
-          <p className="lede" style={{ marginBottom: 0 }}>Nothing booked in the next two weeks yet.</p>
-        </div>
-      )}
-      {[...groups.values()].map((g) => (
-        <div key={g.label} style={{ marginBottom: 18 }}>
-          <h2 style={{ fontSize: 17 }}>{g.label}</h2>
-          {g.rows.map((r) => (
-            <div className="card" key={r.id} style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-              <div>
-                <h3 style={{ marginBottom: 2 }}>
-                  {formatTimeInZone(new Date(r.starts_at), tz)} — {r.customers?.full_name ?? "Customer"}
-                </h3>
-                <p className="small" style={{ margin: 0 }}>
-                  {r.services?.name ?? "Appointment"}
-                  {r.staff?.name ? ` · with ${r.staff.name}` : ""}
-                  {r.confirmation_code ? ` · # ${r.confirmation_code}` : ""}
-                </p>
-              </div>
-              <span className={r.status === "confirmed" ? "chip" : "chip chip-grey"}>
-                {r.status.replace("_", " ")}
-              </span>
-            </div>
-          ))}
-        </div>
-      ))}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 12,
+          flexWrap: "wrap",
+          marginBottom: 12,
+        }}
+      >
+        <h1 style={{ fontSize: 26, margin: 0 }}>Calendar</h1>
+        <Link href="/owner/dashboard/calendar/new" className="btn btn-primary">
+          New appointment
+        </Link>
+      </div>
+      <div className="tabs">
+        <Link href={qs("day", anchor)} className={view === "day" ? "active" : ""}>
+          Day
+        </Link>
+        <Link href={qs("week", anchor)} className={view === "week" ? "active" : ""}>
+          Week
+        </Link>
+        <Link href={qs(view, shiftDate(-shift))}>← Prev</Link>
+        <Link href={qs(view, todayStr)}>Today</Link>
+        <Link href={qs(view, shiftDate(shift))}>Next →</Link>
+      </div>
+      <p className="small" style={{ marginTop: 0 }}>
+        {view === "day"
+          ? `${dayLabel(dates[0])} — one column per team member.`
+          : `${dayLabel(dates[0])} – ${dayLabel(dates[dates.length - 1])}`}{" "}
+        Click an empty time to book there.
+      </p>
+      <div className="card">
+        <CalendarGrid
+          columns={columns}
+          appointments={appointments}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          timezone={tz}
+          mode={view}
+        />
+      </div>
     </div>
   );
 }

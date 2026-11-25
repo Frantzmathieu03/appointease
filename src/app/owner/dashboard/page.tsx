@@ -144,7 +144,12 @@ export default async function DashboardTodayPage() {
             {business.name} · Daily schedule · {niceDate}
           </p>
         </div>
-        <CopyLinkButton url={link} />
+        <span style={{ display: "inline-flex", gap: 8, flexWrap: "wrap" }}>
+          <Link href="/owner/dashboard/calendar/new" className="btn btn-primary">
+            New appointment
+          </Link>
+          <CopyLinkButton url={link} />
+        </span>
       </div>
 
       {(unread ?? 0) > 0 && (
