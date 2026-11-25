@@ -2,6 +2,21 @@ import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { PLANS, formatPlanPrice } from "@/lib/plans";
 
+const BENEFITS = [
+  { icon: "📞", title: "No more phone tag", line: "Customers book themselves online, so your phone stays free for the work." },
+  { icon: "🔔", title: "Fewer no-shows", line: "Automatic text and email reminders bring people in, on time." },
+  { icon: "🌙", title: "Book while you sleep", line: "Your page takes bookings around the clock, even after closing time." },
+  { icon: "🎨", title: "Your page, your brand", line: "Your services, your hours, your own link — a page that looks like your business." },
+  { icon: "🗂️", title: "Every customer in one place", line: "Bookings, history and messages for each customer, kept together." },
+  { icon: "🔁", title: "Reschedules handle themselves", line: "Every reminder carries a secure link to reschedule or cancel." },
+  { icon: "📩", title: "Text and email, every time", line: "Confirmation, 24-hour and 2-hour reminders go out on both channels." },
+  { icon: "👥", title: "Your whole team, one calendar", line: "Each staff member gets their own services, hours and bookings." },
+  { icon: "🔍", title: "Customers find you", line: "Get discovered by category and location when customers browse." },
+  { icon: "⚡", title: "Set up in minutes", line: "Add your services and hours, publish, and share your link the same day." },
+  { icon: "💚", title: "Free for your customers", line: "Booking never costs your customers a cent — only businesses subscribe." },
+  { icon: "🤝", title: "Support from real people", line: "Questions? A human answers — by email, whenever you need help." },
+];
+
 // Landing page — visual-first marketing page. Short copy, real product
 // claims only: no testimonials, no invented counts or ratings.
 export default function HomePage() {
@@ -16,31 +31,21 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Hero */}
+        {/* Hero — full-background photo, headline on the image */}
         <section className="mkt-hero">
-          <div className="hero-grid">
-            <div>
+          <div className="hero-panel">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="hero-bg-img" src="/images/salon-action.jpg" alt="" aria-hidden="true" />
+            <div className="hero-overlay" />
+            <div className="hero-content">
               <p className="eyebrow">Online booking for small businesses</p>
               <h1>Let customers book.<br />Get back to work.</h1>
-              <p className="hero-sub">
-                Your own booking page with automatic text &amp; email reminders —
-                so fewer people forget, and you spend less time on the phone.
-              </p>
+              <p className="hero-sub">Your booking page with automatic reminders — fewer no-shows, less phone time.</p>
               <div className="hero-ctas">
                 <Link href="/owner/signup" className="btn btn-primary btn-lg">Create your booking page</Link>
                 <Link href="/jesus-barber-shop" className="btn btn-lg">See a live example</Link>
               </div>
-              <p className="trust-line">30-day free trial · No card required · Customers always book free</p>
             </div>
-            <div className="hero-media">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/salon-action.jpg" alt="A stylist blow-drying a client's hair in a busy hair salon" />
-            </div>
-          </div>
-          <div className="chips-strip" aria-label="Business types">
-            {["Barbershops", "Hair salons", "Law offices", "Clinics", "Nail salons", "Studios", "Pet groomers", "Auto repair"].map((c) => (
-              <span key={c} className="chip chip-lg">{c}</span>
-            ))}
           </div>
         </section>
 
@@ -77,6 +82,26 @@ export default function HomePage() {
             <div className="split-media">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/booking-phone.jpg" alt="A business owner checking bookings on a phone" />
+            </div>
+          </div>
+        </section>
+
+        {/* Reminder showcase — a product example on the demo business */}
+        <section className="mkt-section">
+          <div className="section-head">
+            <p className="eyebrow">Automatic reminders</p>
+            <h2>Reminders that bring people in</h2>
+            <p className="lede">Every appointment gets a confirmation, a 24-hour reminder, and a 2-hour reminder — by text and email.</p>
+          </div>
+          <div className="showcase-photo">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/reception.jpg" alt="A barber greeting a customer at the reception counter" />
+            <div className="notify-card">
+              <p className="notify-status"><span className="notify-dot" />Reminder sent successfully</p>
+              <p className="notify-text">
+                Hi <span className="notify-hl">Maria</span> 👋 Reminder for your appointment at{" "}
+                <span className="notify-hl">Jesus Barber Shop</span> tomorrow at 10:00 AM.
+              </p>
             </div>
           </div>
         </section>
@@ -121,11 +146,30 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Built for your business */}
+        {/* Benefits carousel — honest benefit cards, no testimonials:
+            AppointEase is new, so no invented names, quotes or ratings.
+            Real customer quotes can replace these cards later. */}
         <section className="mkt-section">
           <div className="section-head">
-            <p className="eyebrow">Built for your business</p>
-            <h2>Made for the way you work</h2>
+            <p className="eyebrow">Why AppointEase</p>
+            <h2>Made for businesses that run on appointments</h2>
+          </div>
+          <div className="carousel" aria-label="AppointEase benefits">
+            {BENEFITS.map((b) => (
+              <div className="benefit-card" key={b.title}>
+                <div className="feature-icon">{b.icon}</div>
+                <h3>{b.title}</h3>
+                <p>{b.line}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Built for your kind of business */}
+        <section className="mkt-section">
+          <div className="section-head">
+            <p className="eyebrow">Who it&apos;s for</p>
+            <h2>Built for your kind of business</h2>
           </div>
           <div className="img-cards">
             <div className="img-card">
