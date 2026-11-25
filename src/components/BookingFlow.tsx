@@ -274,7 +274,8 @@ export default function BookingFlow({
         ) : (
           <p className="small">
             A confirmation is on its way, with reminders 24 hours and 2 hours
-            before — each with a link to reschedule or cancel.
+            before (when the booking is made far enough ahead) — each with a
+            link to reschedule or cancel.
             {result?.accountCreated &&
               " Your AppointEase account was created with the email and password you gave — it works at every business here."}
           </p>
@@ -437,7 +438,8 @@ export default function BookingFlow({
           ) : (
             <p className="small">
               You&apos;ll get a confirmation, then a text and email 24 hours and 2 hours
-              before — each with a link to reschedule or cancel.
+              before (when the booking is made far enough ahead) — each with a
+              link to reschedule or cancel.
             </p>
           )}
           <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
