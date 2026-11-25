@@ -3,11 +3,15 @@ import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 
 // The slim header on a business's own pages (white label, Frantz
 // 2026-11-25): the business's logo and name on the left; on the right,
-// the CUSTOMER's account actions for this business — Log in / Sign up
-// (both carry next=/<slug> so the customer lands back on this business
-// after signing in), or My appointments when already signed in. No
-// AppointEase branding here — the only platform mention on a business
-// page is the small "Powered by AppointEase" line at the very bottom.
+// the CUSTOMER's account actions for this business. Signed out: two
+// clear buttons, "Sign up" and "Sign in" (Frantz's words — real
+// buttons, not shy text links; both carry next=/<slug> so the customer
+// lands back on this business). Signed in: "My dashboard", the
+// per-business customer dashboard at /<slug>/my — accounts are per
+// business, so the dashboard shows only this business's appointments,
+// messages and history. No AppointEase branding here — the only
+// platform mention on a business page is the small "Powered by
+// AppointEase" line at the very bottom.
 export default async function BusinessHeader({
   slug,
   name,
@@ -45,16 +49,16 @@ export default async function BusinessHeader({
       </Link>
       <nav className="biz-header-actions">
         {signedIn ? (
-          <Link href={`/my-appointments?business=${slug}`} className="btn btn-primary biz-header-btn">
-            My appointments
+          <Link href={`/${slug}/my`} className="btn btn-primary biz-header-btn">
+            My dashboard
           </Link>
         ) : (
           <>
-            <Link href={`/login?next=${encodeURIComponent(`/${slug}`)}`} className="biz-header-link">
-              Log in
-            </Link>
             <Link href={`/signup?next=${encodeURIComponent(`/${slug}`)}`} className="btn btn-primary biz-header-btn">
               Sign up
+            </Link>
+            <Link href={`/login?next=${encodeURIComponent(`/${slug}`)}`} className="btn biz-header-btn">
+              Sign in
             </Link>
           </>
         )}

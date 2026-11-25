@@ -54,6 +54,32 @@ export default function SignInForm({
     }
   }
 
+  // Passwordless option: Supabase emails a sign-in link through the
+  // same mailer that already delivers this project's confirmation and
+  // password-reset mail, and /auth/callback exchanges it for a
+  // session. (Phone-code sign-in is NOT offered anywhere: the
+  // project's phone provider is disabled — texting is not connected
+  // yet — and a code button that cannot send is never shipped.)
+  async function emailLink() {
+    setError("");
+    if (!email) {
+      setNotice("Type your email above first — then we'll send the sign-in link there.");
+      return;
+    }
+    const supabase = createBrowserSupabase();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+      },
+    });
+    if (error) {
+      setError("That sign-in link didn't go out — check the email address, or use your password below.");
+      return;
+    }
+    setNotice("Check your email — we sent you a sign-in link. Tap it and you're in, no password needed.");
+  }
+
   async function forgot() {
     setError("");
     if (!email) {
@@ -91,6 +117,23 @@ export default function SignInForm({
         </button>
       </form>
       <p className="small center" style={{ marginTop: 12 }}>
+        <button
+          type="button"
+          onClick={emailLink}
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            font: "inherit",
+            color: "inherit",
+            textDecoration: "underline",
+            cursor: "pointer",
+          }}
+        >
+          Email me a sign-in link instead
+        </button>
+      </p>
+      <p className="small center" style={{ marginTop: 8 }}>
         <button
           type="button"
           onClick={forgot}

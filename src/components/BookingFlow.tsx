@@ -41,7 +41,7 @@ function ClaimAccountCard({ email }: { email: string }) {
       <p className="lede">
         The link in your confirmation text and email always works to change
         or cancel — no password needed. Want a password too, so you can sign
-        in and see all your appointments in one place?
+        in and see your appointments with this business in one place?
       </p>
       {state === "sent" ? (
         <p className="small">Check your email — we sent you a link to set your password.</p>
@@ -62,11 +62,14 @@ function ClaimAccountCard({ email }: { email: string }) {
 }
 
 // Booking flow: service → time → details → review → confirmed.
-// Signed-in customers skip the account fields; new customers book as
-// guests — no password is ever asked for. The /api/book route creates
-// their one AppointEase account behind the scenes, they manage the
-// booking through the link in their confirmation text/email, and the
-// confirmation screen offers (never requires) setting a password.
+// ACCOUNT-FIRST (Frantz, 2026-11-25): the book page gates signed-out
+// customers into a short account step (AccountGate) before this flow
+// ever renders, so a booking from a business's page always belongs to
+// the customer's account WITH THIS BUSINESS — details prefill from
+// their profile and nothing account-shaped is asked again here. The
+// /api/book guest fallback (account created at checkout) remains only
+// for a session that expires mid-flow; the confirmation screen then
+// offers (never requires) setting a password via the claim card.
 // The database makes double-booking impossible.
 export default function BookingFlow({
   slug,
@@ -360,7 +363,7 @@ export default function BookingFlow({
             {result?.manageToken && (
               <Link href={`/manage/${result.manageToken}`} className="btn">Manage this appointment</Link>
             )}
-            <Link href="/my-appointments" className="btn btn-primary">My appointments</Link>
+            <Link href={`/${slug}/my`} className="btn btn-primary">My dashboard</Link>
             <Link href={`/${slug}`} className="btn">Back to {businessName}</Link>
           </div>
         </div>
@@ -483,11 +486,17 @@ export default function BookingFlow({
               or sent, and no account is created.
             </p>
           )}
+          {signedIn && !isDemo && (
+            <p className="small" style={{ fontWeight: 400 }}>
+              From your account with {businessName} — we send your
+              confirmation and reminders to these details.
+            </p>
+          )}
           {!signedIn && !isDemo && (
             <p className="small" style={{ fontWeight: 400 }}>
-              No password needed — we text and email your confirmation with a
-              link to change or cancel anytime. Already have one?{" "}
-              <Link href={`/login?next=/${slug}/book`}>Sign in instead</Link>.
+              You&apos;re not signed in.{" "}
+              <Link href={`/login?next=/${slug}/book`}>Sign in</Link> so this
+              booking lands in your dashboard with {businessName}.
             </p>
           )}
           <label className="field">

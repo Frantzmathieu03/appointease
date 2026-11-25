@@ -7,7 +7,20 @@ import { useEffect, useState } from "react";
  * Google Maps / Apple Maps / Waze deep links plus Copy address.
  * Apple Maps is listed first on iOS, Google Maps first everywhere else.
  */
-export default function AddressDirections({ address }: { address: string }) {
+export default function AddressDirections({
+  address,
+  variant = "link",
+}: {
+  address: string;
+  /**
+   * "link" (default): the address itself is the underlined trigger —
+   * the original inline use. "action": the trigger is a small quiet
+   * "Get directions" button and the parent renders the address as
+   * plain text (the business page's contact card — no underlined
+   * link look, Frantz 2026-11-25).
+   */
+  variant?: "link" | "action";
+}) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [appleFirst, setAppleFirst] = useState(false);
@@ -62,17 +75,32 @@ export default function AddressDirections({ address }: { address: string }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          font: "inherit",
-          color: "var(--green)",
-          textDecoration: "underline",
-          cursor: "pointer",
-        }}
+        style={
+          variant === "action"
+            ? {
+                background: "none",
+                border: "none",
+                padding: 0,
+                font: "inherit",
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--green)",
+                textDecoration: "none",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }
+            : {
+                background: "none",
+                border: "none",
+                padding: 0,
+                font: "inherit",
+                color: "var(--green)",
+                textDecoration: "underline",
+                cursor: "pointer",
+              }
+        }
       >
-        {address}
+        {variant === "action" ? "Get directions" : address}
       </button>
       {open && (
         <>

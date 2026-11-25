@@ -5,8 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 
-// One customer account across all of AppointEase: sign up once, book with
-// any business. Continue with Google first, or email + password below.
+// Per-business customer accounts (Frantz, 2026-11-25): a customer
+// signs up WITH a business, on that business's page — the membership,
+// dashboard, messages and history live inside that business's world
+// and never mix with any other business. The same email can join
+// another business on its own page. Continue with Google first, or
+// email + password below.
 export default function SignupForm({
   nextPath = "/my-appointments",
 }: {
@@ -70,7 +74,7 @@ export default function SignupForm({
         <h2>Check your email</h2>
         <p className="lede">
           We sent a confirmation link to {form.email}. Click it, then sign in —
-          your account works at every business on AppointEase.
+          you&apos;ll land right back where you were.
         </p>
         <Link href="/login" className="btn btn-primary">Go to sign in</Link>
       </div>
@@ -81,8 +85,10 @@ export default function SignupForm({
     <div className="card">
       <h2>Create your account</h2>
       <p className="lede" style={{ marginBottom: 16 }}>
-        One account for every business on AppointEase — book, reschedule and
-        message them all with the same login.
+        Your account lives with the business you&apos;re signing up with —
+        your appointments, messages and history there stay in that
+        business&apos;s dashboard, and nowhere else. Joining another
+        business happens on its own page, with the same email.
       </p>
       {error && <div className="error">{error}</div>}
       <button className="btn btn-primary btn-block" type="button" onClick={google}>

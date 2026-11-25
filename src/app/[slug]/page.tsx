@@ -1,13 +1,48 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBusinessPageData, hoursSummary } from "@/lib/data";
+import { getBusinessPageData, hoursSummary, openStatus } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { ensureBusinessMembership } from "@/lib/profile";
 import { getBillingState } from "@/lib/plans";
 import { formatPhone, formatPrice, visitTypeLabel } from "@/lib/types";
 import AddressDirections from "@/components/AddressDirections";
 import { categoryLabel } from "@/lib/categories";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
+
+// Contact-card line icons (Visit us restyle, Frantz 2026-11-25): one
+// small consistent set, single color via currentColor, no emojis.
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 21s-7-5.6-7-11a7 7 0 1 1 14 0c0 5.4-7 11-7 11z" />
+      <circle cx="12" cy="10" r="2.6" />
+    </svg>
+  );
+}
+function PhoneIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 4h4l1.5 4.5L8 10a12.5 12.5 0 0 0 6 6l1.5-2.5L20 15v4a2 2 0 0 1-2.2 2A17.5 17.5 0 0 1 3 6.2 2 2 0 0 1 5 4z" />
+    </svg>
+  );
+}
+function MailIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3.5 6.5 12 13l8.5-6.5" />
+    </svg>
+  );
+}
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </svg>
+  );
+}
 
 export default async function BusinessPage({
   params,
@@ -62,6 +97,31 @@ export default async function BusinessPage({
       </main>
     );
   }
+
+  // Per-business accounts (Frantz, 2026-11-25): a signed-in customer
+  // on this business's page belongs to THIS business's world — make
+  // sure the membership exists (signing up from here joins them here,
+  // and only here). Quiet and best-effort: the public page never
+  // breaks over a membership write.
+  if (!page.demoMode && !demoShop && isSupabaseConfigured()) {
+    try {
+      const supabase = await createServerSupabase();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      // Never the owner: viewing your own page must not make you a
+      // customer of your own business.
+      if (user && user.id !== business.owner_id) {
+        await ensureBusinessMembership(supabase, business.id, user.id);
+      }
+    } catch {
+      // Public page first — membership also joins at booking,
+      // dashboard and message time.
+    }
+  }
+
+  // Open/closed for the contact card, from the real hours.
+  const status = openStatus(page.availability, tz);
 
   // Reviews (carried over from the old app): average + latest few, public.
   let reviewSummary: { avg: number; total: number; latest: { rating: number; comment: string | null; name: string }[] } | null = null;
@@ -265,47 +325,71 @@ export default async function BusinessPage({
       {(business.address || business.phone || business.email) && (
         <div className="card">
           <h2>Visit us</h2>
-          {business.address && (
-            <p style={{ margin: "6px 0", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span aria-hidden="true">📍</span>
-              <AddressDirections address={business.address} />
-              <span className="small">— tap for directions</span>
+          {/* Clean contact card (Frantz, 2026-11-25): line icons on a
+              shared left edge, plain text with NO underlined links,
+              even rows with thin dividers. The address row keeps the
+              directions sheet (Google Maps / Apple Maps / Waze / Copy
+              address) behind a quiet "Get directions" action. */}
+          <div className="contact-list">
+            {business.address && (
+              <div className="contact-row">
+                <span className="contact-icon"><PinIcon /></span>
+                <span style={{ flex: 1 }}>{business.address}</span>
+                <AddressDirections address={business.address} variant="action" />
+              </div>
+            )}
+            {business.phone && !demoShop && (
+              <div className="contact-row">
+                <span className="contact-icon"><PhoneIcon /></span>
+                <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{formatPhone(business.phone)}</a>
+              </div>
+            )}
+            {business.email && !demoShop && (
+              <div className="contact-row">
+                <span className="contact-icon"><MailIcon /></span>
+                <a href={`mailto:${business.email}`}>{business.email}</a>
+              </div>
+            )}
+            <div className="contact-row">
+              <span className="contact-icon"><ClockIcon /></span>
+              <span style={{ flex: 1 }}>
+                {status
+                  ? status.todayLabel
+                    ? `Today · ${status.todayLabel}`
+                    : "Today · Closed"
+                  : hoursSummary(page.availability)}
+              </span>
+              {status && (
+                <span className="open-note">
+                  <span className={status.state === "open" ? "open-dot" : "closed-dot"} aria-hidden="true" />
+                  {status.note}
+                </span>
+              )}
+            </div>
+          </div>
+          {status && (
+            <p className="small" style={{ margin: "10px 0 0" }}>
+              Hours: {hoursSummary(page.availability)}
             </p>
           )}
-          {business.phone && !demoShop && (
-            <p style={{ margin: "6px 0", display: "flex", alignItems: "center", gap: 8 }}>
-              <span aria-hidden="true">📞</span>
-              <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{formatPhone(business.phone)}</a>
-            </p>
-          )}
-          {business.email && !demoShop && (
-            <p style={{ margin: "6px 0", display: "flex", alignItems: "center", gap: 8 }}>
-              <span aria-hidden="true">✉️</span>
-              <a href={`mailto:${business.email}`}>{business.email}</a>
-            </p>
-          )}
-          <p className="small" style={{ margin: "6px 0 0" }}>
-            Hours: {hoursSummary(page.availability)}
-          </p>
           {page.locations.length > 0 && (
-            <div style={{ marginTop: 10 }}>
-              <p style={{ margin: "4px 0", fontWeight: 600 }}>Our locations</p>
+            <div style={{ marginTop: 6 }}>
+              <p style={{ margin: "10px 0 0", fontWeight: 600 }}>Our locations</p>
               {page.locations.map((loc) => (
-                <p key={loc.id} style={{ margin: "4px 0" }}>
-                  <strong>{loc.name}</strong>
+                <div key={loc.id} className="contact-loc">
+                  <p style={{ margin: "0 0 2px", fontWeight: 600 }}>{loc.name}</p>
                   {loc.address && (
-                    <>
-                      {" — "}
-                      <AddressDirections address={loc.address} />
-                    </>
+                    <div className="contact-loc-row">
+                      <span style={{ flex: 1 }}>{loc.address}</span>
+                      <AddressDirections address={loc.address} variant="action" />
+                    </div>
                   )}
                   {loc.phone && !demoShop && (
-                    <>
-                      {" · "}
+                    <div className="contact-loc-row">
                       <a href={`tel:${loc.phone.replace(/[^+\d]/g, "")}`}>{formatPhone(loc.phone)}</a>
-                    </>
+                    </div>
                   )}
-                </p>
+                </div>
               ))}
             </div>
           )}

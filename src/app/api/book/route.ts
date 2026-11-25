@@ -9,12 +9,18 @@ import { logCustomerEvent } from "@/lib/events";
 
 // POST /api/book
 // Body: { slug, serviceId, staffId, startsAt, name, phone, email, notes? }
-// - Signed-in customers book as themselves.
-// - New customers: an account is created at checkout with a random password
-//   they never see — no password is asked for at booking. They manage the
-//   booking through the link in their confirmation text/email, and can set
-//   a real password later from the confirmation screen. One account across
-//   all of AppointEase.
+// - Signed-in customers book as themselves. The business page is
+//   ACCOUNT-FIRST (Frantz, 2026-11-25): the book page sends signed-out
+//   customers through a short account step first, so this is the
+//   normal path — and booking joins the customer to THIS business
+//   (business_customers below). Accounts are per business: the
+//   membership, dashboard, messages and history never mix across
+//   businesses.
+// - Fallback only (a session that expired mid-flow): an account is
+//   created at checkout with a random password they never see. They
+//   manage the booking through the link in their confirmation
+//   text/email, and can set a real password later from the
+//   confirmation screen.
 // - The database exclusion constraint makes double-booking impossible; a
 //   lost race comes back as 409 and the client asks for a new time.
 export async function POST(req: NextRequest) {
@@ -132,7 +138,9 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Global customer profile (one per person, across all businesses).
+  // Customer profile basics (name/contact). The account's home is the
+  // per-business membership created just below — nothing about this
+  // booking is visible at any other business.
   await admin.from("customers").upsert(
     { id: customerId, full_name: name ?? "", email: email ?? null, phone: phone ?? null },
     { onConflict: "id" }

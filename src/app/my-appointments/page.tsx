@@ -19,6 +19,21 @@ interface ApptRow {
   services: { name: string } | null;
 }
 
+interface BizLite {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+}
+
+// Customer appointments, PER-BUSINESS model (Frantz, 2026-11-25):
+// there is no cross-business customer home anymore. With a business
+// in context (?business=<slug> — old links, the sign-in default) this
+// page shows ONLY that business's appointments; the full dashboard
+// for a business lives at /<slug>/my. Without a business in context
+// it is a plain picker — "Your businesses" — listing the businesses
+// this customer has joined, each opening its own separate dashboard.
+// Appointments, messages and history never mix across businesses.
 export default async function MyAppointmentsPage({
   searchParams,
 }: {
@@ -30,7 +45,7 @@ export default async function MyAppointmentsPage({
       <main className="column">
         <div className="notice">
           Demo mode — accounts and saved appointments turn on when the live
-          database is connected. Try the sample booking flow meanwhile:
+          database is connected. Try the sample business meanwhile:
         </div>
         <Link href="/main-street-barbers" className="btn btn-primary btn-block">
           Visit Main Street Barbers
@@ -49,6 +64,18 @@ export default async function MyAppointmentsPage({
   }
   await ensureCustomerProfile(supabase, user);
 
+  // The business in context, if any (published businesses are public).
+  let focusBiz: BizLite | null = null;
+  if (focusSlug) {
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("id, name, slug, logo_url")
+      .eq("slug", focusSlug)
+      .eq("published", true)
+      .maybeSingle();
+    focusBiz = (biz as BizLite) ?? null;
+  }
+
   const { data } = await supabase
     .from("appointments")
     .select(
@@ -56,7 +83,11 @@ export default async function MyAppointmentsPage({
     )
     .eq("customer_id", user.id)
     .order("starts_at", { ascending: true });
-  const appts = (data ?? []) as unknown as ApptRow[];
+  const allAppts = (data ?? []) as unknown as ApptRow[];
+  // Scoped mode: only the focus business's appointments exist here.
+  const appts = focusBiz
+    ? allAppts.filter((a) => a.business_id === focusBiz.id)
+    : allAppts;
 
   // Intake forms (migration 0012): which of these appointments'
   // services have a form attached, and which appointments already have
@@ -166,20 +197,6 @@ export default async function MyAppointmentsPage({
   const next = upcoming[0];
   const rest = upcoming.slice(1);
 
-  // Arriving from a business's page (?business=<slug> — the business
-  // header's My appointments link): that business's appointments come
-  // first, under its name, so the customer lands in that business's
-  // area. The account stays the one global customer account — this is
-  // framing only (Frantz, 2026-11-25).
-  const focusBiz = focusSlug
-    ? (appts.find((a) => a.businesses?.slug === focusSlug)?.businesses ?? null)
-    : null;
-  const focusAppts = focusBiz ? appts.filter((a) => a.businesses?.slug === focusSlug) : [];
-  const focusUpcoming = focusAppts.filter(isUpcoming);
-  const focusPast = focusAppts.filter((a) => !isUpcoming(a)).reverse();
-  const otherUpcoming = focusBiz ? upcoming.filter((a) => a.businesses?.slug !== focusSlug) : [];
-  const otherPast = focusBiz ? past.filter((a) => a.businesses?.slug !== focusSlug) : [];
-
   const card = (a: ApptRow, big = false) => {
     const tz = a.businesses?.timezone ?? "America/New_York";
     return (
@@ -263,70 +280,131 @@ export default async function MyAppointmentsPage({
     );
   };
 
+  // ── No business in context: the picker. Names and logos only —
+  // no appointment, message or history data from any business here.
+  if (!focusBiz) {
+    const { data: memberRows } = await supabase
+      .from("business_customers")
+      .select("business_id, businesses:business_id ( id, name, slug, logo_url )")
+      .eq("customer_id", user.id);
+    const bizById = new Map<string, BizLite>();
+    for (const r of memberRows ?? []) {
+      const b = (r as unknown as { businesses: BizLite | null }).businesses;
+      if (b) bizById.set(b.id, b);
+    }
+    // Anyone with appointments at a business belongs in its world even
+    // if a membership row is somehow missing (older bookings).
+    for (const a of allAppts) {
+      if (a.businesses && !bizById.has(a.business_id)) {
+        bizById.set(a.business_id, {
+          id: a.business_id,
+          name: a.businesses.name,
+          slug: a.businesses.slug,
+          logo_url: a.businesses.logo_url,
+        });
+      }
+    }
+    const myBusinesses = [...bizById.values()].sort((x, y) => x.name.localeCompare(y.name));
+
+    return (
+      <main className="column">
+        <h1 style={{ fontSize: 28 }}>Your businesses</h1>
+        <p className="small" style={{ margin: "0 0 16px" }}>
+          Each business has its own dashboard — your appointments,
+          messages and history with that business live there, and only
+          there.
+        </p>
+
+        {myBusinesses.length === 0 && (
+          <div className="card">
+            <p className="lede" style={{ marginBottom: 10 }}>
+              You haven&apos;t joined a business yet. Open a business&apos;s
+              page link and sign up there — or browse businesses near you.
+            </p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <Link href="/explore" className="btn btn-primary">Find a business</Link>
+              <Link href="/main-street-barbers" className="btn">Try the sample shop</Link>
+            </div>
+          </div>
+        )}
+
+        {myBusinesses.map((b) => (
+          <div className="card" key={b.id}>
+            <h3 style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 0 }}>
+              {b.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={b.logo_url}
+                  alt={`${b.name} logo`}
+                  width={34}
+                  height={34}
+                  style={{ borderRadius: 9, objectFit: "cover" }}
+                />
+              ) : (
+                <span className="biz-header-initial" aria-hidden="true">
+                  {b.name.trim().charAt(0).toUpperCase() || "?"}
+                </span>
+              )}
+              <span>{b.name}</span>
+            </h3>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <Link href={`/${b.slug}/my`} className="btn btn-primary">
+                Open my dashboard
+              </Link>
+              <Link href={`/${b.slug}`} className="btn">
+                Visit page
+              </Link>
+            </div>
+          </div>
+        ))}
+
+        <div className="card">
+          <h3>Message alerts</h3>
+          <p className="small" style={{ marginBottom: 10 }}>
+            When a business replies, we email you right away. Turn on push as well
+            so replies reach this device instantly:
+          </p>
+          <PushOptIn />
+        </div>
+
+        <form action="/auth/signout" method="post" style={{ textAlign: "center" }}>
+          <button className="btn" type="submit">Sign out</button>
+        </form>
+      </main>
+    );
+  }
+
+  // ── Business in context: ONLY that business's appointments.
   return (
     <main className="column">
-      <h1 style={{ fontSize: 28 }}>My appointments</h1>
+      <p className="eyebrow">{focusBiz.name}</p>
+      <h1 style={{ fontSize: 28, marginBottom: 10 }}>My appointments</h1>
+      <p className="small" style={{ margin: "0 0 16px" }}>
+        Only your appointments with {focusBiz.name} are shown here.{" "}
+        <Link href={`/${focusBiz.slug}/my`}>Open your full dashboard at {focusBiz.name}</Link>{" "}
+        for messages and your visit history.
+      </p>
 
       {appts.length === 0 && (
         <div className="card">
           <p className="lede" style={{ marginBottom: 10 }}>
-            Nothing booked yet. Find a business page link — or try the sample shop.
+            Nothing booked with {focusBiz.name} yet.
           </p>
-          <Link href="/main-street-barbers" className="btn btn-primary">Book at Main Street Barbers</Link>
+          <Link href={`/${focusBiz.slug}/book`} className="btn btn-primary">
+            Book at {focusBiz.name}
+          </Link>
         </div>
       )}
 
-      {focusBiz && focusAppts.length > 0 ? (
-        <>
-          <h2 style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
-            {focusBiz.logo_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={focusBiz.logo_url}
-                alt=""
-                width={34}
-                height={34}
-                style={{ borderRadius: 9, objectFit: "cover" }}
-              />
-            )}
-            <span>{focusBiz.name}</span>
-          </h2>
-          {focusUpcoming.map((a) => card(a, a.id === next?.id))}
-          {focusPast.map((a) => card(a))}
+      {next && card(next, true)}
+      {rest.map((a) => card(a))}
 
-          {(otherUpcoming.length > 0 || otherPast.length > 0) && (
-            <h2 style={{ marginTop: 22 }}>Your other appointments</h2>
-          )}
-          {otherUpcoming.map((a) => card(a, a.id === next?.id))}
-          {otherPast.length > 0 && (
-            <>
-              <h3 style={{ marginTop: 16 }}>Past appointments</h3>
-              {otherPast.map((a) => card(a))}
-            </>
-          )}
-        </>
-      ) : (
+      {past.length > 0 && (
         <>
-          {next && card(next, true)}
-          {rest.map((a) => card(a))}
-
-          {past.length > 0 && (
-            <>
-              <h2 style={{ marginTop: 22 }}>Past appointments</h2>
-              {past.map((a) => card(a))}
-            </>
-          )}
+          <h2 style={{ marginTop: 22 }}>Past appointments</h2>
+          {past.map((a) => card(a))}
         </>
       )}
-
-      <div className="card">
-        <h3>Message alerts</h3>
-        <p className="small" style={{ marginBottom: 10 }}>
-          When a business replies, we email you right away. Turn on push as well
-          so replies reach this device instantly:
-        </p>
-        <PushOptIn />
-      </div>
 
       <form action="/auth/signout" method="post" style={{ textAlign: "center" }}>
         <button className="btn" type="submit">Sign out</button>

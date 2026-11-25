@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getBusinessPageData } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase } from "@/lib/supabase";
-import { ensureCustomerProfile } from "@/lib/profile";
+import { ensureBusinessMembership, ensureCustomerProfile } from "@/lib/profile";
 import ThreadView from "@/components/ThreadView";
 
 export default async function MessagePage({
@@ -67,6 +67,7 @@ export default async function MessagePage({
   }
 
   await ensureCustomerProfile(supabase, user);
+  await ensureBusinessMembership(supabase, business.id, user.id);
 
   return (
     <main className="column">
@@ -77,7 +78,7 @@ export default async function MessagePage({
       </div>
       <p className="small center">
         <Link href={`/${slug}`}>← Back to {business.name}</Link> ·{" "}
-        <Link href="/my-appointments">My appointments</Link>
+        <Link href={`/${slug}/my`}>My dashboard</Link>
       </p>
     </main>
   );

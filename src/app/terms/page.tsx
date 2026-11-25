@@ -37,7 +37,7 @@ export default function TermsPage() {
       <h2>2. Accounts</h2>
       <ul>
         <li><strong>Business accounts.</strong> A business owner creates an account, sets up their business profile, services, staff and hours, and publishes a booking page.</li>
-        <li><strong>Customer accounts.</strong> Customers create one account with a verified phone number and password, or with Google sign-in, and can use it to book with any business on AppointEase.</li>
+        <li><strong>Customer accounts.</strong> Customers create an account with a business, on that business&apos;s page — with Google sign-in or with email and password. The account belongs to that business: its appointments, messages and history live in that business&apos;s dashboard and are not shared with any other business. A customer who uses several businesses joins each one on its own page; the same email may be used at each.</li>
         <li>You are responsible for keeping your sign-in credentials confidential and for activity under your account. Tell us promptly if you believe your account has been compromised.</li>
         <li>You must provide accurate information and keep it up to date.</li>
       </ul>

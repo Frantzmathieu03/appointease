@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { getBusinessPageData } from "@/lib/data";
 import { getBillingState } from "@/lib/plans";
 import { isDemoShop } from "@/lib/demo";
+import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { ensureBusinessMembership, ensureCustomerProfile } from "@/lib/profile";
 import BookingFlow from "@/components/BookingFlow";
+import AccountGate from "@/components/AccountGate";
 
 export default async function BookPage({
   params,
@@ -33,6 +36,34 @@ export default async function BookPage({
         </div>
       </main>
     );
+  }
+
+  // Account-first booking (Frantz, 2026-11-25): a booking from a
+  // business's page belongs to the customer's account WITH THIS
+  // BUSINESS. Signed-out customers get the short account step first
+  // (Google, or email sign-up/sign-in) and land right back here;
+  // signed-in customers go straight in — and arriving signed in joins
+  // them to this business (the per-business membership). Demo shops
+  // and demo mode stay account-free simulations, as before.
+  if (!page.demoMode && !isDemoShop(slug) && isSupabaseConfigured()) {
+    const supabase = await createServerSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return (
+        <main className="column">
+          <p className="eyebrow">{page.business.name}</p>
+          <h1 style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
+          <AccountGate slug={slug} businessName={page.business.name} />
+          <p className="small center" style={{ marginTop: 14 }}>
+            <Link href={`/${slug}`}>← Back to {page.business.name}</Link>
+          </p>
+        </main>
+      );
+    }
+    await ensureCustomerProfile(supabase, user);
+    await ensureBusinessMembership(supabase, page.business.id, user.id);
   }
 
   return (
