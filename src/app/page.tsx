@@ -33,9 +33,8 @@ export default function HomePage() {
               <p className="trust-line">30-day free trial · No card required · Customers always book free</p>
             </div>
             <div className="hero-media">
-              <video autoPlay muted loop playsInline poster="/images/hero-barbershop.jpg">
-                <source src="/videos/hero-loop.mp4" type="video/mp4" />
-              </video>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/salon-action.jpg" alt="A stylist blow-drying a client's hair in a busy hair salon" />
             </div>
           </div>
           <div className="chips-strip" aria-label="Business types">
@@ -131,7 +130,7 @@ export default function HomePage() {
           <div className="img-cards">
             <div className="img-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/hero-barbershop.jpg" alt="A barber at work in a bright barbershop" />
+              <img src="/images/barbershop.jpg" alt="A barber giving a client a fade with clippers in a men's barbershop" />
               <div className="img-card-body">
                 <h3>Barbershops</h3>
                 <p>Chairs stay full with online booking and reminders that cut no-shows.</p>
@@ -139,15 +138,15 @@ export default function HomePage() {
             </div>
             <div className="img-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/salon.jpg" alt="A stylist working in a bright hair salon" />
+              <img src="/images/nail-salon.jpg" alt="A nail technician painting a client's nails in a nail salon" />
               <div className="img-card-body">
-                <h3>Salons &amp; spas</h3>
-                <p>Per-stylist services and hours, so clients book the right chair every time.</p>
+                <h3>Nail salons &amp; spas</h3>
+                <p>Book by service and technician, so every station stays on schedule.</p>
               </div>
             </div>
             <div className="img-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/office.jpg" alt="A professional greeting a client in a bright office" />
+              <img src="/images/law-office.jpg" alt="A lawyer reviewing documents with a client in a law office" />
               <div className="img-card-body">
                 <h3>Law offices &amp; clinics</h3>
                 <p>Consultations booked ahead, with confirmations your clients actually see.</p>
@@ -170,8 +169,9 @@ export default function HomePage() {
                 <Link href="/jesus-barber-shop" className="btn btn-white btn-lg">Visit the shop</Link>
               </div>
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero-barbershop.jpg" alt="Inside Jesus Barber Shop" />
+            <video autoPlay muted loop playsInline poster="/images/barbershop.jpg">
+              <source src="/videos/hero-loop.mp4" type="video/mp4" />
+            </video>
           </div>
         </section>
 

@@ -23,16 +23,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <header className="site-header">
               <Link href="/" className="logo">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/logo.webp" alt="AppointEase logo" className="logo-img" width={34} height={34} />
-                <span className="logo-word">AppointEase</span>
+                <img src="/images/logo.webp" alt="AppointEase logo" className="logo-img" width={40} height={40} />
+                <span className="logo-word">Appoint<span className="logo-word-accent">Ease</span></span>
               </Link>
               <nav className="header-links">
-                <Link href="/my-appointments">
+                <Link href="/my-appointments" className="header-link-text">
                   My appointments
                   <UnreadBadge variant="customer" />
                 </Link>
-                <Link href="/owner">Business sign-in</Link>
-                <Link href="/owner/signup" className="btn btn-primary" style={{ padding: "9px 15px" }}>
+                <Link href="/owner" className="header-link-text">Business sign-in</Link>
+                <Link href="/owner/signup" className="btn btn-primary header-cta">
                   Create booking page
                 </Link>
               </nav>
@@ -46,8 +46,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="footer-brand">
                 <Link href="/" className="logo">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/logo.webp" alt="AppointEase logo" className="logo-img" width={34} height={34} />
-                  <span className="logo-word">AppointEase</span>
+                  <img src="/images/logo.webp" alt="AppointEase logo" className="logo-img" width={40} height={40} />
+                  <span className="logo-word">Appoint<span className="logo-word-accent">Ease</span></span>
                 </Link>
                 <p>Booking, reminders and messaging for appointment-based businesses.</p>
               </div>
