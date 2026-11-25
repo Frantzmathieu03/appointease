@@ -96,39 +96,24 @@ export default function HomePage() {
             </div>
           </div>
           <div className="steps-media">
-            {/* Built phone mock (not a photo): the old stock photo's
-                screen showed a vague empty grid — this shows the actual
-                product moment, a customer getting their texts. */}
-            <div
-              className="phone-panel"
-              role="img"
-              aria-label="A customer's phone showing a booking confirmation and a reminder text from Main Street Barbers"
-            >
+            {/* Animated loop of the real product: a customer booking a
+                Classic haircut on the live Main Street Barbers page —
+                service, day and time, details, sample confirmation.
+                Recorded from the actual app, not a mock. */}
+            <div className="phone-panel loop-panel">
               <div className="phone-frame">
-                <div className="phone-screen">
-                  <div className="phone-head">
-                    <span className="phone-avatar">M</span>
-                    <div>
-                      <div className="phone-name">Main Street Barbers</div>
-                      <div className="phone-sub">Text message</div>
-                    </div>
-                  </div>
-                  <div className="bubble">
-                    Hi James 👋 Your appointment is confirmed —{" "}
-                    <strong>Classic haircut</strong> at Main Street Barbers,{" "}
-                    <strong>tomorrow at 10:00 AM</strong>. Confirmation #:{" "}
-                    <strong>AE-7KX42P</strong>
-                  </div>
-                  <div className="bubble">
-                    Reminder: your appointment is in about{" "}
-                    <strong>2 hours</strong>. Need to change it? Reschedule or
-                    cancel:{" "}
-                    <span className="bubble-link">appointease.io/manage</span>
-                  </div>
-                  <div className="phone-note">
-                    Confirmation + reminders — automatic, every booking
-                  </div>
-                </div>
+                <video
+                  className="loop-video"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  poster="/loops/loop-booking-poster.jpg"
+                  aria-label="A customer booking a Classic haircut on the Main Street Barbers page: choosing the service, picking a day and time, entering their details, and receiving a confirmation number"
+                >
+                  <source src="/loops/loop-booking.webm" type="video/webm" />
+                  <source src="/loops/loop-booking.mp4" type="video/mp4" />
+                </video>
               </div>
             </div>
           </div>
@@ -144,8 +129,26 @@ export default function HomePage() {
             <p className="lede">Every appointment gets a confirmation, a 24-hour reminder, and a 2-hour reminder — by text and email.</p>
           </div>
           <div className="showcase-photo">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/reminders-wellness.jpg" alt="A therapist greeting a client in a bright wellness studio" />
+            {/* Animated loop of the real product: the confirmation
+                screen's own message previews — confirmation, 24-hour
+                reminder, 2-hour reminder, each with its reschedule /
+                cancel link. Recorded from the actual app. */}
+            <div className="reminder-media">
+              <div className="phone-frame reminder-frame">
+                <video
+                  className="loop-video"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  poster="/loops/loop-reminder-poster.jpg"
+                  aria-label="The messages a customer receives after booking: a confirmation sent right away, a reminder 24 hours before, and a reminder 2 hours before, each with a link to reschedule or cancel"
+                >
+                  <source src="/loops/loop-reminder.webm" type="video/webm" />
+                  <source src="/loops/loop-reminder.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
             <div className="notify-card">
               <p className="notify-status"><span className="notify-dot" />Reminder sent successfully</p>
               <p className="notify-text">

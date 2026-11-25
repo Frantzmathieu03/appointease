@@ -371,6 +371,17 @@ img, video { max-width: 100%; }
 .bubble-link { color: var(--green); font-weight: 600; text-decoration: underline; }
 .phone-note { text-align: center; font-size: 11.5px; color: var(--muted); }
 
+/* Animated product loops — real app screens recorded inside the
+   same phone frame as the built mocks. The phone stands fully
+   visible in its panel (no crop): the recordings carry important
+   UI at the bottom of the frame, so the panel grows to fit it. */
+.loop-panel { aspect-ratio: auto; padding: 36px 16px 40px; }
+.loop-panel .phone-frame { margin-top: 0; }
+.loop-video {
+  display: block; width: 100%; aspect-ratio: 1 / 2; object-fit: cover;
+  border-radius: 26px; background: #f7f9f7;
+}
+
 /* Card icon chip — used by the benefits carousel cards */
 .feature-icon {
   width: 46px; height: 46px; border-radius: 13px; background: var(--mint);
@@ -430,6 +441,18 @@ img, video { max-width: 100%; }
 .notify-dot { width: 8px; height: 8px; border-radius: 50%; background: #7ed491; flex: 0 0 auto; }
 .notify-text { margin: 0; font-size: 17px; line-height: 1.5; color: #f2f7f3; }
 .notify-hl { color: #a9dfb6; font-weight: 600; }
+
+/* Reminder loop — the phone stands in a sage panel where the photo
+   used to be; the notify card keeps its overlap below the panel,
+   so the panel carries extra bottom padding and the phone stays
+   fully clear of the card. */
+.reminder-media {
+  border-radius: 24px; overflow: hidden;
+  background: linear-gradient(160deg, #eef4ee 0%, #dfeee2 55%, #cfe4d4 100%);
+  box-shadow: 0 14px 40px rgba(20, 60, 35, 0.16);
+  display: flex; justify-content: center; padding: 34px 16px 92px;
+}
+.reminder-frame { margin-top: 0; }
 
 /* Journey strip — the life of one appointment in four connected
    steps. White cards and whitespace separate the steps; the arrows
@@ -727,6 +750,12 @@ footer.site-footer { padding: 0; text-align: left; }
      stays full-size instead of shrinking with the 16/9 panel. */
   .phone-panel { aspect-ratio: 10 / 11; }
   .phone-frame { width: 84%; margin-top: 22px; }
+  /* Loop panels stay auto-height on mobile too — the recorded
+     phone is never cropped. */
+  .phone-panel.loop-panel { aspect-ratio: auto; padding: 24px 12px 30px; }
+  .loop-panel .phone-frame { margin-top: 0; }
+  .reminder-media { padding: 24px 12px 80px; }
+  .reminder-frame { width: 84%; }
   .btn { min-height: 48px; }
   .mkt-section { padding-top: 36px; }
   .cta-band { padding: 34px 20px; }
