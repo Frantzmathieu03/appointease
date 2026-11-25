@@ -51,16 +51,19 @@ export default function StaffManager({ businessId }: { businessId: string }) {
       )}
       {staff.map((m) => (
         <div key={m.id} className="service-row">
-          <div className="service-name">{m.name}</div>
+          <div>
+            <div className="service-name">{m.name}</div>
+            <div className="service-meta">Bookable staff</div>
+          </div>
           <button className="btn" style={{ padding: "7px 13px" }} onClick={() => remove(m.id)}>
             Remove
           </button>
         </div>
       ))}
       <form onSubmit={add} style={{ display: "flex", gap: 8, marginTop: 14 }}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Team member name" required />
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Staff name" required aria-label="Staff name" />
         <button className="btn btn-primary" type="submit" disabled={busy || !name.trim()}>
-          Add
+          Add staff member
         </button>
       </form>
       <p className="small" style={{ marginTop: 10 }}>

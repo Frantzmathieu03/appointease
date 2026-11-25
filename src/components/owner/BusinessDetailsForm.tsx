@@ -113,7 +113,7 @@ export default function BusinessDetailsForm({ business }: { business: Business }
         </select>
       </label>
       <button className="btn btn-primary" type="submit" disabled={busy}>
-        {busy ? "Saving…" : saved ? "Saved ✓" : "Save details"}
+        {busy ? "Saving…" : saved ? "Saved ✓" : "Save settings"}
       </button>
     </form>
   );

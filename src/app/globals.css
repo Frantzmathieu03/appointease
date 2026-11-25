@@ -170,6 +170,41 @@ textarea { min-height: 84px; resize: vertical; }
 }
 .tabs a.active { background: var(--green); color: #fff; border-color: var(--green); }
 
+/* Owner dashboard workspace: left sidebar + content (design-demo layout). */
+.dash-shell {
+  max-width: 1180px; margin: 0 auto; padding: 0 16px 48px;
+  display: flex; gap: 20px; align-items: flex-start;
+}
+.dash-sidebar {
+  width: 224px; flex: 0 0 224px; position: sticky; top: 16px;
+  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 18px 14px;
+}
+.dash-nav { display: flex; flex-direction: column; gap: 4px; margin-top: 14px; }
+.dash-nav a {
+  padding: 10px 12px; border-radius: 10px; color: var(--ink);
+  text-decoration: none; font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.dash-nav a:hover { background: #f4f8f4; }
+.dash-main { flex: 1 1 auto; min-width: 0; }
+.staff-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px; align-items: start;
+}
+.appt-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; background: #f4f8f4;
+  text-decoration: none; color: var(--ink); margin-bottom: 8px;
+}
+.appt-row:hover { background: var(--mint); }
+@media (max-width: 900px) {
+  .dash-shell { flex-direction: column; }
+  .dash-sidebar { width: 100%; flex: none; position: static; }
+  .dash-nav { flex-direction: row; flex-wrap: wrap; }
+  .dash-main { width: 100%; }
+}
+
 .notice {
   border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-bottom: 14px;
   background: #fff7e0; border: 1px solid #ecd27a; color: #5f4b00;

@@ -22,8 +22,10 @@ export default async function DashboardThreadPage({
     <div>
       <p className="eyebrow">
         <Link href="/owner/dashboard/inbox">← Inbox</Link>
+        {"  ·  "}
+        <Link href="/owner/dashboard/customers">View customer</Link>
       </p>
-      <h1 style={{ fontSize: 25 }}>{customer.full_name || "Customer"}</h1>
+      <h1 style={{ fontSize: 25 }}>Conversation with {customer.full_name || "Customer"}</h1>
       <p className="small" style={{ marginTop: -6, marginBottom: 14 }}>
         {[customer.phone, customer.email].filter(Boolean).join(" · ")}
       </p>

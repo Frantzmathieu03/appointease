@@ -151,10 +151,53 @@ export default async function BusinessPage({
             <span className="demo-badge">Demo shop</span>
           </p>
         )}
+        {business.address && (
+          <p className="lede" style={{ marginBottom: 6 }}>📍 {business.address}</p>
+        )}
         <p className="lede" style={{ marginBottom: 6 }}>
           {hoursSummary(page.availability)}
         </p>
         {business.description && <p className="lede" style={{ marginBottom: 0 }}>{business.description}</p>}
+
+        <div
+          className="action-row"
+          style={{ margin: "16px 0 0", ...(demoShop ? { gridTemplateColumns: "1fr" } : {}) }}
+        >
+          <Link
+            href={`/${slug}/book`}
+            className="btn"
+            style={{ background: "#fff", color: "var(--green)", borderColor: "#fff" }}
+          >
+            Book appointment
+          </Link>
+          {!demoShop && (
+            <Link
+              href={`/${slug}/message`}
+              className="btn"
+              style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
+            >
+              Message us
+            </Link>
+          )}
+          {!demoShop &&
+            (business.phone ? (
+              <a
+                href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}
+                className="btn"
+                style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
+              >
+                Call {business.phone}
+              </a>
+            ) : (
+              <span
+                className="btn"
+                aria-disabled="true"
+                style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
+              >
+                Call office
+              </span>
+            ))}
+        </div>
       </div>
 
       {nextAppt && (
@@ -175,17 +218,6 @@ export default async function BusinessPage({
           </div>
         </div>
       )}
-
-      <div className="action-row" style={demoShop ? { gridTemplateColumns: "1fr" } : undefined}>
-        <Link href={`/${slug}/book`} className="btn btn-primary">Book appointment</Link>
-        {!demoShop && <Link href={`/${slug}/message`} className="btn">Message us</Link>}
-        {!demoShop &&
-          (business.phone ? (
-            <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`} className="btn">Call office</a>
-          ) : (
-            <span className="btn" aria-disabled="true">Call office</span>
-          ))}
-      </div>
 
       {(business.address || business.phone || business.email) && (
         <div className="card">

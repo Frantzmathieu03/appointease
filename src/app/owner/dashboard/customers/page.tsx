@@ -65,7 +65,7 @@ export default async function DashboardCustomersPage() {
             </p>
           </div>
           <Link href={`/owner/dashboard/inbox/${c.id}`} className="btn">
-            Message
+            Open profile
             {(unreadBy.get(c.id) ?? 0) > 0 && <span className="badge">{unreadBy.get(c.id)}</span>}
           </Link>
         </div>

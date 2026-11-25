@@ -95,7 +95,7 @@ export default async function OwnerSetupPage() {
       </div>
 
       <div className="card">
-        <h2>Logo &amp; photos</h2>
+        <h2>Logo &amp; photos (optional)</h2>
         <p className="small" style={{ marginBottom: 10 }}>
           Optional — your logo and up to four photos of your work make your
           booking page feel like your shop. You can add them now or anytime

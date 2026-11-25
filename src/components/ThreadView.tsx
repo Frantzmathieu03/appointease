@@ -135,15 +135,25 @@ export default function ThreadView({
         <div ref={bottomRef} />
       </div>
       {error && <div className="error">{error}</div>}
-      <form onSubmit={send} style={{ display: "flex", gap: 8 }}>
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Write a message…"
-          aria-label="Write a message"
-        />
+      <form onSubmit={send}>
+        <label className="field" style={{ marginBottom: 8 }}>
+          <span>Your message</span>
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                e.currentTarget.form?.requestSubmit();
+              }
+            }}
+            placeholder="Write a message…"
+            aria-label="Your message"
+            rows={2}
+          />
+        </label>
         <button className="btn btn-primary" type="submit" disabled={sending || !draft.trim()}>
-          Send
+          {sending ? "Sending…" : "Send message"}
         </button>
       </form>
     </div>
