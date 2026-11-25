@@ -114,7 +114,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="bubble">
-                    Hi Maria 👋 Your appointment is confirmed —{" "}
+                    Hi James 👋 Your appointment is confirmed —{" "}
                     <strong>Classic haircut</strong> at Main Street Barbers,{" "}
                     <strong>tomorrow at 10:00 AM</strong>. Confirmation #:{" "}
                     <strong>AE-7KX42P</strong>
@@ -134,7 +134,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Reminder showcase — a product example on the demo business */}
+        {/* Reminder showcase — a second product example, a different
+            business than the steps phone mock above (wellness studio,
+            not the barbershop) so the two sections don't repeat. */}
         <section className="mkt-section">
           <div className="section-head">
             <p className="eyebrow">Automatic reminders</p>
@@ -143,12 +145,12 @@ export default function HomePage() {
           </div>
           <div className="showcase-photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/reception.jpg" alt="A barber greeting a customer at the reception counter" />
+            <img src="/images/reminders-wellness.jpg" alt="A therapist greeting a client in a bright wellness studio" />
             <div className="notify-card">
               <p className="notify-status"><span className="notify-dot" />Reminder sent successfully</p>
               <p className="notify-text">
-                Hi <span className="notify-hl">Maria</span> 👋 Reminder for your appointment at{" "}
-                <span className="notify-hl">Main Street Barbers</span> tomorrow at 10:00 AM.
+                Hi <span className="notify-hl">Sarah</span> 👋 Reminder for your massage at{" "}
+                <span className="notify-hl">Willow Wellness Studio</span> on Wednesday at 2:30 PM.
               </p>
             </div>
           </div>
