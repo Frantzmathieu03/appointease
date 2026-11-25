@@ -28,6 +28,10 @@ export default function TermsPage() {
         the business. AppointEase provides the booking and reminder tools only:
         the services themselves (haircuts, consultations, treatments, and so
         on) are provided by the business you book with, not by AppointEase.
+        AppointEase is a scheduling tool only: it is not a medical record
+        system and is not HIPAA-certified, so diagnoses, treatment notes and
+        other medical details must not be entered into booking notes or
+        messages.
       </p>
 
       <h2>2. Accounts</h2>
@@ -123,7 +127,7 @@ export default function TermsPage() {
       <h2>13. Contact</h2>
       <p>
         Questions about these terms? Email us at{" "}
-        <a href="mailto:appointeaseapp@gmail.com">appointeaseapp@gmail.com</a>{" "}
+        <a href="mailto:support@appointease.io">support@appointease.io</a>{" "}
         or use our <Link href="/contact">contact page</Link>.
       </p>
     </main>

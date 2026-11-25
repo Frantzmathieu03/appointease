@@ -10,6 +10,7 @@ const BENEFITS = [
   { icon: "🌙", title: "Book while you sleep", line: "Your page takes bookings around the clock, even after closing time." },
   { icon: "🎨", title: "Your page, your brand", line: "Your services, your hours, your own link — a page that looks like your business." },
   { icon: "🗂️", title: "Every customer in one place", line: "Bookings, history and messages for each customer, kept together." },
+  { icon: "💬", title: "Message right in the app", line: "Customers message you from their booking — unread badges mean nothing slips by." },
   { icon: "🔁", title: "Reschedules handle themselves", line: "Every reminder carries a secure link to reschedule or cancel." },
   { icon: "📩", title: "Text and email, every time", line: "Confirmation, 24-hour and 2-hour reminders go out on both channels." },
   { icon: "👥", title: "Your whole team, one calendar", line: "Each staff member gets their own services, hours and bookings." },
@@ -33,8 +34,10 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Hero — full-background photo, headline on the image */}
-        <section className="mkt-hero">
+        {/* Hero (desktop, ≥1024px) — salon photo panel with the headline
+            on the image under a lightened green gradient, so the photo
+            stays bright. Hidden below 1024px (see .hero-desktop CSS). */}
+        <section className="mkt-hero hero-desktop">
           <div className="hero-panel">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="hero-bg-img" src="/images/salon-action.jpg" alt="" aria-hidden="true" />
@@ -48,6 +51,24 @@ export default function HomePage() {
                 <Link href="/jesus-barber-shop" className="btn btn-lg">See a live example</Link>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Hero (mobile, <1024px) — light and open: centered text on the
+            pale background, salon photo in a clean panel below. Nothing
+            sits on the image. Hidden at ≥1024px (see .hero-mobile CSS). */}
+        <section className="mkt-hero hero-mobile">
+          <div className="hero-content">
+            <p className="hero-badge"><span className="hero-badge-dot" />Built for local businesses across the U.S. &amp; beyond</p>
+            <h1>Let customers book.<br />Get back to work.</h1>
+            <div className="hero-ctas">
+              <Link href="/owner/signup" className="btn btn-primary btn-lg">Create your booking page</Link>
+              <Link href="/jesus-barber-shop" className="btn btn-lg">See a live example</Link>
+            </div>
+          </div>
+          <div className="hero-media">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/salon-action.jpg" alt="Inside a busy hair salon — a stylist finishing a client's hair while another client is at the shampoo bowl" />
           </div>
         </section>
 
@@ -100,47 +121,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Features */}
-        <section className="mkt-section">
-          <div className="section-head">
-            <p className="eyebrow">Features</p>
-            <h2>Everything an appointment business needs</h2>
-          </div>
-          <div className="feature-grid">
-            <div className="feature-card">
-              <div className="feature-icon">📅</div>
-              <h3>Your own booking page</h3>
-              <p>Your services, hours and phone number on one clean page with your own link.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">🔔</div>
-              <h3>Automatic reminders</h3>
-              <p>Text and email at confirmation, 24 hours before, and 2 hours before — no chasing.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">💬</div>
-              <h3>Two-way messaging</h3>
-              <p>Customers message you right from their booking, with unread badges so nothing slips by.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">🔁</div>
-              <h3>Easy reschedule &amp; cancel</h3>
-              <p>Every reminder carries a secure link, so changes happen early instead of at the door.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">👥</div>
-              <h3>Team calendars</h3>
-              <p>Staff members with their own services and hours — customers book the right person.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">🔍</div>
-              <h3>Get discovered</h3>
-              <p>Customers browse by category and location. You pick your category when you sign up.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Benefits carousel — honest benefit cards, no testimonials:
+        {/* Benefits carousel — the single benefits section (the old
+            Features grid repeated these points and was removed; its one
+            unique point, two-way messaging, is a carousel card now).
+            Honest benefit cards, no testimonials:
             AppointEase is new, so no invented names, quotes or ratings.
             Real customer quotes can replace these cards later. */}
         <section className="mkt-section">
@@ -164,6 +148,7 @@ export default function HomePage() {
           <div className="section-head">
             <p className="eyebrow">Who it&apos;s for</p>
             <h2>Built for your kind of business</h2>
+            <p className="lede">See what a booking page looks like in your world.</p>
           </div>
           <div className="cat-grid">
             {TILE_CATEGORIES.map((c) => (
@@ -215,18 +200,85 @@ export default function HomePage() {
                 <div className="price-amount">
                   {formatPlanPrice(plan.monthlyCents)}<span>/mo</span>
                 </div>
-                <p className="small" style={{ margin: 0 }}>
-                  {plan.staffLimit === 1 ? "1 team member" : `Up to ${plan.staffLimit} team members`}
-                </p>
                 <p className="price-blurb">{plan.blurb}</p>
+                <ul className="price-features">
+                  {plan.features.map((f) => (
+                    <li key={f}><span className="price-check" aria-hidden="true">✓</span>{f}</li>
+                  ))}
+                </ul>
                 <Link href="/owner/signup" className={`btn ${plan.id === "team" ? "btn-primary" : ""} btn-block`}>
                   Start free trial
                 </Link>
               </div>
             ))}
           </div>
+
+          {/* Plan comparison — only what the product actually delivers
+              (staff limits from plans.ts; everything else is core
+              product included in every plan, except priority support,
+              which plans.ts reserves for Business). */}
+          <div className="compare-wrap">
+            <table className="compare">
+              <thead>
+                <tr>
+                  <th scope="col"><span className="compare-sr">Feature</span></th>
+                  {PLANS.map((plan) => (
+                    <th scope="col" key={plan.id}>
+                      {plan.name}
+                      <span className="compare-price">{formatPlanPrice(plan.monthlyCents)}/mo</span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Staff calendars</th>
+                  <td>1</td>
+                  <td>Up to 5</td>
+                  <td>Up to 15</td>
+                </tr>
+                <tr>
+                  <th scope="row">Booking page with your own link</th>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <th scope="row">Confirmation, 24-hour &amp; 2-hour reminders by text and email</th>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <th scope="row">Reschedule &amp; cancel links in every reminder</th>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <th scope="row">Two-way messaging with customers</th>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <th scope="row">Listed in Find-a-Business search</th>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <th scope="row">Priority support</th>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>✓</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <p className="pricing-note">
-            The first 10 businesses to sign up keep launch pricing for life. Customers never pay to book.
+            Launch pricing: the first 10 businesses to subscribe lock today&apos;s price for life — it never
+            goes up while your subscription stays active. Customers never pay to book.
           </p>
         </section>
 

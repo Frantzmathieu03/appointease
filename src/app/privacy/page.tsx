@@ -30,7 +30,18 @@ export default function PrivacyPage() {
         <li><strong>Technical information.</strong> Basic device, browser and usage data needed to run and secure the service, and notification preferences such as web-push subscriptions you opt into.</li>
       </ul>
 
-      <h2>2. How we use information</h2>
+      <h2>2. Health information</h2>
+      <p>
+        AppointEase is an appointment-scheduling tool — it is not a medical
+        record system, and it is not HIPAA-certified. Businesses that take
+        bookings for health-related services, such as dental, medical or
+        wellness practices, must not enter diagnoses, treatment notes, or
+        other medical details into booking notes, messages, or any other
+        part of AppointEase. Customers should share only the information
+        needed to book and manage an appointment.
+      </p>
+
+      <h2>3. How we use information</h2>
       <ul>
         <li>To provide the service: create and display booking pages, take bookings, and show each business only its own customers, appointments and messages.</li>
         <li>To send appointment confirmations and reminders by text message and email (at booking, 24 hours before, and 2 hours before), including secure reschedule/cancel links.</li>
@@ -44,7 +55,7 @@ export default function PrivacyPage() {
         relationships, appointments and messages.
       </p>
 
-      <h2>3. How we share information</h2>
+      <h2>4. How we share information</h2>
       <ul>
         <li><strong>With the business you book.</strong> Your name, contact details, booking details and messages are shared with that business so it can serve you.</li>
         <li><strong>With service providers.</strong> We use trusted providers to run AppointEase — for example hosting and database, payment processing, email delivery and text messaging. They receive only the information needed to perform their service.</li>
@@ -52,14 +63,14 @@ export default function PrivacyPage() {
         <li><strong>Never sold.</strong> We do not sell your personal information, and we do not share it for third-party advertising.</li>
       </ul>
 
-      <h2>4. Cookies</h2>
+      <h2>5. Cookies</h2>
       <p>
         We use cookies and similar storage that are necessary to keep you
         signed in and to make the site work. We do not use third-party
         advertising trackers.
       </p>
 
-      <h2>5. Data security</h2>
+      <h2>6. Data security</h2>
       <p>
         We protect information with encryption in transit, access controls,
         and database rules that separate each business&apos;s data. No system
@@ -67,7 +78,7 @@ export default function PrivacyPage() {
         limit access to only what is needed to operate the service.
       </p>
 
-      <h2>6. Data retention</h2>
+      <h2>7. Data retention</h2>
       <p>
         We keep account, booking and message information for as long as the
         account is active and as needed to provide the service, resolve
@@ -75,7 +86,7 @@ export default function PrivacyPage() {
         is retained so the business can reactivate without starting over.
       </p>
 
-      <h2>7. Your rights and choices</h2>
+      <h2>8. Your rights and choices</h2>
       <ul>
         <li><strong>Access and correction.</strong> You can view and update your account and booking information in the app, or contact us for help.</li>
         <li><strong>Deletion.</strong> You can ask us to delete your account and personal information; some records may be kept where the law requires.</li>
@@ -83,23 +94,23 @@ export default function PrivacyPage() {
         <li><strong>Marketing.</strong> We do not send marketing texts. If we ever offer optional product emails, you will be able to unsubscribe at any time.</li>
       </ul>
 
-      <h2>8. Children</h2>
+      <h2>9. Children</h2>
       <p>
         AppointEase is intended for adults and businesses. We do not knowingly
         collect personal information from children under 13.
       </p>
 
-      <h2>9. Changes to this policy</h2>
+      <h2>10. Changes to this policy</h2>
       <p>
         We may update this policy from time to time. When we make material
         changes, we will update the effective date above and, where practical,
         notify account holders by email.
       </p>
 
-      <h2>10. Contact</h2>
+      <h2>11. Contact</h2>
       <p>
         Questions about privacy? Email us at{" "}
-        <a href="mailto:appointeaseapp@gmail.com">appointeaseapp@gmail.com</a>{" "}
+        <a href="mailto:support@appointease.io">support@appointease.io</a>{" "}
         or use our <Link href="/contact">contact page</Link>.
       </p>
     </main>

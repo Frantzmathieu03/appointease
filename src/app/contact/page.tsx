@@ -23,8 +23,8 @@ export default function ContactPage() {
           <div className="contact-card">
             <h3>Email us directly</h3>
             <p style={{ margin: "0 0 14px", lineHeight: 1.55 }}>
-              <a href="mailto:appointeaseapp@gmail.com" style={{ fontWeight: 700 }}>
-                appointeaseapp@gmail.com
+              <a href="mailto:support@appointease.io" style={{ fontWeight: 700 }}>
+                support@appointease.io
               </a>
             </p>
             <h3>Business owners</h3>

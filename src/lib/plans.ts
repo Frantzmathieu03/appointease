@@ -16,6 +16,8 @@ export interface Plan {
   monthlyCents: number;
   staffLimit: number;
   blurb: string;
+  /** Concrete, checkable card bullets — only what the product delivers. */
+  features: string[];
 }
 
 export const PLANS: Plan[] = [
@@ -24,21 +26,39 @@ export const PLANS: Plan[] = [
     name: "Solo",
     monthlyCents: 2999,
     staffLimit: 1,
-    blurb: "Booking page, reminders by text + email, inbox — for a one-person shop.",
+    blurb: "For a one-person shop that runs on appointments.",
+    features: [
+      "1 staff calendar",
+      "Your own booking page & link",
+      "Confirmation, 24-hour & 2-hour reminders — by text and email",
+      "Two-way messaging with your customers",
+      "Listed in Find-a-Business search",
+    ],
   },
   {
     id: "team",
     name: "Team",
     monthlyCents: 4999,
     staffLimit: 5,
-    blurb: "Everything in Solo, plus team calendars and per-person services & hours.",
+    blurb: "For a small team sharing one booking page.",
+    features: [
+      "Up to 5 staff calendars",
+      "Each staff member's own services & hours",
+      "Customers book the right person, every time",
+      "Everything in Solo",
+    ],
   },
   {
     id: "business",
     name: "Business",
     monthlyCents: 14999,
     staffLimit: 15,
-    blurb: "Everything in Team, plus intake forms and priority support — built for big businesses.",
+    blurb: "For bigger teams that need more calendars and faster support.",
+    features: [
+      "Up to 15 staff calendars",
+      "Priority support — your questions jump the queue",
+      "Everything in Team",
+    ],
   },
 ];
 

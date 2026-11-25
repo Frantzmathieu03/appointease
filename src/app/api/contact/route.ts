@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   const from = process.env.EMAIL_FROM ?? "AppointEase <reminders@appointease.io>";
   if (!apiKey) {
     return NextResponse.json(
-      { error: "Email is not configured yet — please write to appointeaseapp@gmail.com directly." },
+      { error: "Email is not configured yet — please write to support@appointease.io directly." },
       { status: 503 }
     );
   }
@@ -48,14 +48,14 @@ export async function POST(req: NextRequest) {
     });
     if (!res.ok) {
       return NextResponse.json(
-        { error: "The message could not be sent right now — please email appointeaseapp@gmail.com directly." },
+        { error: "The message could not be sent right now — please email support@appointease.io directly." },
         { status: 502 }
       );
     }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(
-      { error: "The message could not be sent right now — please email appointeaseapp@gmail.com directly." },
+      { error: "The message could not be sent right now — please email support@appointease.io directly." },
       { status: 502 }
     );
   }
