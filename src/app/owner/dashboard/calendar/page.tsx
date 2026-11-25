@@ -49,17 +49,6 @@ export default async function DashboardCalendarPage({
     zonedTimeToUtc(dates[dates.length - 1], "00:00", tz).getTime() + 86400000
   );
 
-  // Locations (migration 0013): the filter only appears when the
-  // business actually has 2+ branches — one-location shops never see it.
-  const locRes = await supabase
-    .from("locations")
-    .select("id, name")
-    .eq("business_id", business.id)
-    .order("created_at", { ascending: true });
-  const locations = locRes.error ? [] : ((locRes.data ?? []) as { id: string; name: string }[]);
-  const locFilter =
-    locations.length >= 2 && sp.loc && locations.some((l) => l.id === sp.loc) ? sp.loc : null;
-
   const apptSelect =
     "id, starts_at, ends_at, status, staff_id, customers:customer_id ( full_name ), services:service_id ( name ), staff:staff_id ( name )";
   const apptQuery = (cols: string) =>
@@ -70,17 +59,27 @@ export default async function DashboardCalendarPage({
       .gte("starts_at", rangeStartUtc.toISOString())
       .lt("starts_at", rangeEndUtc.toISOString())
       .order("starts_at", { ascending: true });
-  // location_id arrives with migration 0013 — select it when filtering,
-  // and fall back to the plain select if the column isn't there yet.
-  let apptRes = locFilter
-    ? await apptQuery(`${apptSelect}, location_id`).eq("location_id", locFilter)
-    : await apptQuery(apptSelect);
-  if (apptRes.error && locFilter) {
-    apptRes = await apptQuery(apptSelect);
-  }
-  const { data } = apptRes;
+  // location_id arrives with migration 0013 — always select it and
+  // apply the location filter in memory, so this query does not have
+  // to wait for the locations result. Fall back to the plain select
+  // if the column isn't there yet (rows then stay unfiltered, exactly
+  // as the old fallback behaved).
+  const fetchAppointments = async () => {
+    const withLoc = await apptQuery(`${apptSelect}, location_id`);
+    if (!withLoc.error) return { res: withLoc, hasLoc: true };
+    const plain = await apptQuery(apptSelect);
+    return { res: plain, hasLoc: false };
+  };
 
-  const [{ data: staffRows }, { data: availRows }] = await Promise.all([
+  // Locations, appointments, staff, and availability are independent
+  // of each other — fire them together instead of in sequence.
+  const [locRes, apptFetch, { data: staffRows }, { data: availRows }] = await Promise.all([
+    supabase
+      .from("locations")
+      .select("id, name")
+      .eq("business_id", business.id)
+      .order("created_at", { ascending: true }),
+    fetchAppointments(),
     supabase
       .from("staff")
       .select("id, name")
@@ -92,7 +91,16 @@ export default async function DashboardCalendarPage({
       .select("open_time, close_time")
       .eq("business_id", business.id),
   ]);
-  const rows = (data ?? []) as unknown as Row[];
+
+  // Locations (migration 0013): the filter only appears when the
+  // business actually has 2+ branches — one-location shops never see it.
+  const locations = locRes.error ? [] : ((locRes.data ?? []) as { id: string; name: string }[]);
+  const locFilter =
+    locations.length >= 2 && sp.loc && locations.some((l) => l.id === sp.loc) ? sp.loc : null;
+
+  const allRows = (apptFetch.res.data ?? []) as unknown as Row[];
+  const rows =
+    locFilter && apptFetch.hasLoc ? allRows.filter((r) => r.location_id === locFilter) : allRows;
   const staffList = (staffRows ?? []) as { id: string; name: string }[];
 
   // Grid hours: the business's opening span, defaulting to 8 AM–6 PM.

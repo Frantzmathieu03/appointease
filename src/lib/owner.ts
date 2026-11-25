@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createServerSupabase } from "./supabase";
@@ -20,15 +21,21 @@ export async function getOwnerBusiness(
   return (data as Business) ?? null;
 }
 
-/** For owner pages: signed-in user + their business, or redirect away. */
-export async function requireUser(): Promise<{ supabase: SupabaseClient; user: User }> {
-  const supabase = await createServerSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/owner");
-  return { supabase, user };
-}
+/**
+ * For owner pages: signed-in user + their business, or redirect away.
+ * Wrapped in React cache() so the layout and the page share one
+ * auth.getUser call per request instead of resolving it twice.
+ */
+export const requireUser = cache(
+  async (): Promise<{ supabase: SupabaseClient; user: User }> => {
+    const supabase = await createServerSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/owner");
+    return { supabase, user };
+  }
+);
 
 /**
  * The user's team membership (migration 0011), or null. Before the
@@ -66,7 +73,12 @@ export interface BusinessAccess {
   member: BusinessMember | null;
 }
 
-export async function requireBusiness(): Promise<BusinessAccess> {
+/**
+ * Wrapped in React cache(): the dashboard layout and each page both
+ * call this, and per request they now share one resolution (one auth
+ * call, one businesses query) instead of running the chain twice.
+ */
+export const requireBusiness = cache(async (): Promise<BusinessAccess> => {
   const { supabase, user } = await requireUser();
   const owned = await getOwnerBusiness(supabase, user.id);
   if (owned) {
@@ -94,7 +106,7 @@ export async function requireBusiness(): Promise<BusinessAccess> {
     }
   }
   redirect("/owner/setup");
-}
+});
 
 export function siteUrl(): string {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://appointease.io";

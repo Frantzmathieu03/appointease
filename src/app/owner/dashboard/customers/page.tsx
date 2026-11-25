@@ -17,18 +17,6 @@ export default async function DashboardCustomersPage({
   const { supabase, user, business } = await requireBusiness();
   const tz = business.timezone;
 
-  // Locations (migration 0013): a customer "belongs" to a location
-  // through their appointments there. The filter only appears when the
-  // business actually has 2+ branches.
-  const locRes = await supabase
-    .from("locations")
-    .select("id, name")
-    .eq("business_id", business.id)
-    .order("created_at", { ascending: true });
-  const locations = locRes.error ? [] : ((locRes.data ?? []) as { id: string; name: string }[]);
-  const locFilter =
-    locations.length >= 2 && sp.loc && locations.some((l) => l.id === sp.loc) ? sp.loc : null;
-
   // Assignment lives on business_customers (migration 0010). Until that
   // migration is applied the column doesn't exist — fall back to the
   // pre-0010 select so this page never breaks.
@@ -37,39 +25,85 @@ export default async function DashboardCustomersPage({
     assigned_staff_id?: string | null;
     customers: { full_name: string; email: string | null; phone: string | null } | null;
   }
-  let rels: Rel[] = [];
-  const withAssign = await supabase
-    .from("business_customers")
-    .select("customer_id, assigned_staff_id, customers:customer_id ( full_name, email, phone )")
-    .eq("business_id", business.id);
-  if (withAssign.error) {
-    const basic = await supabase
+  type ApptRow = {
+    customer_id: string;
+    starts_at: string;
+    status: string;
+    location_id?: string | null;
+  };
+
+  const fetchRels = async (): Promise<Rel[]> => {
+    const withAssign = await supabase
       .from("business_customers")
-      .select("customer_id, customers:customer_id ( full_name, email, phone )")
+      .select("customer_id, assigned_staff_id, customers:customer_id ( full_name, email, phone )")
       .eq("business_id", business.id);
-    rels = (basic.data ?? []) as unknown as Rel[];
-  } else {
-    rels = (withAssign.data ?? []) as unknown as Rel[];
-  }
+    if (withAssign.error) {
+      const basic = await supabase
+        .from("business_customers")
+        .select("customer_id, customers:customer_id ( full_name, email, phone )")
+        .eq("business_id", business.id);
+      return (basic.data ?? []) as unknown as Rel[];
+    }
+    return (withAssign.data ?? []) as unknown as Rel[];
+  };
 
   // location_id arrives with migration 0013 — fall back to the plain
-  // select if the column isn't there yet.
-  let apptRows: { customer_id: string; starts_at: string; status: string; location_id?: string | null }[] = [];
-  const withLoc = await supabase
-    .from("appointments")
-    .select("customer_id, starts_at, status, location_id")
-    .eq("business_id", business.id)
-    .order("starts_at", { ascending: false });
-  if (withLoc.error) {
-    const basic = await supabase
+  // select if the column isn't there yet. Bounded at 2000 rows, most
+  // recent first, as an interim limit: this page only counts the rows
+  // and finds the latest visit per customer.
+  const fetchAppts = async (): Promise<ApptRow[]> => {
+    const withLoc = await supabase
       .from("appointments")
-      .select("customer_id, starts_at, status")
+      .select("customer_id, starts_at, status, location_id")
       .eq("business_id", business.id)
-      .order("starts_at", { ascending: false });
-    apptRows = (basic.data ?? []) as typeof apptRows;
-  } else {
-    apptRows = (withLoc.data ?? []) as typeof apptRows;
-  }
+      .order("starts_at", { ascending: false })
+      .limit(2000);
+    if (withLoc.error) {
+      const basic = await supabase
+        .from("appointments")
+        .select("customer_id, starts_at, status")
+        .eq("business_id", business.id)
+        .order("starts_at", { ascending: false })
+        .limit(2000);
+      return (basic.data ?? []) as ApptRow[];
+    }
+    return (withLoc.data ?? []) as ApptRow[];
+  };
+
+  // Locations, relationships, appointments, unread messages, and staff
+  // are independent of each other — fire them together instead of in
+  // sequence. The location set is computed after they land. The unread
+  // messages query is bounded at 2000 rows as an interim limit; it
+  // only feeds a per-customer count.
+  const [locRes, rels, apptRows, { data: unreadRows }, { data: staffRows }] = await Promise.all([
+    supabase
+      .from("locations")
+      .select("id, name")
+      .eq("business_id", business.id)
+      .order("created_at", { ascending: true }),
+    fetchRels(),
+    fetchAppts(),
+    supabase
+      .from("messages")
+      .select("customer_id")
+      .eq("business_id", business.id)
+      .eq("sender", "customer")
+      .is("read_at", null)
+      .limit(2000),
+    supabase
+      .from("staff")
+      .select("id, business_id, name, active")
+      .eq("business_id", business.id)
+      .eq("active", true)
+      .order("created_at", { ascending: true }),
+  ]);
+
+  // Locations (migration 0013): a customer "belongs" to a location
+  // through their appointments there. The filter only appears when the
+  // business actually has 2+ branches.
+  const locations = locRes.error ? [] : ((locRes.data ?? []) as { id: string; name: string }[]);
+  const locFilter =
+    locations.length >= 2 && sp.loc && locations.some((l) => l.id === sp.loc) ? sp.loc : null;
   const stats = new Map<string, { total: number; last: string | null }>();
   const customersAtLocation = new Set<string>();
   for (const a of apptRows) {
@@ -80,21 +114,9 @@ export default async function DashboardCustomersPage({
     if (locFilter && a.location_id === locFilter) customersAtLocation.add(a.customer_id);
   }
 
-  const { data: unreadRows } = await supabase
-    .from("messages")
-    .select("customer_id")
-    .eq("business_id", business.id)
-    .eq("sender", "customer")
-    .is("read_at", null);
   const unreadBy = new Map<string, number>();
   for (const m of unreadRows ?? []) unreadBy.set(m.customer_id, (unreadBy.get(m.customer_id) ?? 0) + 1);
 
-  const { data: staffRows } = await supabase
-    .from("staff")
-    .select("id, business_id, name, active")
-    .eq("business_id", business.id)
-    .eq("active", true)
-    .order("created_at", { ascending: true });
   const staff = (staffRows ?? []) as StaffMember[];
 
   const visibleRels = locFilter ? rels.filter((r) => customersAtLocation.has(r.customer_id)) : rels;
