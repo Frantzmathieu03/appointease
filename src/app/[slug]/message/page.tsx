@@ -1,17 +1,25 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getBusinessPageData } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase } from "@/lib/supabase";
-import { ensureBusinessMembership, ensureCustomerProfile } from "@/lib/profile";
+import {
+  ensureBusinessMembership,
+  ensureCustomerProfile,
+  isBusinessMember,
+} from "@/lib/profile";
 import ThreadView from "@/components/ThreadView";
+import JoinStep from "@/components/JoinStep";
 
 export default async function MessagePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ join?: string }>;
 }) {
   const { slug } = await params;
+  const { join } = await searchParams;
   const page = await getBusinessPageData(slug);
   if (!page) notFound();
   const { business } = page;
@@ -55,7 +63,10 @@ export default async function MessagePage({
             your conversation stays saved here, and we alert you the moment
             they reply.
           </p>
-          <Link href={`/login?next=/${slug}/message`} className="btn btn-primary">
+          <Link
+            href={`/login?next=${encodeURIComponent(`/${slug}/message?join=1`)}`}
+            className="btn btn-primary"
+          >
             Sign in to message
           </Link>
           <p className="small" style={{ marginTop: 12 }}>
@@ -66,8 +77,41 @@ export default async function MessagePage({
     );
   }
 
+  // Per-business accounts (Frantz, 2026-11-25): messaging a business
+  // is for ITS customers. A signed-in non-member (the owner included)
+  // gets the same join step as booking first — completing sign-in
+  // through this business's link (the join marker) or tapping join
+  // creates the membership for this business, then the thread opens.
+  // Members go straight in.
+  const isOwner = user.id === business.owner_id;
+  const member =
+    !isOwner && (await isBusinessMember(supabase, business.id, user.id));
+  if (!member) {
+    if (!isOwner && join) {
+      await ensureCustomerProfile(supabase, user);
+      await ensureBusinessMembership(supabase, business.id, user.id);
+      redirect(`/${slug}/message`);
+    }
+    return (
+      <main className="column">
+        <p className="eyebrow">{business.name}</p>
+        <h1 style={{ fontSize: 27 }}>Messages</h1>
+        <JoinStep
+          slug={slug}
+          businessName={business.name}
+          businessId={business.id}
+          continuePath={`/${slug}/message`}
+          actionLabel={`Join ${business.name} and message`}
+          ownerView={isOwner}
+        />
+        <p className="small center">
+          <Link href={`/${slug}`}>← Back to {business.name}</Link>
+        </p>
+      </main>
+    );
+  }
+
   await ensureCustomerProfile(supabase, user);
-  await ensureBusinessMembership(supabase, business.id, user.id);
 
   return (
     <main className="column">

@@ -1,22 +1,27 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getBusinessPageData } from "@/lib/data";
 import { getBillingState } from "@/lib/plans";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { ensureBusinessMembership, ensureCustomerProfile } from "@/lib/profile";
+import {
+  ensureBusinessMembership,
+  ensureCustomerProfile,
+  isBusinessMember,
+} from "@/lib/profile";
 import BookingFlow from "@/components/BookingFlow";
 import AccountGate from "@/components/AccountGate";
+import JoinStep from "@/components/JoinStep";
 
 export default async function BookPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ service?: string }>;
+  searchParams: Promise<{ service?: string; join?: string }>;
 }) {
   const { slug } = await params;
-  const { service } = await searchParams;
+  const { service, join } = await searchParams;
   const page = await getBusinessPageData(slug);
   if (!page) notFound();
 
@@ -40,11 +45,19 @@ export default async function BookPage({
 
   // Account-first booking (Frantz, 2026-11-25): a booking from a
   // business's page belongs to the customer's account WITH THIS
-  // BUSINESS. Signed-out customers get the short account step first
-  // (Google, or email sign-up/sign-in) and land right back here;
-  // signed-in customers go straight in — and arriving signed in joins
-  // them to this business (the per-business membership). Demo shops
-  // and demo mode stay account-free simulations, as before.
+  // BUSINESS. Being signed in to AppointEase alone is not enough —
+  // the gate keys off membership of this business, never the bare
+  // session:
+  //   - signed out: the short account step (Google, or email
+  //     sign-up/sign-in), which returns here carrying the join marker;
+  //   - signed in, not a member of this business (the owner testing
+  //     their own page included): the join step — one tap joins this
+  //     business and continues into booking. A visitor who just
+  //     completed sign-in/sign-up through this business's own account
+  //     step arrives with the join marker, is joined on the spot, and
+  //     continues with nothing re-asked;
+  //   - signed-in member: straight into the booking flow.
+  // Demo shops and demo mode stay account-free simulations, as before.
   if (!page.demoMode && !isDemoShop(slug) && isSupabaseConfigured()) {
     const supabase = await createServerSupabase();
     const {
@@ -62,8 +75,43 @@ export default async function BookPage({
         </main>
       );
     }
+    const business = page.business;
+    const isOwner = user.id === business.owner_id;
+    const member =
+      !isOwner && (await isBusinessMember(supabase, business.id, user.id));
+    if (!member) {
+      if (!isOwner && join) {
+        await ensureCustomerProfile(supabase, user);
+        await ensureBusinessMembership(supabase, business.id, user.id);
+        redirect(
+          service
+            ? `/${slug}/book?service=${encodeURIComponent(service)}`
+            : `/${slug}/book`
+        );
+      }
+      return (
+        <main className="column">
+          <p className="eyebrow">{business.name}</p>
+          <h1 style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
+          <JoinStep
+            slug={slug}
+            businessName={business.name}
+            businessId={business.id}
+            continuePath={
+              service
+                ? `/${slug}/book?service=${encodeURIComponent(service)}`
+                : `/${slug}/book`
+            }
+            actionLabel={`Join ${business.name} and book`}
+            ownerView={isOwner}
+          />
+          <p className="small center" style={{ marginTop: 14 }}>
+            <Link href={`/${slug}`}>← Back to {business.name}</Link>
+          </p>
+        </main>
+      );
+    }
     await ensureCustomerProfile(supabase, user);
-    await ensureBusinessMembership(supabase, page.business.id, user.id);
   }
 
   return (

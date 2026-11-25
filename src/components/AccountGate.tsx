@@ -10,10 +10,14 @@ import { createBrowserSupabase } from "@/lib/supabase-browser";
  * WITH THIS BUSINESS — no more anonymous guest checkout from the
  * business page. Google first (one tap), or the existing email
  * sign-up / sign-in pages, always with next set back into this
- * booking so nothing is asked twice. Phone-code sign-in is NOT
- * offered: Supabase reports the phone provider disabled (texting
- * is not connected yet), and a button that cannot send a code is
- * never shipped.
+ * booking so nothing is asked twice. The return path carries the
+ * join marker (?join=1): completing sign-in or sign-up through THIS
+ * business's account step is what joins the customer to this
+ * business — the book page sees the marker, creates the membership,
+ * and continues into booking. Phone-code sign-in is NOT offered:
+ * Supabase reports the phone provider disabled (texting is not
+ * connected yet), and a button that cannot send a code is never
+ * shipped.
  */
 export default function AccountGate({
   slug,
@@ -23,7 +27,7 @@ export default function AccountGate({
   businessName: string;
 }) {
   const [error, setError] = useState("");
-  const back = `/${slug}/book`;
+  const back = `/${slug}/book?join=1`;
 
   async function google() {
     setError("");

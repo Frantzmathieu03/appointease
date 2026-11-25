@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { getBusinessPageData, hoursSummary, openStatus } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { ensureBusinessMembership } from "@/lib/profile";
 import { getBillingState } from "@/lib/plans";
 import { formatPhone, formatPrice, visitTypeLabel } from "@/lib/types";
 import AddressDirections from "@/components/AddressDirections";
@@ -98,27 +97,14 @@ export default async function BusinessPage({
     );
   }
 
-  // Per-business accounts (Frantz, 2026-11-25): a signed-in customer
-  // on this business's page belongs to THIS business's world — make
-  // sure the membership exists (signing up from here joins them here,
-  // and only here). Quiet and best-effort: the public page never
-  // breaks over a membership write.
-  if (!page.demoMode && !demoShop && isSupabaseConfigured()) {
-    try {
-      const supabase = await createServerSupabase();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      // Never the owner: viewing your own page must not make you a
-      // customer of your own business.
-      if (user && user.id !== business.owner_id) {
-        await ensureBusinessMembership(supabase, business.id, user.id);
-      }
-    } catch {
-      // Public page first — membership also joins at booking,
-      // dashboard and message time.
-    }
-  }
+  // Per-business accounts (Frantz, 2026-11-25): merely VIEWING this
+  // page does not join anyone to the business. Being signed in to
+  // AppointEase does not make you a client of this business — the
+  // membership starts at the deliberate join steps: the booking
+  // account step, the message join step, or opening the customer's
+  // dashboard for this business. That is what lets the header show
+  // Sign up / Sign in honestly to everyone who is not yet a customer
+  // here, the owner included.
 
   // Open/closed for the contact card, from the real hours.
   const status = openStatus(page.availability, tz);

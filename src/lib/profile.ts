@@ -23,6 +23,32 @@ export async function ensureCustomerProfile(supabase: SupabaseClient, user: User
 }
 
 /**
+ * Is this user a customer member of THIS business? Being signed in
+ * to AppointEase alone does NOT make someone a client of a business
+ * (Frantz, 2026-11-25) — only the business_customers row does. The
+ * business header, the booking gate and the message gate all key off
+ * this check, never off the bare session. RLS lets a customer read
+ * their own membership rows. Never throws.
+ */
+export async function isBusinessMember(
+  supabase: SupabaseClient,
+  businessId: string,
+  userId: string
+): Promise<boolean> {
+  try {
+    const { data } = await supabase
+      .from("business_customers")
+      .select("business_id")
+      .eq("business_id", businessId)
+      .eq("customer_id", userId)
+      .maybeSingle();
+    return Boolean(data);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Join this customer to ONE business (per-business account model,
  * Frantz 2026-11-25): the business_customers row is the membership —
  * the account's home at that business. Signing up from a business's

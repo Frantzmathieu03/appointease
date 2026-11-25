@@ -22,7 +22,7 @@ export default async function BusinessLayout({
   return (
     <>
       <div className="column" style={{ paddingBottom: 0 }}>
-        <BusinessHeader slug={slug} name={business.name} logoUrl={business.logo_url} />
+        <BusinessHeader slug={slug} name={business.name} logoUrl={business.logo_url} businessId={business.id} ownerId={business.owner_id} />
       </div>
       {children}
       <div className="column" style={{ paddingTop: 0 }}>
