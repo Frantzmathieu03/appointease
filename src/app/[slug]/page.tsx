@@ -1,8 +1,13 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getBusinessPageData, hoursSummary, openStatus } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import {
+  ensureBusinessMembership,
+  ensureCustomerProfile,
+  isBusinessMember,
+} from "@/lib/profile";
 import { getBillingState } from "@/lib/plans";
 import { formatPhone, formatPrice, visitTypeLabel } from "@/lib/types";
 import AddressDirections from "@/components/AddressDirections";
@@ -45,10 +50,13 @@ function ClockIcon() {
 
 export default async function BusinessPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ join?: string }>;
 }) {
   const { slug } = await params;
+  const { join } = await searchParams;
   const page = await getBusinessPageData(slug);
   if (!page) notFound();
   const { business, services } = page;
@@ -60,6 +68,31 @@ export default async function BusinessPage({
   // Demo shops (public examples): labeled as demos, contact rows hidden,
   // no call/message actions — booking is a safe simulation (see lib/demo).
   const demoShop = isDemoShop(slug);
+
+  // Join on return (per-business account model, Frantz 2026-11-25):
+  // the header's Sign up / Sign in buttons on this business's own
+  // pages carry the join marker (?join=1) in their return path, so a
+  // visitor who just completed sign-up or sign-in through them lands
+  // back here WITH the marker — that deliberate completion is what
+  // joins them to this business, exactly like the booking and
+  // message gates. Join, then redirect to the clean page so the
+  // header renders their new "My dashboard". A plain page view (no
+  // marker) never joins anyone, and the owner never joins their own
+  // business as a customer.
+  if (join && !page.demoMode && !demoShop && isSupabaseConfigured()) {
+    const supabase = await createServerSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user && user.id !== business.owner_id) {
+      const member = await isBusinessMember(supabase, business.id, user.id);
+      if (!member) {
+        await ensureCustomerProfile(supabase, user);
+        await ensureBusinessMembership(supabase, business.id, user.id);
+        redirect(`/${slug}`);
+      }
+    }
+  }
 
   // Billing gate: a business whose trial ended with no active subscription
   // (or whose subscription lapsed past its grace window) shows a paused

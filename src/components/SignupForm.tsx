@@ -50,7 +50,14 @@ export default function SignupForm({
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { data: { full_name: form.name, phone: form.phone } },
+      options: {
+        data: { full_name: form.name, phone: form.phone },
+        // The confirmation link must land back where the customer
+        // started (a business's page carries its join marker there),
+        // through the same /auth/callback the sign-in link uses —
+        // never on the platform home page.
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+      },
     });
     if (error) {
       setError(error.message);

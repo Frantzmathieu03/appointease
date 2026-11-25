@@ -12,7 +12,8 @@ import { isDemoShop } from "@/lib/demo";
 // the owner testing their own page, and signed-in visitors who have
 // not joined this business, see the "Sign up" and "Sign in" buttons
 // (Frantz's words — real buttons, not shy text links; both carry
-// next=/<slug> so the customer lands back on this business). Demo
+// next=/<slug>?join=1 so the customer lands back on this business
+// AND joins it — see the join handling on the business page). Demo
 // shops keep their sample behavior (any signed-in visitor sees the
 // sample dashboard link). No AppointEase branding here — the only
 // platform mention on a business page is the small "Powered by
@@ -49,6 +50,14 @@ export default async function BusinessHeader({
     }
   }
 
+  // Completing sign-up or sign-in from THIS business's page joins the
+  // customer to this business (per-business account model): the
+  // buttons carry the join marker in their return path, and the
+  // business page itself creates the membership when a signed-in
+  // non-owner lands back with it — the same ?join=1 mechanism as the
+  // booking and message gates. Demo shops keep their plain return.
+  const nextPath = isDemoShop(slug) ? `/${slug}` : `/${slug}?join=1`;
+
   return (
     <header className="biz-header">
       <Link href={`/${slug}`} className="biz-header-brand">
@@ -69,10 +78,10 @@ export default async function BusinessHeader({
           </Link>
         ) : (
           <>
-            <Link href={`/signup?next=${encodeURIComponent(`/${slug}`)}`} className="btn btn-primary biz-header-btn">
+            <Link href={`/signup?next=${encodeURIComponent(nextPath)}`} className="btn btn-primary biz-header-btn">
               Sign up
             </Link>
-            <Link href={`/login?next=${encodeURIComponent(`/${slug}`)}`} className="btn biz-header-btn">
+            <Link href={`/login?next=${encodeURIComponent(nextPath)}`} className="btn biz-header-btn">
               Sign in
             </Link>
           </>
