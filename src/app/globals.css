@@ -239,14 +239,14 @@ img, video { max-width: 100%; }
 .header-links .header-link-text { white-space: nowrap; }
 
 /* Hero — responsive split at 1024px.
-   Desktop (≥1024px, .hero-desktop): photo panel with the headline on
-   the image. The deep-green gradient is lightened by roughly a third
+   Desktop (≥1024px, .hero-desktop): video panel with the headline on
+   the footage. The deep-green gradient is lightened by roughly a third
    versus the original panel hero (0.90/0.74/0.32 → 0.60/0.46/0.18)
-   so the photo reads bright; it stays strongest at the left, behind
+   so the footage reads bright; it stays strongest at the left, behind
    the text block, so the white headline remains readable.
    Mobile (<1024px, .hero-mobile): light stacked hero — centered text
-   on the pale sage background, salon photo in a clean rounded panel
-   below it. No overlay, no gradient, nothing on the image.
+   on the pale sage background, hero video in a clean rounded panel
+   below it. No overlay, no gradient, nothing on the video.
    The two variants reuse inner class names, so every shared rule is
    scoped under its variant class and cannot leak across the split. */
 .mkt-hero { padding: 24px 0 8px; }
@@ -264,6 +264,10 @@ img, video { max-width: 100%; }
   box-shadow: 0 16px 44px rgba(20, 60, 35, 0.22);
 }
 .hero-bg-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center; display: block;
+}
+.hero-bg-video {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; object-position: center; display: block;
 }
@@ -311,7 +315,7 @@ img, video { max-width: 100%; }
   margin-top: 32px; border-radius: 24px; overflow: hidden;
   box-shadow: var(--shadow);
 }
-.hero-media img {
+.hero-media img, .hero-media video {
   width: 100%; aspect-ratio: 16 / 9;
   object-fit: cover; object-position: center; display: block;
 }
@@ -745,7 +749,7 @@ footer.site-footer { padding: 0; text-align: left; }
   .hero-mobile .hero-ctas { flex-direction: column; }
   .hero-mobile .hero-ctas .btn { width: 100%; }
   .hero-media { margin-top: 24px; border-radius: 20px; }
-  .hero-media img { aspect-ratio: 4 / 3; }
+  .hero-media img, .hero-media video { aspect-ratio: 4 / 3; }
   /* Phone mock goes portrait on small screens so the message text
      stays full-size instead of shrinking with the 16/9 panel. */
   .phone-panel { aspect-ratio: 10 / 11; }

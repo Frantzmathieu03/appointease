@@ -34,13 +34,14 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Hero (desktop, ≥1024px) — salon photo panel with the headline
-            on the image under a lightened green gradient, so the photo
+        {/* Hero (desktop, ≥1024px) — hero video panel with the headline
+            on the video under a lightened green gradient, so the footage
             stays bright. Hidden below 1024px (see .hero-desktop CSS). */}
         <section className="mkt-hero hero-desktop">
           <div className="hero-panel">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="hero-bg-img" src="/images/salon-action.jpg" alt="" aria-hidden="true" />
+            <video className="hero-bg-video" autoPlay muted loop playsInline preload="auto" poster="/hero/hero-poster.jpg" aria-hidden="true">
+              <source src="/hero/hero-video.mp4" type="video/mp4" />
+            </video>
             <div className="hero-overlay" />
             <div className="hero-content">
               <p className="hero-badge"><span className="hero-badge-dot" />Built for local businesses across the U.S. &amp; beyond</p>
@@ -55,8 +56,8 @@ export default function HomePage() {
         </section>
 
         {/* Hero (mobile, <1024px) — light and open: centered text on the
-            pale background, salon photo in a clean panel below. Nothing
-            sits on the image. Hidden at ≥1024px (see .hero-mobile CSS). */}
+            pale background, hero video in a clean panel below. Nothing
+            sits on the video. Hidden at ≥1024px (see .hero-mobile CSS). */}
         <section className="mkt-hero hero-mobile">
           <div className="hero-content">
             <p className="hero-badge"><span className="hero-badge-dot" />Built for local businesses across the U.S. &amp; beyond</p>
@@ -67,8 +68,9 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hero-media">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/salon-action.jpg" alt="Inside a busy hair salon — a stylist finishing a client's hair while another client is at the shampoo bowl" />
+            <video autoPlay muted loop playsInline preload="auto" poster="/hero/hero-poster.jpg" aria-label="AppointEase in action — a client booking an appointment and a business owner checking the day's bookings">
+              <source src="/hero/hero-video.mp4" type="video/mp4" />
+            </video>
           </div>
         </section>
 
