@@ -8,6 +8,7 @@ const FILTERS = [
   { key: "appointments", label: "Appointments" },
   { key: "messages", label: "Messages" },
   { key: "notes", label: "Notes" },
+  { key: "forms", label: "Forms" },
 ] as const;
 
 type FilterKey = (typeof FILTERS)[number]["key"];
@@ -18,6 +19,7 @@ function inFilter(e: CustomerEvent, f: FilterKey): boolean {
   if (f === "all") return true;
   if (f === "appointments") return APPOINTMENT_TYPES.has(e.type);
   if (f === "messages") return e.type === "message";
+  if (f === "forms") return e.type === "form_submitted";
   return e.type === "note_added";
 }
 
@@ -49,8 +51,13 @@ function describe(e: CustomerEvent, fmt: (iso: string) => string): string {
     }
     case "reminder_sent":
       return "Reminder sent";
-    case "form_submitted":
-      return "Form submitted";
+    case "form_submitted": {
+      const parts: string[] = [];
+      if (typeof d.answers === "number") parts.push(`${d.answers} answer${d.answers === 1 ? "" : "s"}`);
+      if (typeof d.files === "number" && d.files > 0)
+        parts.push(`${d.files} file${d.files === 1 ? "" : "s"}`);
+      return `Submitted ${str(d.form_name) ?? "intake form"}${parts.length ? ` (${parts.join(", ")})` : ""}`;
+    }
     case "profile_changed":
       return "Profile updated";
     default:

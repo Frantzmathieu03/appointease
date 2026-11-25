@@ -44,6 +44,9 @@ export interface Service {
       (migration 0009). 0 = explicitly free. */
   price_cents: number | null;
   active: boolean;
+  /** Attached intake form, if any (migration 0012). Optional: rows
+      fetched before the migration lands won't have it. */
+  form_id?: string | null;
 }
 
 export interface StaffMember {
@@ -203,6 +206,65 @@ export interface TeamInvite {
   token: string;
   expires_at: string;
   accepted_at: string | null;
+  created_at: string;
+}
+
+// --- Intake forms (migration 0012) -----------------------------------------
+// No fee/deposit question types exist: forms never collect money data
+// for AppointEase — the app never receives or holds client money.
+export type FormQuestionType =
+  | "short_text"
+  | "long_text"
+  | "multiple_choice"
+  | "yes_no"
+  | "date"
+  | "file";
+
+export interface IntakeForm {
+  id: string;
+  business_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface FormQuestion {
+  id: string;
+  form_id: string;
+  label: string;
+  type: FormQuestionType;
+  /** Choice labels for multiple_choice; empty for other types. */
+  options: string[];
+  required: boolean;
+  position: number;
+  created_at: string;
+}
+
+/** answers maps question id → answer: a string for text/choice/yes-no/
+ *  date questions, or an array of form-uploads storage paths for file
+ *  questions. */
+export type FormAnswers = Record<string, string | string[]>;
+
+export interface FormSubmission {
+  id: string;
+  form_id: string;
+  business_id: string;
+  customer_id: string;
+  appointment_id: string | null;
+  answers: FormAnswers;
+  submitted_at: string;
+}
+
+/** Visit-note starter text (migration 0012, PDF §7): picking a template
+ *  pre-fills the note's discussed / customer-actions fields. service_id
+ *  null = offered for every service. */
+export interface NoteTemplate {
+  id: string;
+  business_id: string;
+  service_id: string | null;
+  name: string;
+  discussed_prompt: string;
+  actions_prompt: string;
   created_at: string;
 }
 

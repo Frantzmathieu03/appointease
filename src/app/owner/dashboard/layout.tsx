@@ -63,6 +63,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <UnreadBadge variant="owner" businessId={business.id} />
             </Link>
             <Link href="/owner/dashboard/customers">Customers</Link>
+            {!isStaff && <Link href="/owner/dashboard/forms">Forms</Link>}
             {!isStaff && <Link href="/owner/dashboard/settings#services">Services</Link>}
             {!isStaff && <Link href="/owner/dashboard/team">Team</Link>}
             {!isStaff && <Link href="/owner/dashboard/settings">Settings</Link>}

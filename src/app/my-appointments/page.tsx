@@ -14,6 +14,7 @@ interface ApptRow {
   manage_token: string;
   confirmation_code: string | null;
   business_id: string;
+  service_id: string;
   businesses: { name: string; slug: string; address: string | null; timezone: string; logo_url: string | null; phone: string | null } | null;
   services: { name: string } | null;
 }
@@ -43,11 +44,70 @@ export default async function MyAppointmentsPage() {
   const { data } = await supabase
     .from("appointments")
     .select(
-      "id, starts_at, status, manage_token, confirmation_code, business_id, businesses:business_id ( name, slug, address, timezone, logo_url, phone ), services:service_id ( name )"
+      "id, starts_at, status, manage_token, confirmation_code, business_id, service_id, businesses:business_id ( name, slug, address, timezone, logo_url, phone ), services:service_id ( name )"
     )
     .eq("customer_id", user.id)
     .order("starts_at", { ascending: true });
   const appts = (data ?? []) as unknown as ApptRow[];
+
+  // Intake forms (migration 0012): which of these appointments'
+  // services have a form attached, and which appointments already have
+  // a submission. Both queries degrade to empty before the migration.
+  const intakeByAppt = new Map<string, { formName: string; submitted: boolean }>();
+  if (appts.length > 0) {
+    try {
+      const serviceIds = [...new Set(appts.map((a) => a.service_id))];
+      const { data: svcRows, error: svcErr } = await supabase
+        .from("services")
+        .select("id, form_id")
+        .in("id", serviceIds);
+      if (!svcErr && svcRows) {
+        const formIds = [
+          ...new Set(
+            svcRows
+              .map((s) => (s as { form_id: string | null }).form_id)
+              .filter((f): f is string => !!f)
+          ),
+        ];
+        if (formIds.length > 0) {
+          const [{ data: formRows }, { data: subRows }] = await Promise.all([
+            supabase.from("forms").select("id, name").in("id", formIds),
+            supabase
+              .from("form_submissions")
+              .select("appointment_id")
+              .eq("customer_id", user.id)
+              .in(
+                "appointment_id",
+                appts.map((a) => a.id)
+              ),
+          ]);
+          const formName = new Map(
+            (formRows ?? []).map((f) => [f.id as string, f.name as string])
+          );
+          const submittedAppts = new Set(
+            (subRows ?? []).map((s) => s.appointment_id as string)
+          );
+          const formByService = new Map(
+            svcRows.map((s) => [
+              s.id as string,
+              (s as { form_id: string | null }).form_id,
+            ])
+          );
+          for (const a of appts) {
+            const fid = formByService.get(a.service_id);
+            if (fid && formName.has(fid)) {
+              intakeByAppt.set(a.id, {
+                formName: formName.get(fid)!,
+                submitted: submittedAppts.has(a.id),
+              });
+            }
+          }
+        }
+      }
+    } catch {
+      // Intake display is additive — never break the appointments list.
+    }
+  }
 
   const { data: myReviews } = await supabase
     .from("reviews")
@@ -136,6 +196,16 @@ export default async function MyAppointmentsPage() {
               <Link href={`/manage/${a.manage_token}`} className="btn">Cancel</Link>
             </>
           )}
+          {intakeByAppt.has(a.id) &&
+            (intakeByAppt.get(a.id)!.submitted ? (
+              <span className="btn" aria-disabled="true" style={{ opacity: 0.75 }}>
+                ✓ Intake form sent
+              </span>
+            ) : (
+              <Link href={`/manage/${a.manage_token}/form`} className="btn btn-primary">
+                Complete your intake form
+              </Link>
+            ))}
           {a.businesses && (
             <Link href={`/${a.businesses.slug}/message`} className="btn">
               Message

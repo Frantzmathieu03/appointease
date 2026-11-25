@@ -22,10 +22,11 @@ interface ApptRow {
 }
 
 // Customer profile (PDF §8): header with assignment, visit stats, then
-// Overview / Visits / Timeline / Messages. The Timeline is the automatic,
-// append-only history from customer_events (migration 0010). The PDF's
-// Payments and Forms tabs are intentionally absent: AppointEase never
-// handles client money, and intake forms are a later build.
+// Overview / Visits / Timeline / Forms & files / Messages. The Timeline
+// is the automatic, append-only history from customer_events
+// (migration 0010); Forms & files lists intake submissions
+// (migration 0012). The PDF's Payments tab is intentionally absent:
+// AppointEase never handles client money.
 export default async function DashboardCustomerProfilePage({
   params,
 }: {
@@ -92,6 +93,23 @@ export default async function DashboardCustomerProfilePage({
     .order("created_at", { ascending: false })
     .limit(200);
   const events = (eventRows ?? []) as CustomerEvent[];
+
+  // Intake submissions (migration 0012) — empty until the migration
+  // lands. answers values that are arrays are uploaded-file paths.
+  interface SubmissionRow {
+    id: string;
+    submitted_at: string;
+    appointment_id: string | null;
+    answers: Record<string, string | string[]>;
+    forms: { name: string } | null;
+  }
+  const { data: subData } = await supabase
+    .from("form_submissions")
+    .select("id, submitted_at, appointment_id, answers, forms:form_id ( name )")
+    .eq("business_id", business.id)
+    .eq("customer_id", customerId)
+    .order("submitted_at", { ascending: false });
+  const submissions = (subData ?? []) as unknown as SubmissionRow[];
 
   const { data: noteRows } = await supabase
     .from("visit_notes")
@@ -234,6 +252,31 @@ export default async function DashboardCustomerProfilePage({
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Timeline</h2>
         <Timeline events={events} tz={tz} />
+      </div>
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>Forms &amp; files</h2>
+        {submissions.length === 0 && (
+          <p className="small" style={{ margin: 0 }}>
+            No intake forms submitted yet. When a service with a form
+            attached is booked, the customer completes it before the
+            visit and it appears here.
+          </p>
+        )}
+        {submissions.map((s) => {
+          const answerCount = Object.keys(s.answers ?? {}).length;
+          const fileCount = Object.values(s.answers ?? {}).filter((v) => Array.isArray(v)).length;
+          return (
+            <p key={s.id} className="small" style={{ margin: "0 0 8px" }}>
+              <Link href={`/owner/dashboard/forms/submissions/${s.id}`}>
+                <strong>{s.forms?.name ?? "Intake form"}</strong>
+              </Link>{" "}
+              — submitted {fmtDT(s.submitted_at)} · {answerCount} answer
+              {answerCount === 1 ? "" : "s"}
+              {fileCount > 0 ? ` · ${fileCount} file upload${fileCount === 1 ? "" : "s"}` : ""}
+            </p>
+          );
+        })}
       </div>
 
       <div className="card">

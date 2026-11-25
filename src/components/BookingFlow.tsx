@@ -108,6 +108,7 @@ export default function BookingFlow({
     manageToken?: string;
     accountCreated?: boolean;
     confirmationCode?: string;
+    intakeFormName?: string | null;
   } | null>(null);
 
   const service = services.find((s) => s.id === serviceId);
@@ -210,6 +211,7 @@ export default function BookingFlow({
         manageToken: data.appointment?.manageToken,
         accountCreated: !!data.accountCreated,
         confirmationCode: data.appointment?.confirmationCode,
+        intakeFormName: data.appointment?.intakeFormName ?? null,
       });
       setStep(5);
     } catch {
@@ -332,6 +334,19 @@ export default function BookingFlow({
             <Link href={`/${slug}`} className="btn">Back to {businessName}</Link>
           </div>
         </div>
+        {!result?.demoMode && result?.manageToken && result?.intakeFormName && (
+          <div className="card center">
+            <h2>One more step: your intake form</h2>
+            <p className="small">
+              {businessName} asks customers to complete the{" "}
+              <strong>{result.intakeFormName}</strong> form before their
+              visit — it only takes a couple of minutes.
+            </p>
+            <Link href={`/manage/${result.manageToken}/form`} className="btn btn-primary">
+              Complete your intake form
+            </Link>
+          </div>
+        )}
         {result?.accountCreated && !result?.demoMode && (
           <ClaimAccountCard email={form.email} />
         )}

@@ -179,6 +179,23 @@ export async function POST(req: NextRequest) {
 
   await scheduleReminders(admin, appt.id, start);
 
+  // Intake form (migration 0012): if this service has a form attached,
+  // the confirmation screen offers the customer a "Complete your
+  // intake form" step. Defensive — no form_id column before 0012.
+  let intakeFormName: string | null = null;
+  if (service.form_id) {
+    try {
+      const { data: form } = await admin
+        .from("forms")
+        .select("name")
+        .eq("id", service.form_id)
+        .single();
+      if (form) intakeFormName = form.name as string;
+    } catch {
+      intakeFormName = null;
+    }
+  }
+
   // Timeline: the booking itself (migration 0010). Guest bookings are
   // still "by customer" — the account was created for them at checkout.
   await logCustomerEvent(admin, {
@@ -206,6 +223,7 @@ export async function POST(req: NextRequest) {
       serviceName: service.name,
       startsAt: start.toISOString(),
       businessName: page.business.name,
+      intakeFormName,
     },
     accountCreated: !user,
   });

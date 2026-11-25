@@ -4,7 +4,7 @@ import { requireBusiness, siteUrl } from "@/lib/owner";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import AssignControl from "@/components/owner/AssignControl";
 import VisitNotes, { type NoteBundle } from "@/components/owner/VisitNotes";
-import type { NextStep, StaffMember, VisitNote, VisitNoteAddendum } from "@/lib/types";
+import type { NextStep, NoteTemplate, StaffMember, VisitNote, VisitNoteAddendum } from "@/lib/types";
 
 interface Appt {
   id: string;
@@ -13,6 +13,7 @@ interface Appt {
   confirmation_code: string | null;
   manage_token: string;
   customer_id: string;
+  service_id: string;
   customers: { full_name: string; phone: string | null; email: string | null } | null;
   services: { name: string; duration_minutes: number } | null;
   staff: { name: string } | null;
@@ -49,7 +50,7 @@ export default async function DashboardAppointmentPage({
   const { data } = await supabase
     .from("appointments")
     .select(
-      "id, starts_at, status, confirmation_code, manage_token, customer_id, customers:customer_id ( full_name, phone, email ), services:service_id ( name, duration_minutes ), staff:staff_id ( name )"
+      "id, starts_at, status, confirmation_code, manage_token, customer_id, service_id, customers:customer_id ( full_name, phone, email ), services:service_id ( name, duration_minutes ), staff:staff_id ( name )"
     )
     .eq("id", id)
     .eq("business_id", business.id)
@@ -110,6 +111,49 @@ export default async function DashboardAppointmentPage({
     }));
   }
   const isPast = new Date(appt.starts_at).getTime() < Date.now();
+
+  // Intake form state (migration 0012): the form attached to this
+  // appointment's service, and whether the customer submitted it.
+  // Defensive — before the migration lands, no card is shown.
+  let intake: { formName: string; submissionId: string | null; submittedAt: string | null } | null =
+    null;
+  try {
+    const { data: svcRow, error: svcErr } = await supabase
+      .from("services")
+      .select("form_id")
+      .eq("id", appt.service_id)
+      .maybeSingle();
+    const formId = (svcRow as { form_id?: string | null } | null)?.form_id ?? null;
+    if (!svcErr && formId) {
+      const [{ data: formRow }, { data: subRow }] = await Promise.all([
+        supabase.from("forms").select("name").eq("id", formId).maybeSingle(),
+        supabase
+          .from("form_submissions")
+          .select("id, submitted_at")
+          .eq("appointment_id", appt.id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      if (formRow) {
+        intake = {
+          formName: (formRow as { name: string }).name,
+          submissionId: (subRow as { id: string } | null)?.id ?? null,
+          submittedAt: (subRow as { submitted_at: string } | null)?.submitted_at ?? null,
+        };
+      }
+    }
+  } catch {
+    intake = null;
+  }
+
+  // Visit-note templates (migration 0012) for the note editor's picker.
+  const { data: templateRows } = await supabase
+    .from("note_templates")
+    .select("*")
+    .eq("business_id", business.id)
+    .order("created_at", { ascending: true });
+  const templates = (templateRows ?? []) as NoteTemplate[];
 
   const startsAt = new Date(appt.starts_at);
   const statusChip =
@@ -231,6 +275,27 @@ export default async function DashboardAppointmentPage({
         })}
       </div>
 
+      {intake && (
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>Intake form</h2>
+          {intake.submissionId ? (
+            <p className="small" style={{ margin: 0 }}>
+              <strong>{intake.formName}</strong> — Submitted{" "}
+              {intake.submittedAt ? fmtWhen(intake.submittedAt) : ""}.{" "}
+              <Link href={`/owner/dashboard/forms/submissions/${intake.submissionId}`}>
+                View answers
+              </Link>
+            </p>
+          ) : (
+            <p className="small" style={{ margin: 0 }}>
+              <strong>{intake.formName}</strong> — Intake missing. The
+              customer can complete it from the link in their confirmation
+              or from My Appointments.
+            </p>
+          )}
+        </div>
+      )}
+
       {(isPast || bundles.length > 0 || appt.status === "completed" || appt.status === "no_show") && (
         <VisitNotes
           businessId={business.id}
@@ -240,6 +305,8 @@ export default async function DashboardAppointmentPage({
           actorId={user.id}
           tz={tz}
           bundles={bundles}
+          templates={templates}
+          serviceId={appt.service_id}
         />
       )}
     </div>

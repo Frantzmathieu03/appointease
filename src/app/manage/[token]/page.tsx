@@ -41,6 +41,7 @@ function icsStamp(d: Date): string {
 export default function ManagePage({ params }: { params: Promise<{ token: string }> }) {
   const [token, setToken] = useState("");
   const [data, setData] = useState<ManageData | null>(null);
+  const [intake, setIntake] = useState<{ formName: string; submitted: boolean } | null>(null);
   const [loadError, setLoadError] = useState("");
   const [mode, setMode] = useState<"view" | "reschedule" | "cancel" | "done">("view");
   const [doneKind, setDoneKind] = useState<"cancelled" | "rescheduled">("rescheduled");
@@ -64,6 +65,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
         const d = await r.json();
         if (!r.ok) throw new Error(d.error ?? "Not found");
         setData(d.appointment as ManageData);
+        setIntake(d.intake ?? null);
       })
       .catch((e) => setLoadError(e.message));
   }, [token]);
@@ -227,6 +229,27 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
           <Link href={`/${biz.slug}`} className="btn btn-primary">
             Book a new time
           </Link>
+        </div>
+      )}
+
+      {mode === "view" && intake && (
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>{intake.formName}</h3>
+          {intake.submitted ? (
+            <p className="small" style={{ margin: 0 }}>
+              ✓ You&apos;ve sent your intake form — {biz.name} has your answers.
+            </p>
+          ) : (
+            <>
+              <p className="small" style={{ margin: "0 0 10px" }}>
+                {biz.name} asks customers to complete this short form before
+                their visit.
+              </p>
+              <Link href={`/manage/${token}/form`} className="btn btn-primary">
+                Complete your intake form
+              </Link>
+            </>
+          )}
         </div>
       )}
 

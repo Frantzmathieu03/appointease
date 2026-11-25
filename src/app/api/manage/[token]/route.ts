@@ -25,7 +25,35 @@ export async function GET(
     .eq("manage_token", token)
     .single();
   if (!appt) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
-  return NextResponse.json({ appointment: appt });
+
+  // Intake form state (migration 0012): does this appointment's service
+  // have a form attached, and has the customer already submitted it?
+  // Defensive — before the migration lands this stays null and the
+  // manage page simply shows no intake card.
+  let intake: { formName: string; submitted: boolean } | null = null;
+  try {
+    const { data: svc } = await admin
+      .from("services")
+      .select("form_id")
+      .eq("id", appt.service_id)
+      .single();
+    if (svc?.form_id) {
+      const [{ data: form }, { data: sub }] = await Promise.all([
+        admin.from("forms").select("name").eq("id", svc.form_id).single(),
+        admin
+          .from("form_submissions")
+          .select("id")
+          .eq("appointment_id", appt.id)
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      if (form) intake = { formName: form.name as string, submitted: !!sub };
+    }
+  } catch {
+    intake = null;
+  }
+
+  return NextResponse.json({ appointment: appt, intake });
 }
 
 export async function POST(

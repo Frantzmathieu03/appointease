@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
-import type { NextStep, VisitNote, VisitNoteAddendum, VisitNoteOutcome } from "@/lib/types";
+import type { NextStep, NoteTemplate, VisitNote, VisitNoteAddendum, VisitNoteOutcome } from "@/lib/types";
 import NextStepsList from "./NextStepsList";
 
 export interface NoteBundle {
@@ -41,6 +41,8 @@ export default function VisitNotes({
   actorId,
   tz,
   bundles,
+  templates,
+  serviceId,
 }: {
   businessId: string;
   customerId: string;
@@ -49,6 +51,9 @@ export default function VisitNotes({
   actorId: string;
   tz: string;
   bundles: NoteBundle[];
+  /** Note templates (migration 0012) — service-matching ones first. */
+  templates?: NoteTemplate[];
+  serviceId?: string;
 }) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
@@ -332,6 +337,37 @@ export default function VisitNotes({
 
       {showForm && (
         <form onSubmit={saveNote} style={{ marginTop: 12 }}>
+          {templates && templates.length > 0 && (
+            <>
+              <label className="small">Start from a template (optional)</label>
+              <select
+                defaultValue=""
+                style={{ display: "block", marginBottom: 10 }}
+                onChange={(e) => {
+                  const t = templates.find((x) => x.id === e.target.value);
+                  if (!t) return;
+                  // The template's prompts are starter text — the
+                  // author edits them into the real note before saving.
+                  if (t.discussed_prompt) setDiscussed(t.discussed_prompt);
+                  if (t.actions_prompt) setActions(t.actions_prompt);
+                }}
+              >
+                <option value="">Blank note</option>
+                {[...templates]
+                  .sort((a, b) => {
+                    const am = a.service_id && a.service_id === serviceId ? 0 : 1;
+                    const bm = b.service_id && b.service_id === serviceId ? 0 : 1;
+                    return am - bm;
+                  })
+                  .map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                      {t.service_id && t.service_id === serviceId ? " (for this service)" : ""}
+                    </option>
+                  ))}
+              </select>
+            </>
+          )}
           <label className="small">Outcome</label>
           <select value={outcome} onChange={(e) => setOutcome(e.target.value as VisitNoteOutcome)} style={{ display: "block", marginBottom: 10 }}>
             {OUTCOMES.map((o) => (

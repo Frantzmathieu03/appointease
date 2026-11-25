@@ -119,6 +119,43 @@ export default async function DashboardTodayPage() {
     .eq("business_id", business.id)
     .is("assigned_staff_id", null);
 
+  // Intakes missing (PDF §3, migration 0012): upcoming confirmed
+  // appointments whose service has an intake form attached but no
+  // submission yet. Degrades to 0 until the migration lands.
+  let intakesMissing = 0;
+  try {
+    const { data: formServices, error: fsErr } = await supabase
+      .from("services")
+      .select("id")
+      .eq("business_id", business.id)
+      .not("form_id", "is", null);
+    if (!fsErr && formServices && formServices.length > 0) {
+      const { data: upcoming } = await supabase
+        .from("appointments")
+        .select("id")
+        .eq("business_id", business.id)
+        .eq("status", "confirmed")
+        .gte("starts_at", new Date().toISOString())
+        .in(
+          "service_id",
+          formServices.map((s) => s.id)
+        );
+      if (upcoming && upcoming.length > 0) {
+        const { data: subs } = await supabase
+          .from("form_submissions")
+          .select("appointment_id")
+          .in(
+            "appointment_id",
+            upcoming.map((a) => a.id)
+          );
+        const done = new Set((subs ?? []).map((s) => s.appointment_id));
+        intakesMissing = upcoming.filter((a) => !done.has(a.id)).length;
+      }
+    }
+  } catch {
+    intakesMissing = 0;
+  }
+
   const niceDate = new Intl.DateTimeFormat("en-US", {
     timeZone: tz,
     weekday: "long",
@@ -160,13 +197,20 @@ export default async function DashboardTodayPage() {
         </div>
       )}
 
-      {(withoutNotes.length > 0 || (unassignedCount ?? 0) > 0) && (
+      {(withoutNotes.length > 0 || (unassignedCount ?? 0) > 0 || intakesMissing > 0) && (
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Needs attention</h3>
           {(unassignedCount ?? 0) > 0 && (
             <p className="small" style={{ margin: "2px 0" }}>
               {unassignedCount} customer{unassignedCount === 1 ? " is" : "s are"} not assigned
               to a team member — <Link href="/owner/dashboard/customers">assign them</Link>.
+            </p>
+          )}
+          {intakesMissing > 0 && (
+            <p className="small" style={{ margin: "2px 0" }}>
+              {intakesMissing} upcoming appointment{intakesMissing === 1 ? " is" : "s are"}{" "}
+              missing an intake form —{" "}
+              <Link href="/owner/dashboard/calendar">see them on the calendar</Link>.
             </p>
           )}
           {withoutNotes.length > 0 && (
