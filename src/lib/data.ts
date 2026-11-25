@@ -122,16 +122,20 @@ export async function getPublishedBusinesses(): Promise<{
   const baseCols = "id, slug, name, address, logo_url";
   type Row = Record<string, unknown>;
   let rows: Row[] = [];
+  // The demo business stays published so its demo page keeps working, but
+  // it is not a real business — never list it in the public directory.
   const withCategory = await supabase
     .from("businesses")
     .select(`${baseCols}, category`)
     .eq("published", true)
+    .neq("slug", DEMO_BUSINESS.slug)
     .order("name", { ascending: true });
   if (withCategory.error) {
     const fallback = await supabase
       .from("businesses")
       .select(baseCols)
       .eq("published", true)
+      .neq("slug", DEMO_BUSINESS.slug)
       .order("name", { ascending: true });
     rows = ((fallback.data ?? []) as Row[]).map((r) => ({ ...r, category: "other" }));
   } else {
