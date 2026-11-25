@@ -71,7 +71,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
       {error && <div className="error">{error}</div>}
       <label className="field">
         <span>Business name</span>
-        <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Jesus Barber Shop" />
+        <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Main Street Barbers" />
       </label>
       {name && (
         <p className="small" style={{ marginTop: -8, marginBottom: 12 }}>

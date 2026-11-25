@@ -120,6 +120,13 @@ export function formatDateInZone(d: Date, timeZone: string): string {
   }).format(d);
 }
 
+/**
+ * How far ahead customers can book, in days (today + 59 more).
+ * One source of truth: the booking flow and the reschedule page both
+ * build their pickable date lists from this.
+ */
+export const BOOKING_WINDOW_DAYS = 60;
+
 /** Next N dates (yyyy-mm-dd, business zone) starting today. */
 export function nextDates(count: number, timeZone: string, from = new Date()): string[] {
   const fmt = new Intl.DateTimeFormat("en-CA", {

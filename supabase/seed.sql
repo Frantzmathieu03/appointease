@@ -1,11 +1,11 @@
--- AppointEase demo seed — Jesus Barber Shop
+-- AppointEase demo seed — Main Street Barbers
 -- Run AFTER 0001_schema.sql (Supabase: `supabase db reset` applies seed.sql,
 -- or paste into the SQL editor of the real project).
 --
 -- Creates a demo owner login (owner@jesusbarber.example / demo-password —
 -- LOCAL DEMO ONLY, delete before real use), the business, its services,
 -- one staff member, and Mon–Sat 9:00–18:00 hours, already published so the
--- page at /jesus-barber-shop and the booking flow work immediately.
+-- page at /main-street-barbers and the booking flow work immediately.
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -23,7 +23,7 @@ insert into public.businesses (id, owner_id, slug, name, type, address, phone, e
 values (
   '22222222-2222-2222-2222-222222222222',
   '11111111-1111-1111-1111-111111111111',
-  'jesus-barber-shop', 'Jesus Barber Shop', 'Barbershop',
+  'main-street-barbers', 'Main Street Barbers', 'Barbershop',
   '25 Main St, Boston, MA', '617-555-0142', 'owner@jesusbarber.example', true
 ) on conflict (slug) do nothing;
 

@@ -6,8 +6,8 @@ import type { Availability, Business, Service, StaffMember } from "./types";
 export const DEMO_BUSINESS: Business = {
   id: "22222222-2222-2222-2222-222222222222",
   owner_id: "11111111-1111-1111-1111-111111111111",
-  slug: "jesus-barber-shop",
-  name: "Jesus Barber Shop",
+  slug: "main-street-barbers",
+  name: "Main Street Barbers",
   type: "Barbershop",
   logo_url: null,
   description: "Walk-ins welcome. Book ahead to skip the wait.",

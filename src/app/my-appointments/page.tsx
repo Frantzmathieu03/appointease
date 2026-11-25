@@ -26,8 +26,8 @@ export default async function MyAppointmentsPage() {
           Demo mode — accounts and saved appointments turn on when the live
           database is connected. Try the sample booking flow meanwhile:
         </div>
-        <Link href="/jesus-barber-shop" className="btn btn-primary btn-block">
-          Visit Jesus Barber Shop
+        <Link href="/main-street-barbers" className="btn btn-primary btn-block">
+          Visit Main Street Barbers
         </Link>
       </main>
     );
@@ -114,7 +114,7 @@ export default async function MyAppointmentsPage() {
           <p className="lede" style={{ marginBottom: 10 }}>
             Nothing booked yet. Find a business page link — or try the sample shop.
           </p>
-          <Link href="/jesus-barber-shop" className="btn btn-primary">Book at Jesus Barber Shop</Link>
+          <Link href="/main-street-barbers" className="btn btn-primary">Book at Main Street Barbers</Link>
         </div>
       )}
 

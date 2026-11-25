@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { formatPrice, type Availability, type Service, type StaffMember } from "@/lib/types";
-import { formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
+import { BOOKING_WINDOW_DAYS, formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
+import DatePicker from "@/components/DatePicker";
 import { demoSlotsForDay, sampleReminderPreviews } from "@/lib/demo";
 import { generateConfirmationCode } from "@/lib/confirmation";
 
@@ -46,7 +47,7 @@ export default function BookingFlow({
       : services[0]?.id ?? ""
   );
   const [staffId, setStaffId] = useState(staff.length === 1 ? staff[0].id : "");
-  const dates = useMemo(() => nextDates(14, timezone), [timezone]);
+  const dates = useMemo(() => nextDates(BOOKING_WINDOW_DAYS, timezone), [timezone]);
   const [date, setDate] = useState(dates[0]);
   const [slots, setSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -342,15 +343,7 @@ export default function BookingFlow({
       {step === 2 && (
         <div className="card">
           <h2>Pick a time</h2>
-          <div className="day-row">
-            {dates.map((d) => (
-              <button key={d} className={d === date ? "day selected" : "day"} onClick={() => setDate(d)}>
-                {new Intl.DateTimeFormat("en-US", { timeZone: timezone, weekday: "short" }).format(new Date(`${d}T12:00:00Z`))}
-                <br />
-                {new Intl.DateTimeFormat("en-US", { timeZone: timezone, month: "short", day: "numeric" }).format(new Date(`${d}T12:00:00Z`))}
-              </button>
-            ))}
-          </div>
+          <DatePicker dates={dates} value={date} onChange={setDate} timeZone={timezone} />
           {slotsLoading ? (
             <p className="small">Loading times…</p>
           ) : slots.length === 0 ? (

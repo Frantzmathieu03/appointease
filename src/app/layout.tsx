@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <h4>Product</h4>
                 <Link href="/owner/signup">Create booking page</Link>
                 <Link href="/explore">Find a business</Link>
-                <Link href="/jesus-barber-shop">See a live example</Link>
+                <Link href="/main-street-barbers">See a live example</Link>
                 <Link href="/my-appointments">My appointments</Link>
                 <Link href="/owner">Business sign-in</Link>
               </div>

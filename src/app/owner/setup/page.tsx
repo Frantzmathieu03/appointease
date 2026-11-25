@@ -18,7 +18,7 @@ export default async function OwnerSetupPage() {
         <div className="notice">
           Demo mode — business setup turns on when the live database is connected.
         </div>
-        <Link href="/jesus-barber-shop" className="btn btn-primary btn-block">
+        <Link href="/main-street-barbers" className="btn btn-primary btn-block">
           See a finished business page
         </Link>
       </main>

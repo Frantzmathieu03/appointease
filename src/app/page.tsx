@@ -48,7 +48,7 @@ export default function HomePage() {
               <p className="hero-sub">Your booking page with automatic reminders — fewer no-shows, less phone time.</p>
               <div className="hero-ctas">
                 <Link href="/owner/signup" className="btn btn-primary btn-lg">Create your booking page</Link>
-                <Link href="/jesus-barber-shop" className="btn btn-lg">See a live example</Link>
+                <Link href="/main-street-barbers" className="btn btn-lg">See a live example</Link>
               </div>
             </div>
           </div>
@@ -63,7 +63,7 @@ export default function HomePage() {
             <h1>Let customers book.<br />Get back to work.</h1>
             <div className="hero-ctas">
               <Link href="/owner/signup" className="btn btn-primary btn-lg">Create your booking page</Link>
-              <Link href="/jesus-barber-shop" className="btn btn-lg">See a live example</Link>
+              <Link href="/main-street-barbers" className="btn btn-lg">See a live example</Link>
             </div>
           </div>
           <div className="hero-media">
@@ -96,8 +96,41 @@ export default function HomePage() {
             </div>
           </div>
           <div className="steps-media">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/booking-phone.jpg" alt="A business owner checking bookings on a phone" />
+            {/* Built phone mock (not a photo): the old stock photo's
+                screen showed a vague empty grid — this shows the actual
+                product moment, a customer getting their texts. */}
+            <div
+              className="phone-panel"
+              role="img"
+              aria-label="A customer's phone showing a booking confirmation and a reminder text from Main Street Barbers"
+            >
+              <div className="phone-frame">
+                <div className="phone-screen">
+                  <div className="phone-head">
+                    <span className="phone-avatar">M</span>
+                    <div>
+                      <div className="phone-name">Main Street Barbers</div>
+                      <div className="phone-sub">Text message</div>
+                    </div>
+                  </div>
+                  <div className="bubble">
+                    Hi Maria 👋 Your appointment is confirmed —{" "}
+                    <strong>Classic haircut</strong> at Main Street Barbers,{" "}
+                    <strong>tomorrow at 10:00 AM</strong>. Confirmation #:{" "}
+                    <strong>AE-7KX42P</strong>
+                  </div>
+                  <div className="bubble">
+                    Reminder: your appointment is in about{" "}
+                    <strong>2 hours</strong>. Need to change it? Reschedule or
+                    cancel:{" "}
+                    <span className="bubble-link">appointease.io/manage</span>
+                  </div>
+                  <div className="phone-note">
+                    Confirmation + reminders — automatic, every booking
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -115,7 +148,7 @@ export default function HomePage() {
               <p className="notify-status"><span className="notify-dot" />Reminder sent successfully</p>
               <p className="notify-text">
                 Hi <span className="notify-hl">Maria</span> 👋 Reminder for your appointment at{" "}
-                <span className="notify-hl">Jesus Barber Shop</span> tomorrow at 10:00 AM.
+                <span className="notify-hl">Main Street Barbers</span> tomorrow at 10:00 AM.
               </p>
             </div>
           </div>
@@ -170,13 +203,13 @@ export default function HomePage() {
           <div className="showcase">
             <div>
               <p className="eyebrow" style={{ color: "#bcd8c2" }}>Try it as a customer</p>
-              <h2>Meet Jesus Barber Shop</h2>
+              <h2>Meet Main Street Barbers</h2>
               <p>
                 This is a real AppointEase booking page. Look through the services,
                 pick a time, and book — the way your own customers will.
               </p>
               <div style={{ marginTop: 20 }}>
-                <Link href="/jesus-barber-shop" className="btn btn-white btn-lg">Visit the shop</Link>
+                <Link href="/main-street-barbers" className="btn btn-white btn-lg">Visit the shop</Link>
               </div>
             </div>
             <video autoPlay muted loop playsInline poster="/images/barbershop.jpg">

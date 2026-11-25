@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
+import { BOOKING_WINDOW_DAYS, formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
+import DatePicker from "@/components/DatePicker";
 
 // Secure manage page — the link from every confirmation/reminder.
 // The token in the URL is the credential; no account needed.
@@ -48,7 +49,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
   }, [token]);
 
   const tz = data?.businesses.timezone ?? "America/New_York";
-  const dates = useMemo(() => nextDates(14, tz), [tz]);
+  const dates = useMemo(() => nextDates(BOOKING_WINDOW_DAYS, tz), [tz]);
 
   useEffect(() => {
     if (mode !== "reschedule" || !data || !date) return;
@@ -148,15 +149,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
       {mode === "reschedule" && (
         <div className="card">
           <h2>Pick a new time</h2>
-          <div className="day-row">
-            {dates.map((d) => (
-              <button key={d} className={d === date ? "day selected" : "day"} onClick={() => setDate(d)}>
-                {new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short" }).format(new Date(`${d}T12:00:00Z`))}
-                <br />
-                {new Intl.DateTimeFormat("en-US", { timeZone: tz, month: "short", day: "numeric" }).format(new Date(`${d}T12:00:00Z`))}
-              </button>
-            ))}
-          </div>
+          <DatePicker dates={dates} value={date} onChange={setDate} timeZone={tz} />
           {slots.length === 0 ? (
             <p className="small">No open times that day — try another day.</p>
           ) : (

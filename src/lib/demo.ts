@@ -16,7 +16,13 @@
 import { availableSlots } from "./slots";
 import type { Availability } from "./types";
 
-export const DEMO_SLUGS: ReadonlySet<string> = new Set(["jesus-barber-shop"]);
+// Both slugs are recognized during the rename transition: the live
+// database row still carries "jesus-barber-shop" until its slug is
+// flipped to "main-street-barbers" at deployment time.
+export const DEMO_SLUGS: ReadonlySet<string> = new Set([
+  "jesus-barber-shop",
+  "main-street-barbers",
+]);
 
 export function isDemoShop(slug: string | null | undefined): boolean {
   return !!slug && DEMO_SLUGS.has(slug);
