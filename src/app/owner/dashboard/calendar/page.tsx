@@ -9,6 +9,7 @@ interface Row {
   ends_at: string;
   status: string;
   staff_id: string | null;
+  location_id?: string | null;
   customers: { full_name: string } | null;
   services: { name: string } | null;
   staff: { name: string } | null;
@@ -21,7 +22,7 @@ interface Row {
 export default async function DashboardCalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; date?: string }>;
+  searchParams: Promise<{ view?: string; date?: string; loc?: string }>;
 }) {
   const sp = await searchParams;
   const { supabase, business } = await requireBusiness();
@@ -48,16 +49,38 @@ export default async function DashboardCalendarPage({
     zonedTimeToUtc(dates[dates.length - 1], "00:00", tz).getTime() + 86400000
   );
 
-  const [{ data }, { data: staffRows }, { data: availRows }] = await Promise.all([
+  // Locations (migration 0013): the filter only appears when the
+  // business actually has 2+ branches — one-location shops never see it.
+  const locRes = await supabase
+    .from("locations")
+    .select("id, name")
+    .eq("business_id", business.id)
+    .order("created_at", { ascending: true });
+  const locations = locRes.error ? [] : ((locRes.data ?? []) as { id: string; name: string }[]);
+  const locFilter =
+    locations.length >= 2 && sp.loc && locations.some((l) => l.id === sp.loc) ? sp.loc : null;
+
+  const apptSelect =
+    "id, starts_at, ends_at, status, staff_id, customers:customer_id ( full_name ), services:service_id ( name ), staff:staff_id ( name )";
+  const apptQuery = (cols: string) =>
     supabase
       .from("appointments")
-      .select(
-        "id, starts_at, ends_at, status, staff_id, customers:customer_id ( full_name ), services:service_id ( name ), staff:staff_id ( name )"
-      )
+      .select(cols)
       .eq("business_id", business.id)
       .gte("starts_at", rangeStartUtc.toISOString())
       .lt("starts_at", rangeEndUtc.toISOString())
-      .order("starts_at", { ascending: true }),
+      .order("starts_at", { ascending: true });
+  // location_id arrives with migration 0013 — select it when filtering,
+  // and fall back to the plain select if the column isn't there yet.
+  let apptRes = locFilter
+    ? await apptQuery(`${apptSelect}, location_id`).eq("location_id", locFilter)
+    : await apptQuery(apptSelect);
+  if (apptRes.error && locFilter) {
+    apptRes = await apptQuery(apptSelect);
+  }
+  const { data } = apptRes;
+
+  const [{ data: staffRows }, { data: availRows }] = await Promise.all([
     supabase
       .from("staff")
       .select("id, name")
@@ -137,7 +160,10 @@ export default async function DashboardCalendarPage({
 
   const shift = view === "day" ? 1 : 7;
   const shiftDate = (days: number) => dateFmt.format(new Date(anchorUtc.getTime() + days * 86400000));
-  const qs = (v: string, d: string) => `?view=${v}&date=${d}`;
+  const qs = (v: string, d: string) =>
+    `?view=${v}&date=${d}${locFilter ? `&loc=${locFilter}` : ""}`;
+  const locQs = (loc: string | null) =>
+    `?view=${view}&date=${anchor}${loc ? `&loc=${loc}` : ""}`;
 
   return (
     <div>
@@ -167,6 +193,19 @@ export default async function DashboardCalendarPage({
         <Link href={qs(view, todayStr)}>Today</Link>
         <Link href={qs(view, shiftDate(shift))}>Next →</Link>
       </div>
+      {locations.length >= 2 && (
+        <div className="tabs" style={{ marginTop: 8 }}>
+          <span className="small" style={{ alignSelf: "center" }}>Location:</span>
+          <Link href={locQs(null)} className={!locFilter ? "active" : ""}>
+            All locations
+          </Link>
+          {locations.map((l) => (
+            <Link key={l.id} href={locQs(l.id)} className={locFilter === l.id ? "active" : ""}>
+              {l.name}
+            </Link>
+          ))}
+        </div>
+      )}
       <p className="small" style={{ marginTop: 0 }}>
         {view === "day"
           ? `${dayLabel(dates[0])} — one column per team member.`

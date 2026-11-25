@@ -7,6 +7,7 @@ import HoursManager from "@/components/owner/HoursManager";
 import PublishButton from "@/components/owner/PublishButton";
 import BillingPanel from "@/components/owner/BillingPanel";
 import BusinessMediaManager from "@/components/owner/BusinessMediaManager";
+import LocationsManager from "@/components/owner/LocationsManager";
 import PushOptIn from "@/components/PushOptIn";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import { getBillingState, planById } from "@/lib/plans";
@@ -62,6 +63,11 @@ export default async function DashboardSettingsPage() {
       </div>
 
       <div className="card">
+        <h2>Locations</h2>
+        <LocationsManager businessId={business.id} />
+      </div>
+
+      <div className="card">
         <h2>Reminder schedule</h2>
         <p className="small" style={{ margin: 0 }}>
           Every confirmed appointment gets a confirmation right away, then a
@@ -74,6 +80,11 @@ export default async function DashboardSettingsPage() {
 
       <div className="card" id="billing">
         <h2>Plan &amp; billing</h2>
+        <p className="small" style={{ marginTop: 0 }}>
+          Your plan at a glance also lives on the{" "}
+          <Link href="/owner/dashboard/billing">Billing page</Link> — same
+          buttons, plus your seats and texts sent.
+        </p>
         <BillingPanel
           billingConfigured={isBillingConfigured()}
           annualConfigured={isAnnualBillingConfigured()}

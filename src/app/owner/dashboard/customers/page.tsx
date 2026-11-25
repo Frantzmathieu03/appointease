@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireBusiness } from "@/lib/owner";
 import { formatDateInZone } from "@/lib/slots";
 import CustomersManager, { type CustomerRow } from "@/components/owner/CustomersManager";
@@ -7,9 +8,26 @@ import type { StaffMember } from "@/lib/types";
 // or messaged THIS business. One global customer can appear at many
 // businesses; each business sees only its own relationship — including
 // its own staff assignment (migration 0010).
-export default async function DashboardCustomersPage() {
+export default async function DashboardCustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ loc?: string }>;
+}) {
+  const sp = await searchParams;
   const { supabase, user, business } = await requireBusiness();
   const tz = business.timezone;
+
+  // Locations (migration 0013): a customer "belongs" to a location
+  // through their appointments there. The filter only appears when the
+  // business actually has 2+ branches.
+  const locRes = await supabase
+    .from("locations")
+    .select("id, name")
+    .eq("business_id", business.id)
+    .order("created_at", { ascending: true });
+  const locations = locRes.error ? [] : ((locRes.data ?? []) as { id: string; name: string }[]);
+  const locFilter =
+    locations.length >= 2 && sp.loc && locations.some((l) => l.id === sp.loc) ? sp.loc : null;
 
   // Assignment lives on business_customers (migration 0010). Until that
   // migration is applied the column doesn't exist — fall back to the
@@ -34,17 +52,32 @@ export default async function DashboardCustomersPage() {
     rels = (withAssign.data ?? []) as unknown as Rel[];
   }
 
-  const { data: appts } = await supabase
+  // location_id arrives with migration 0013 — fall back to the plain
+  // select if the column isn't there yet.
+  let apptRows: { customer_id: string; starts_at: string; status: string; location_id?: string | null }[] = [];
+  const withLoc = await supabase
     .from("appointments")
-    .select("customer_id, starts_at, status")
+    .select("customer_id, starts_at, status, location_id")
     .eq("business_id", business.id)
     .order("starts_at", { ascending: false });
+  if (withLoc.error) {
+    const basic = await supabase
+      .from("appointments")
+      .select("customer_id, starts_at, status")
+      .eq("business_id", business.id)
+      .order("starts_at", { ascending: false });
+    apptRows = (basic.data ?? []) as typeof apptRows;
+  } else {
+    apptRows = (withLoc.data ?? []) as typeof apptRows;
+  }
   const stats = new Map<string, { total: number; last: string | null }>();
-  for (const a of appts ?? []) {
+  const customersAtLocation = new Set<string>();
+  for (const a of apptRows) {
     const s = stats.get(a.customer_id) ?? { total: 0, last: null };
     s.total += 1;
     if (!s.last) s.last = a.starts_at;
     stats.set(a.customer_id, s);
+    if (locFilter && a.location_id === locFilter) customersAtLocation.add(a.customer_id);
   }
 
   const { data: unreadRows } = await supabase
@@ -64,7 +97,9 @@ export default async function DashboardCustomersPage() {
     .order("created_at", { ascending: true });
   const staff = (staffRows ?? []) as StaffMember[];
 
-  const rows: CustomerRow[] = rels.map((r) => {
+  const visibleRels = locFilter ? rels.filter((r) => customersAtLocation.has(r.customer_id)) : rels;
+
+  const rows: CustomerRow[] = visibleRels.map((r) => {
     const s = stats.get(r.customer_id);
     return {
       id: r.customer_id,
@@ -81,7 +116,33 @@ export default async function DashboardCustomersPage() {
   return (
     <div>
       <h1 style={{ fontSize: 26 }}>Customers</h1>
-      <CustomersManager businessId={business.id} actorId={user.id} staff={staff} rows={rows} />
+      {locations.length >= 2 && (
+        <div className="tabs" style={{ marginBottom: 12 }}>
+          <span className="small" style={{ alignSelf: "center" }}>Location:</span>
+          <Link href="/owner/dashboard/customers" className={!locFilter ? "active" : ""}>
+            All locations
+          </Link>
+          {locations.map((l) => (
+            <Link
+              key={l.id}
+              href={`/owner/dashboard/customers?loc=${l.id}`}
+              className={locFilter === l.id ? "active" : ""}
+            >
+              {l.name}
+            </Link>
+          ))}
+        </div>
+      )}
+      {locFilter && rows.length === 0 ? (
+        <div className="card">
+          <p className="small" style={{ margin: 0 }}>
+            No customers have an appointment at this location yet. When
+            someone books there, they&apos;ll show up here.
+          </p>
+        </div>
+      ) : (
+        <CustomersManager businessId={business.id} actorId={user.id} staff={staff} rows={rows} />
+      )}
     </div>
   );
 }

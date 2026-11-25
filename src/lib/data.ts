@@ -2,7 +2,19 @@
 // demo data (mirroring supabase/seed.sql) while the project is a placeholder.
 import { createServerSupabase, isSupabaseConfigured } from "./supabase";
 import { DEMO_AVAILABILITY, DEMO_BUSINESS, DEMO_SERVICES, DEMO_STAFF } from "./demo-data";
-import type { Availability, Business, BusinessPhoto, Service, StaffMember } from "./types";
+import type {
+  Availability,
+  Business,
+  BusinessPhoto,
+  Location,
+  Service,
+  StaffMember,
+  StaffService,
+} from "./types";
+
+/** Demo businesses: published so their pages work, but never listed in
+ *  the public directory — they are examples, not real businesses. */
+export const DIRECTORY_EXCLUDED_SLUGS: string[] = [DEMO_BUSINESS.slug, "harbor-family-law"];
 
 export interface BusinessPageData {
   business: Business;
@@ -10,6 +22,11 @@ export interface BusinessPageData {
   staff: StaffMember[];
   availability: Availability[];
   photos: BusinessPhoto[];
+  /** Who offers each service (staff_services). Empty = everyone offers
+      everything, as before. */
+  staffServices: StaffService[];
+  /** Branches (migration 0013). Empty for most businesses. */
+  locations: Location[];
   demoMode: boolean;
 }
 
@@ -22,6 +39,8 @@ export async function getBusinessPageData(slug: string): Promise<BusinessPageDat
       staff: DEMO_STAFF,
       availability: DEMO_AVAILABILITY,
       photos: [],
+      staffServices: [],
+      locations: [],
       demoMode: true,
     };
   }
@@ -48,12 +67,36 @@ export async function getBusinessPageData(slug: string): Promise<BusinessPageDat
         .order("created_at", { ascending: true }),
     ]);
 
+  // Who offers what (staff_services, 0001): used to keep the booking
+  // flow from offering a team member for a service they don't do.
+  const staffIds = ((staff ?? []) as StaffMember[]).map((s) => s.id);
+  let staffServices: StaffService[] = [];
+  if (staffIds.length > 0) {
+    const { data: ss } = await supabase
+      .from("staff_services")
+      .select("staff_id, service_id")
+      .in("staff_id", staffIds);
+    staffServices = (ss ?? []) as StaffService[];
+  }
+
+  // Branches (migration 0013). Defensive: before the migration lands
+  // the table doesn't exist — the page simply has no locations.
+  let locations: Location[] = [];
+  const locRes = await supabase
+    .from("locations")
+    .select("*")
+    .eq("business_id", business.id)
+    .order("created_at", { ascending: true });
+  if (!locRes.error) locations = (locRes.data ?? []) as Location[];
+
   return {
     business: business as Business,
     services: (services ?? []) as Service[],
     staff: (staff ?? []) as StaffMember[],
     availability: (availability ?? []) as Availability[],
     photos: (photos ?? []) as BusinessPhoto[],
+    staffServices,
+    locations,
     demoMode: false,
   };
 }
@@ -122,20 +165,20 @@ export async function getPublishedBusinesses(): Promise<{
   const baseCols = "id, slug, name, address, logo_url";
   type Row = Record<string, unknown>;
   let rows: Row[] = [];
-  // The demo business stays published so its demo page keeps working, but
-  // it is not a real business — never list it in the public directory.
+  // The demo businesses stay published so their demo pages keep working,
+  // but they are not real businesses — never list them in the directory.
   const withCategory = await supabase
     .from("businesses")
     .select(`${baseCols}, category`)
     .eq("published", true)
-    .neq("slug", DEMO_BUSINESS.slug)
+    .not("slug", "in", `(${DIRECTORY_EXCLUDED_SLUGS.join(",")})`)
     .order("name", { ascending: true });
   if (withCategory.error) {
     const fallback = await supabase
       .from("businesses")
       .select(baseCols)
       .eq("published", true)
-      .neq("slug", DEMO_BUSINESS.slug)
+      .not("slug", "in", `(${DIRECTORY_EXCLUDED_SLUGS.join(",")})`)
       .order("name", { ascending: true });
     rows = ((fallback.data ?? []) as Row[]).map((r) => ({ ...r, category: "other" }));
   } else {

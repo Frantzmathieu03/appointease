@@ -47,6 +47,41 @@ export interface Service {
   /** Attached intake form, if any (migration 0012). Optional: rows
       fetched before the migration lands won't have it. */
   form_id?: string | null;
+  /** Where the service happens (migration 0013). Optional: rows
+      fetched before the migration lands won't have it. */
+  visit_type?: VisitType;
+}
+
+export type VisitType = "in_person" | "online" | "both";
+
+/** Plain words for a service's visit type, shown to customers. */
+export function visitTypeLabel(v: VisitType | null | undefined): string {
+  switch (v) {
+    case "online":
+      return "Online";
+    case "both":
+      return "Your choice";
+    default:
+      return "At the business";
+  }
+}
+
+/** A business's branch (migration 0013). Optional feature: a business
+ *  with no location rows just uses its main address, as before. */
+export interface Location {
+  id: string;
+  business_id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  created_at: string;
+}
+
+/** Who offers a service (staff_services, migration 0001). Rows for a
+ *  service = only those team members offer it; no rows = everyone. */
+export interface StaffService {
+  staff_id: string;
+  service_id: string;
 }
 
 export interface StaffMember {
@@ -92,6 +127,9 @@ export interface Appointment {
   cancellation_reason?: string | null;
   cancelled_by?: string | null;
   completed_at?: string | null;
+  /** Which branch the appointment is at (migration 0013). Optional:
+      rows fetched before the migration lands won't have it. */
+  location_id?: string | null;
 }
 
 // --- Customer history (migration 0010) ------------------------------------

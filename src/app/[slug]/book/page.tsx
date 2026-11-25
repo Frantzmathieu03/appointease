@@ -44,6 +44,7 @@ export default async function BookPage({
         timezone={page.business.timezone}
         services={page.services}
         staff={page.staff}
+        staffServices={page.staffServices}
         availability={page.availability}
         demoMode={page.demoMode}
         demoShop={isDemoShop(slug)}

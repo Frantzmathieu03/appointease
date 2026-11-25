@@ -36,6 +36,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Who offers this service (staff_services): when the service has
+  // rows, only those team members can be booked for it. No rows =
+  // everyone offers it. (The slots route enforces the same rule; this
+  // is the backstop for direct calls.)
+  if (staffId) {
+    const offering = page.staffServices.filter((r) => r.service_id === serviceId);
+    if (offering.length > 0 && !offering.some((r) => r.staff_id === staffId)) {
+      return NextResponse.json(
+        { error: "That team member doesn't offer this service — please pick another person or choose First available." },
+        { status: 400 }
+      );
+    }
+  }
+
   const start = new Date(startsAt);
   if (isNaN(start.getTime()) || start.getTime() <= Date.now()) {
     return NextResponse.json({ error: "Pick a future time" }, { status: 400 });

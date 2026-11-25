@@ -33,7 +33,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <summary className="dash-topbar-link">Account</summary>
             <div className="dash-account-menu">
               <Link href="/owner/dashboard/settings#profile">Profile</Link>
-              <Link href="/owner/dashboard/settings#billing">Billing</Link>
+              <Link href="/owner/dashboard/billing">Billing</Link>
               <form action="/auth/signout" method="post">
                 <button type="submit" className="dash-account-signout">
                   Sign out
@@ -63,9 +63,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <UnreadBadge variant="owner" businessId={business.id} />
             </Link>
             <Link href="/owner/dashboard/customers">Customers</Link>
+            {!isStaff && <Link href="/owner/dashboard/booking-page">Booking page</Link>}
             {!isStaff && <Link href="/owner/dashboard/forms">Forms</Link>}
             {!isStaff && <Link href="/owner/dashboard/settings#services">Services</Link>}
             {!isStaff && <Link href="/owner/dashboard/team">Team</Link>}
+            {!isStaff && <Link href="/owner/dashboard/reports">Reports</Link>}
+            {!isStaff && <Link href="/owner/dashboard/billing">Billing</Link>}
             {!isStaff && <Link href="/owner/dashboard/settings">Settings</Link>}
           </nav>
           {!business.published && role === "owner" && (

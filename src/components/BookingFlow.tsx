@@ -3,7 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
-import { formatPrice, type Availability, type Service, type StaffMember } from "@/lib/types";
+import {
+  formatPrice,
+  visitTypeLabel,
+  type Availability,
+  type Service,
+  type StaffMember,
+  type StaffService,
+} from "@/lib/types";
 import { BOOKING_WINDOW_DAYS, formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
 import DatePicker from "@/components/DatePicker";
 import { demoSlotsForDay, sampleReminderPreviews } from "@/lib/demo";
@@ -67,6 +74,7 @@ export default function BookingFlow({
   timezone,
   services,
   staff,
+  staffServices,
   availability,
   demoMode,
   demoShop,
@@ -78,6 +86,9 @@ export default function BookingFlow({
   timezone: string;
   services: Service[];
   staff: StaffMember[];
+  /** Who offers each service (staff_services). A service with rows is
+      offered only by those people; no rows = everyone offers it. */
+  staffServices?: StaffService[];
   availability?: Availability[];
   demoMode: boolean;
   /** Slug-based demo shop: the whole flow is a local simulation —
@@ -112,6 +123,24 @@ export default function BookingFlow({
   } | null>(null);
 
   const service = services.find((s) => s.id === serviceId);
+
+  // Team members who offer the selected service. Unrestricted (no rows
+  // for the service) = the whole team.
+  const offeringStaff = useMemo(() => {
+    const rows = (staffServices ?? []).filter((r) => r.service_id === serviceId);
+    if (rows.length === 0) return staff;
+    const ids = new Set(rows.map((r) => r.staff_id));
+    return staff.filter((m) => ids.has(m.id));
+  }, [staffServices, serviceId, staff]);
+
+  // If the picked person doesn't offer the newly picked service, fall
+  // back to "First available" instead of showing them empty times.
+  useEffect(() => {
+    if (staffId && offeringStaff.length > 0 && !offeringStaff.some((m) => m.id === staffId)) {
+      setStaffId("");
+    }
+    if (staffId && offeringStaff.length === 0) setStaffId("");
+  }, [staffId, offeringStaff]);
 
   useEffect(() => {
     // Demo shops stay fully local: no auth read, no profile prefill.
@@ -376,7 +405,9 @@ export default function BookingFlow({
             <div key={s.id} className="service-row">
               <div>
                 <div className="service-name">{s.name}</div>
-                <div className="service-meta">{s.duration_minutes} min · {formatPrice(s.price_cents)}</div>
+                <div className="service-meta">
+                  {s.duration_minutes} min · {formatPrice(s.price_cents)} · {visitTypeLabel(s.visit_type)}
+                </div>
               </div>
               <button
                 className={s.id === serviceId ? "btn btn-primary" : "btn"}
@@ -392,7 +423,7 @@ export default function BookingFlow({
               <span>With</span>
               <select value={staffId} onChange={(e) => setStaffId(e.target.value)}>
                 <option value="">First available</option>
-                {staff.map((m) => (
+                {offeringStaff.map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
               </select>

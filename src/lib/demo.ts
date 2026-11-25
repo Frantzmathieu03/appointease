@@ -22,6 +22,7 @@ import type { Availability } from "./types";
 export const DEMO_SLUGS: ReadonlySet<string> = new Set([
   "jesus-barber-shop",
   "main-street-barbers",
+  "harbor-family-law",
 ]);
 
 export function isDemoShop(slug: string | null | undefined): boolean {

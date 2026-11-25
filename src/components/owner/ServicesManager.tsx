@@ -2,12 +2,37 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
-import { formatPrice, type IntakeForm, type Service } from "@/lib/types";
+import {
+  formatPrice,
+  visitTypeLabel,
+  type IntakeForm,
+  type Service,
+  type StaffMember,
+  type VisitType,
+} from "@/lib/types";
+
+const VISIT_TYPES: { id: VisitType; label: string }[] = [
+  { id: "in_person", label: "At the business" },
+  { id: "online", label: "Online" },
+  { id: "both", label: "Your choice — either one" },
+];
 
 export default function ServicesManager({ businessId }: { businessId: string }) {
   const [services, setServices] = useState<Service[]>([]);
   const [forms, setForms] = useState<IntakeForm[]>([]);
-  const [form, setForm] = useState({ name: "", duration: "30", price: "", formId: "" });
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  // Who offers what (staff_services): service_id → set of staff ids.
+  // A service ABSENT from this map has no rows = everyone offers it.
+  const [offers, setOffers] = useState<Map<string, Set<string>>>(new Map());
+  const [form, setForm] = useState({
+    name: "",
+    duration: "30",
+    price: "",
+    formId: "",
+    visitType: "in_person" as VisitType,
+  });
+  const [newWho, setNewWho] = useState<"everyone" | "some">("everyone");
+  const [newOffers, setNewOffers] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -34,10 +59,35 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
     if (!error) setForms((data ?? []) as IntakeForm[]);
   }, [businessId]);
 
+  const loadStaffAndOffers = useCallback(async () => {
+    const supabase = createBrowserSupabase();
+    const { data: staffData } = await supabase
+      .from("staff")
+      .select("*")
+      .eq("business_id", businessId)
+      .eq("active", true)
+      .order("created_at", { ascending: true });
+    const staffRows = (staffData ?? []) as StaffMember[];
+    setStaff(staffRows);
+    if (staffRows.length === 0) return;
+    const { data: ss, error } = await supabase
+      .from("staff_services")
+      .select("staff_id, service_id")
+      .in("staff_id", staffRows.map((s) => s.id));
+    if (error) return;
+    const map = new Map<string, Set<string>>();
+    for (const row of (ss ?? []) as { staff_id: string; service_id: string }[]) {
+      if (!map.has(row.service_id)) map.set(row.service_id, new Set());
+      map.get(row.service_id)!.add(row.staff_id);
+    }
+    setOffers(map);
+  }, [businessId]);
+
   useEffect(() => {
     load();
     loadForms();
-  }, [load, loadForms]);
+    loadStaffAndOffers();
+  }, [load, loadForms, loadStaffAndOffers]);
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
@@ -52,18 +102,39 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
       // Blank price = no public price (null) — the customer confirms the
       // price with the business. A typed 0 stays an explicit "Free".
       price_cents: priceTrim === "" ? null : Math.round((parseFloat(priceTrim) || 0) * 100),
+      visit_type: form.visitType,
     };
     if (form.formId) row.form_id = form.formId;
-    let { error } = await supabase.from("services").insert(row);
-    if (error && form.formId) {
-      // form_id arrives with migration 0012 — retry without it.
+    let { data: inserted, error } = await supabase
+      .from("services")
+      .insert(row)
+      .select("id")
+      .single();
+    if (error) {
+      // form_id arrives with migration 0012, visit_type with 0013 —
+      // retry with only the columns that have always existed.
       delete row.form_id;
-      ({ error } = await supabase.from("services").insert(row));
-      if (!error) setMsg("Service added. Attaching a form isn't ready yet — check back soon.");
+      delete row.visit_type;
+      ({ data: inserted, error } = await supabase
+        .from("services")
+        .insert(row)
+        .select("id")
+        .single());
+      if (!error) {
+        setMsg("Service added. Some newer settings aren't ready yet — check back soon.");
+      }
     }
-    setForm({ name: "", duration: "30", price: "", formId: "" });
+    if (!error && inserted && newWho === "some" && newOffers.size > 0) {
+      await supabase.from("staff_services").insert(
+        [...newOffers].map((staffId) => ({ staff_id: staffId, service_id: inserted.id }))
+      );
+    }
+    setForm({ name: "", duration: "30", price: "", formId: "", visitType: "in_person" });
+    setNewWho("everyone");
+    setNewOffers(new Set());
     setBusy(false);
     load();
+    loadStaffAndOffers();
   }
 
   async function attachForm(s: Service, formId: string) {
@@ -79,6 +150,59 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
     load();
   }
 
+  async function setVisitType(s: Service, visitType: VisitType) {
+    const supabase = createBrowserSupabase();
+    const { error } = await supabase.from("services").update({ visit_type: visitType }).eq("id", s.id);
+    if (error) {
+      setMsg("That setting isn't ready yet — check back soon.");
+      return;
+    }
+    load();
+  }
+
+  // "Who offers this" — everyone (no rows) or only the ticked people.
+  async function setWhoMode(s: Service, mode: "everyone" | "some") {
+    const supabase = createBrowserSupabase();
+    if (mode === "everyone") {
+      await supabase.from("staff_services").delete().eq("service_id", s.id);
+    } else {
+      // Start from "everyone ticked" — the owner unticks from there.
+      const current = offers.get(s.id);
+      const initial = current && current.size > 0 ? [...current] : staff.map((m) => m.id);
+      await supabase.from("staff_services").delete().eq("service_id", s.id);
+      if (initial.length > 0) {
+        await supabase
+          .from("staff_services")
+          .insert(initial.map((staffId) => ({ staff_id: staffId, service_id: s.id })));
+      }
+    }
+    loadStaffAndOffers();
+  }
+
+  async function toggleOffer(s: Service, staffId: string, on: boolean) {
+    const supabase = createBrowserSupabase();
+    const current = new Set(offers.get(s.id) ?? []);
+    if (on) {
+      await supabase.from("staff_services").insert({ staff_id: staffId, service_id: s.id });
+    } else {
+      if (current.size <= 1) {
+        // Unticking the last person = nobody offers it, which the
+        // booking page reads as "everyone" — switch the mode instead
+        // so what the owner sees is what customers get.
+        await supabase.from("staff_services").delete().eq("service_id", s.id);
+        setMsg(`${s.name} is back to "everyone offers this" — untick a name only when someone else still offers it.`);
+        loadStaffAndOffers();
+        return;
+      }
+      await supabase
+        .from("staff_services")
+        .delete()
+        .eq("service_id", s.id)
+        .eq("staff_id", staffId);
+    }
+    loadStaffAndOffers();
+  }
+
   async function remove(s: Service) {
     const ok = window.confirm(
       `Remove ${s.name}? It will disappear from your booking page and take no new bookings. Existing appointments for it stay on the calendar and in customer histories.`
@@ -90,6 +214,39 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
     load();
   }
 
+  function whoEditor(s: Service) {
+    if (staff.length <= 1) return null;
+    const restricted = offers.has(s.id);
+    const set = offers.get(s.id);
+    return (
+      <div className="service-meta" style={{ marginTop: 6 }}>
+        Who offers this:{" "}
+        <select
+          value={restricted ? "some" : "everyone"}
+          onChange={(e) => setWhoMode(s, e.target.value as "everyone" | "some")}
+          aria-label={`Who offers ${s.name}`}
+        >
+          <option value="everyone">Everyone on the team</option>
+          <option value="some">Only some people</option>
+        </select>
+        {restricted && (
+          <span style={{ display: "inline-flex", gap: 10, flexWrap: "wrap", marginLeft: 10 }}>
+            {staff.map((m) => (
+              <label key={m.id} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>
+                <input
+                  type="checkbox"
+                  checked={set?.has(m.id) ?? false}
+                  onChange={(e) => toggleOffer(s, m.id, e.target.checked)}
+                />
+                {m.name}
+              </label>
+            ))}
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div>
       {msg && <p className="small" style={{ margin: "0 0 10px" }}>{msg}</p>}
@@ -98,7 +255,24 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
         <div key={s.id} className="service-row">
           <div>
             <div className="service-name">{s.name}</div>
-            <div className="service-meta">{s.duration_minutes} min · {formatPrice(s.price_cents)}</div>
+            <div className="service-meta">
+              {s.duration_minutes} min · {formatPrice(s.price_cents)} · {visitTypeLabel(s.visit_type)}
+            </div>
+            <div className="service-meta" style={{ marginTop: 4 }}>
+              Where:{" "}
+              <select
+                value={s.visit_type ?? "in_person"}
+                onChange={(e) => setVisitType(s, e.target.value as VisitType)}
+                aria-label={`Where ${s.name} happens`}
+              >
+                {VISIT_TYPES.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {whoEditor(s)}
             {forms.length > 0 && (
               <div className="service-meta" style={{ marginTop: 4 }}>
                 Form:{" "}
@@ -137,6 +311,56 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
             <input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="35" />
           </label>
         </div>
+        <label className="field">
+          <span>Where does it happen?</span>
+          <select
+            value={form.visitType}
+            onChange={(e) => setForm({ ...form, visitType: e.target.value as VisitType })}
+          >
+            {VISIT_TYPES.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {staff.length > 1 && (
+          <div className="field">
+            <span>Who offers this?</span>
+            <select
+              value={newWho}
+              onChange={(e) => {
+                const mode = e.target.value as "everyone" | "some";
+                setNewWho(mode);
+                if (mode === "some" && newOffers.size === 0) {
+                  setNewOffers(new Set(staff.map((m) => m.id)));
+                }
+              }}
+            >
+              <option value="everyone">Everyone on the team</option>
+              <option value="some">Only some people</option>
+            </select>
+            {newWho === "some" && (
+              <span style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
+                {staff.map((m) => (
+                  <label key={m.id} style={{ display: "inline-flex", gap: 4, alignItems: "center", fontWeight: 400 }}>
+                    <input
+                      type="checkbox"
+                      checked={newOffers.has(m.id)}
+                      onChange={(e) => {
+                        const next = new Set(newOffers);
+                        if (e.target.checked) next.add(m.id);
+                        else next.delete(m.id);
+                        setNewOffers(next);
+                      }}
+                    />
+                    {m.name}
+                  </label>
+                ))}
+              </span>
+            )}
+          </div>
+        )}
         {forms.length > 0 && (
           <label className="field">
             <span>Form (optional) — customers fill it in before the visit</span>

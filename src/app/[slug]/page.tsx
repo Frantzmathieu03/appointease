@@ -4,7 +4,7 @@ import { getBusinessPageData, hoursSummary } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getBillingState } from "@/lib/plans";
-import { formatPrice } from "@/lib/types";
+import { formatPrice, visitTypeLabel } from "@/lib/types";
 import AddressDirections from "@/components/AddressDirections";
 import { categoryLabel } from "@/lib/categories";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
@@ -241,6 +241,28 @@ export default async function BusinessPage({
           <p className="small" style={{ margin: "6px 0 0" }}>
             Hours: {hoursSummary(page.availability)}
           </p>
+          {page.locations.length > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <p style={{ margin: "4px 0", fontWeight: 600 }}>Our locations</p>
+              {page.locations.map((loc) => (
+                <p key={loc.id} style={{ margin: "4px 0" }}>
+                  <strong>{loc.name}</strong>
+                  {loc.address && (
+                    <>
+                      {" — "}
+                      <AddressDirections address={loc.address} />
+                    </>
+                  )}
+                  {loc.phone && !demoShop && (
+                    <>
+                      {" · "}
+                      <a href={`tel:${loc.phone.replace(/[^+\d]/g, "")}`}>{loc.phone}</a>
+                    </>
+                  )}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -251,7 +273,9 @@ export default async function BusinessPage({
           <div key={s.id} className="service-row">
             <div>
               <div className="service-name">{s.name}</div>
-              <div className="service-meta">{s.duration_minutes} min · {formatPrice(s.price_cents)}</div>
+              <div className="service-meta">
+                {s.duration_minutes} min · {formatPrice(s.price_cents)} · {visitTypeLabel(s.visit_type)}
+              </div>
             </div>
             <Link href={`/${slug}/book?service=${s.id}`} className="btn" style={{ padding: "8px 14px" }}>
               Select

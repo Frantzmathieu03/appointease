@@ -23,6 +23,16 @@ export async function GET(
   const service = page.services.find((s) => s.id === serviceId);
   if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
 
+  // Who offers this service (staff_services): rows for the service mean
+  // ONLY those team members offer it. A named person who isn't one of
+  // them has no times for it. No rows = everyone offers it.
+  if (staffId) {
+    const offering = page.staffServices.filter((r) => r.service_id === serviceId);
+    if (offering.length > 0 && !offering.some((r) => r.staff_id === staffId)) {
+      return NextResponse.json({ slots: [], demoMode: page.demoMode });
+    }
+  }
+
   let booked: BookedRange[] = [];
   if (!page.demoMode && isSupabaseConfigured()) {
     const admin = createAdminSupabase();

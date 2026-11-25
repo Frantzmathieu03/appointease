@@ -72,6 +72,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Staff logins book only on their own calendar." }, { status: 403 });
   }
 
+  // Who offers this service (staff_services): rows for the service mean
+  // only those team members can be booked for it. No rows = everyone.
+  if (effectiveStaffId) {
+    const { data: offering } = await admin
+      .from("staff_services")
+      .select("staff_id")
+      .eq("service_id", serviceId);
+    if (
+      offering &&
+      offering.length > 0 &&
+      !offering.some((r) => r.staff_id === effectiveStaffId)
+    ) {
+      return NextResponse.json(
+        { error: "That team member doesn't offer this service." },
+        { status: 400 }
+      );
+    }
+  }
+
   // Resolve the customer.
   let resolvedCustomerId: string | null = null;
   if (customerId) {
