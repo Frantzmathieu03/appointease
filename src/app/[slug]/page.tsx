@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBusinessPageData, hoursSummary } from "@/lib/data";
+import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getBillingState } from "@/lib/plans";
 import { formatPrice } from "@/lib/types";
@@ -16,6 +17,9 @@ export default async function BusinessPage({
   if (!page) notFound();
   const { business, services } = page;
   const tz = business.timezone;
+  // Demo shops (public examples): labeled as demos, contact rows hidden,
+  // no call/message actions — booking is a safe simulation (see lib/demo).
+  const demoShop = isDemoShop(slug);
 
   // Billing gate: a business whose trial ended with no active subscription
   // (or whose subscription lapsed past its grace window) shows a paused
@@ -33,7 +37,7 @@ export default async function BusinessPage({
           <h2>Online booking is temporarily unavailable</h2>
           <p className="lede">
             {business.name} isn&apos;t taking online bookings right now.
-            {business.phone && (
+            {business.phone && !demoShop && (
               <>
                 {" "}You can still reach them at{" "}
                 <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{business.phone}</a>.
@@ -55,7 +59,7 @@ export default async function BusinessPage({
 
   // Reviews (carried over from the old app): average + latest few, public.
   let reviewSummary: { avg: number; total: number; latest: { rating: number; comment: string | null; name: string }[] } | null = null;
-  if (!page.demoMode && isSupabaseConfigured()) {
+  if (!page.demoMode && !demoShop && isSupabaseConfigured()) {
     const supabase = await createServerSupabase();
     const { data: revs } = await supabase
       .from("reviews")
@@ -80,7 +84,7 @@ export default async function BusinessPage({
   // If the signed-in customer has a next appointment here, it sits on top —
   // with Reschedule / Cancel one tap away (owner spec).
   let nextAppt: { starts_at: string; manage_token: string; serviceName: string; confirmationCode: string | null } | null = null;
-  if (!page.demoMode && isSupabaseConfigured()) {
+  if (!page.demoMode && !demoShop && isSupabaseConfigured()) {
     const supabase = await createServerSupabase();
     const {
       data: { user },
@@ -110,8 +114,15 @@ export default async function BusinessPage({
 
   return (
     <main className="column">
-      {page.demoMode && (
+      {page.demoMode && !demoShop && (
         <div className="notice">Demo business — running on sample data until the live database is connected.</div>
+      )}
+      {demoShop && (
+        <div className="notice" role="note">
+          <strong>Demo shop</strong> — this is a live demo of an AppointEase
+          booking page. Try booking, nothing is real: no appointment is
+          saved and no messages are sent.
+        </div>
       )}
 
       <div className="hero-card">
@@ -133,6 +144,11 @@ export default async function BusinessPage({
         )}
         <p className="eyebrow">{business.type}</p>
         <h1>{business.name}</h1>
+        {demoShop && (
+          <p style={{ margin: "0 0 8px" }}>
+            <span className="demo-badge">Demo shop</span>
+          </p>
+        )}
         <p className="lede" style={{ marginBottom: 6 }}>
           {hoursSummary(page.availability)}
         </p>
@@ -158,14 +174,15 @@ export default async function BusinessPage({
         </div>
       )}
 
-      <div className="action-row">
+      <div className="action-row" style={demoShop ? { gridTemplateColumns: "1fr" } : undefined}>
         <Link href={`/${slug}/book`} className="btn btn-primary">Book appointment</Link>
-        <Link href={`/${slug}/message`} className="btn">Message us</Link>
-        {business.phone ? (
-          <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`} className="btn">Call office</a>
-        ) : (
-          <span className="btn" aria-disabled="true">Call office</span>
-        )}
+        {!demoShop && <Link href={`/${slug}/message`} className="btn">Message us</Link>}
+        {!demoShop &&
+          (business.phone ? (
+            <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`} className="btn">Call office</a>
+          ) : (
+            <span className="btn" aria-disabled="true">Call office</span>
+          ))}
       </div>
 
       {(business.address || business.phone || business.email) && (
@@ -184,12 +201,12 @@ export default async function BusinessPage({
               <span className="small">— tap for directions</span>
             </p>
           )}
-          {business.phone && (
+          {business.phone && !demoShop && (
             <p style={{ margin: "4px 0" }}>
               📞 <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{business.phone}</a>
             </p>
           )}
-          {business.email && (
+          {business.email && !demoShop && (
             <p style={{ margin: "4px 0" }}>
               ✉️ <a href={`mailto:${business.email}`}>{business.email}</a>
             </p>

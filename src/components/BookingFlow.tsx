@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
-import { formatPrice, type Service, type StaffMember } from "@/lib/types";
+import { formatPrice, type Availability, type Service, type StaffMember } from "@/lib/types";
 import { formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
+import { demoSlotsForDay, sampleReminderPreviews } from "@/lib/demo";
+import { generateConfirmationCode } from "@/lib/confirmation";
 
 // Booking flow: service → time → details → review → confirmed.
 // Signed-in customers skip the account fields; new customers create their
@@ -14,20 +16,29 @@ import { formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
 export default function BookingFlow({
   slug,
   businessName,
+  businessAddress,
   timezone,
   services,
   staff,
+  availability,
   demoMode,
+  demoShop,
   preselectedServiceId,
 }: {
   slug: string;
   businessName: string;
+  businessAddress?: string | null;
   timezone: string;
   services: Service[];
   staff: StaffMember[];
+  availability?: Availability[];
   demoMode: boolean;
+  /** Slug-based demo shop: the whole flow is a local simulation —
+   *  no API calls, no database writes, no messages sent. */
+  demoShop?: boolean;
   preselectedServiceId?: string;
 }) {
+  const isDemo = !!demoShop;
   const [step, setStep] = useState(1);
   const [serviceId, setServiceId] = useState(
     preselectedServiceId && services.some((s) => s.id === preselectedServiceId)
@@ -46,6 +57,7 @@ export default function BookingFlow({
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{
     demoMode: boolean;
+    demoShop?: boolean;
     manageToken?: string;
     accountCreated?: boolean;
     confirmationCode?: string;
@@ -54,6 +66,8 @@ export default function BookingFlow({
   const service = services.find((s) => s.id === serviceId);
 
   useEffect(() => {
+    // Demo shops stay fully local: no auth read, no profile prefill.
+    if (isDemo) return;
     (async () => {
       const supabase = createBrowserSupabase();
       const {
@@ -74,12 +88,28 @@ export default function BookingFlow({
         }));
       }
     })();
-  }, []);
+  }, [isDemo]);
 
   useEffect(() => {
     if (!serviceId || !date) return;
-    setSlotsLoading(true);
     setSlot("");
+    // Demo shops: slots are generated locally from the weekly hours —
+    // the slots API (and its appointments read) is never touched.
+    if (isDemo) {
+      const svc = services.find((s) => s.id === serviceId);
+      setSlots(
+        demoSlotsForDay({
+          dateStr: date,
+          durationMinutes: svc?.duration_minutes ?? 30,
+          availability: availability ?? [],
+          staffId: staffId || null,
+          timeZone: timezone,
+        })
+      );
+      setSlotsLoading(false);
+      return;
+    }
+    setSlotsLoading(true);
     const q = new URLSearchParams({ serviceId, date });
     if (staffId) q.set("staffId", staffId);
     fetch(`/api/businesses/${slug}/slots?${q.toString()}`)
@@ -87,12 +117,23 @@ export default function BookingFlow({
       .then((d) => setSlots(d.slots ?? []))
       .catch(() => setSlots([]))
       .finally(() => setSlotsLoading(false));
-  }, [slug, serviceId, staffId, date]);
+  }, [slug, serviceId, staffId, date, isDemo, services, availability, timezone]);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [k]: e.target.value });
 
   async function confirm() {
+    // Demo shops: pure simulation. No fetch, no booking, no messages —
+    // just a locally drawn sample confirmation code and the previews.
+    if (isDemo) {
+      setResult({
+        demoMode: false,
+        demoShop: true,
+        confirmationCode: generateConfirmationCode(),
+      });
+      setStep(5);
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -129,6 +170,76 @@ export default function BookingFlow({
       setError("Booking failed — please try again.");
     }
     setBusy(false);
+  }
+
+  // Demo shop confirmation: a SAMPLE screen. Nothing was booked, saved
+  // or sent — it shows the visitor exactly what a real customer gets,
+  // including the three reminder texts rendered with their details.
+  if (step === 5 && result?.demoShop) {
+    const when = slot
+      ? `${formatDateInZone(new Date(slot), timezone)} at ${formatTimeInZone(new Date(slot), timezone)}`
+      : "";
+    const previews = sampleReminderPreviews({
+      customerName: form.name,
+      serviceName: service?.name ?? "Appointment",
+      businessName,
+      businessAddress: businessAddress ?? null,
+      when,
+      confirmationCode: result.confirmationCode ?? "AE-SAMPLE",
+    });
+    return (
+      <div>
+        <div className="notice" role="note">
+          <strong>Demo — no real booking was made.</strong> Nothing was saved,
+          and no text or email was sent. This is a sample of what your
+          customers would see.
+        </div>
+        <div className="card center">
+          <div style={{ fontSize: 40, marginBottom: 6 }}>✓</div>
+          <h2>Sample confirmation</h2>
+          <p className="lede">
+            {service?.name} at {businessName}
+            <br />
+            {when}
+            <br />
+            <span className="small">For {form.name}</span>
+          </p>
+          {result.confirmationCode && (
+            <p style={{ fontSize: 18, margin: "4px 0 10px" }}>
+              Confirmation #: <strong>{result.confirmationCode}</strong>{" "}
+              <span className="sample-tag">Sample</span>
+            </p>
+          )}
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+            <button
+              className="btn"
+              onClick={() => {
+                setResult(null);
+                setSlot("");
+                setStep(1);
+              }}
+            >
+              Try another time
+            </button>
+            <Link href={`/${slug}`} className="btn btn-primary">Back to {businessName}</Link>
+          </div>
+        </div>
+        <div className="card">
+          <h2>Here&apos;s the text your customer would get</h2>
+          <p className="small" style={{ marginTop: 0 }}>
+            Every real booking sends these three messages — by text and email
+            at the same time. Shown here with your sample details; in the demo
+            they are never actually sent.
+          </p>
+          {previews.map((p) => (
+            <div key={p.label} style={{ marginTop: 16 }}>
+              <p className="msg-preview-label">{p.label}</p>
+              <div className="msg-preview">{p.text}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (step === 5) {
@@ -185,6 +296,12 @@ export default function BookingFlow({
       <p className="small" style={{ marginBottom: 16 }}>
         Step {step} of 4 — {["Choose a service", "Pick a time", "Your details", "Review"][step - 1]}
       </p>
+      {isDemo && (
+        <div className="notice" role="note">
+          <strong>Demo shop</strong> — try the whole booking flow. Nothing is
+          real: no booking is saved and no messages are sent.
+        </div>
+      )}
       {error && <div className="error">{error}</div>}
 
       {step === 1 && (
@@ -271,7 +388,13 @@ export default function BookingFlow({
             <span>Email (for email reminders)</span>
             <input type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
           </label>
-          {!signedIn && (
+          {isDemo && (
+            <p className="small" style={{ fontWeight: 400 }}>
+              Demo only — use any name and number you like. Nothing is saved
+              or sent, and no account is created.
+            </p>
+          )}
+          {!signedIn && !isDemo && (
             <label className="field">
               <span>Create a password</span>
               <input type="password" required minLength={8} value={form.password} onChange={set("password")} autoComplete="new-password" />
@@ -290,7 +413,7 @@ export default function BookingFlow({
             <button
               className="btn btn-primary"
               style={{ flex: 1 }}
-              disabled={!form.name || !form.phone || !form.email || (!signedIn && form.password.length < 8)}
+              disabled={!form.name || !form.phone || !form.email || (!isDemo && !signedIn && form.password.length < 8)}
               onClick={() => setStep(4)}
             >
               Review booking
@@ -312,14 +435,22 @@ export default function BookingFlow({
           <p className="small">
             {form.name} · {form.phone} · {form.email}
           </p>
-          <p className="small">
-            You&apos;ll get a confirmation, then a text and email 24 hours and 2 hours
-            before — each with a link to reschedule or cancel.
-          </p>
+          {isDemo ? (
+            <p className="small">
+              This is the demo — nothing will be booked or sent. On the next
+              screen you&apos;ll see a sample confirmation and the exact
+              reminder texts your customer would get.
+            </p>
+          ) : (
+            <p className="small">
+              You&apos;ll get a confirmation, then a text and email 24 hours and 2 hours
+              before — each with a link to reschedule or cancel.
+            </p>
+          )}
           <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
             <button className="btn" onClick={() => setStep(3)}>Back</button>
             <button className="btn btn-primary" style={{ flex: 1 }} disabled={busy} onClick={confirm}>
-              {busy ? "Booking…" : "Confirm booking"}
+              {busy ? "Booking…" : isDemo ? "See sample confirmation" : "Confirm booking"}
             </button>
           </div>
         </div>

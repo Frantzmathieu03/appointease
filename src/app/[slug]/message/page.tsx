@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBusinessPageData } from "@/lib/data";
+import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase } from "@/lib/supabase";
 import { ensureCustomerProfile } from "@/lib/profile";
 import ThreadView from "@/components/ThreadView";
@@ -15,11 +16,14 @@ export default async function MessagePage({
   if (!page) notFound();
   const { business } = page;
 
-  if (page.demoMode) {
+  // Demo shops never open a real thread: messaging is off in the demo.
+  if (page.demoMode || isDemoShop(slug)) {
     return (
       <main className="column">
         <div className="notice">
-          Demo business — messaging turns on when the live database is connected.
+          {isDemoShop(slug)
+            ? "Demo shop — messaging is turned off in the demo."
+            : "Demo business — messaging turns on when the live database is connected."}
         </div>
         <div className="card">
           <h2>Message {business.name}</h2>

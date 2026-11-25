@@ -62,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
               <div className="footer-col">
                 <h4>Company</h4>
+                <Link href="/about">About</Link>
                 <Link href="/contact">Contact</Link>
                 <Link href="/terms">Terms of Service</Link>
                 <Link href="/privacy">Privacy Policy</Link>

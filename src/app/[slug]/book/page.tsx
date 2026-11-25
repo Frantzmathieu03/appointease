@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBusinessPageData } from "@/lib/data";
 import { getBillingState } from "@/lib/plans";
+import { isDemoShop } from "@/lib/demo";
 import BookingFlow from "@/components/BookingFlow";
 
 export default async function BookPage({
@@ -39,10 +40,13 @@ export default async function BookPage({
       <BookingFlow
         slug={slug}
         businessName={page.business.name}
+        businessAddress={page.business.address}
         timezone={page.business.timezone}
         services={page.services}
         staff={page.staff}
+        availability={page.availability}
         demoMode={page.demoMode}
+        demoShop={isDemoShop(slug)}
         preselectedServiceId={service}
       />
     </main>

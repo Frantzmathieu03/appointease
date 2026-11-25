@@ -4,6 +4,7 @@ import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from 
 import { scheduleReminders } from "@/lib/reminders";
 import { getBillingState } from "@/lib/plans";
 import { generateConfirmationCode } from "@/lib/confirmation";
+import { isDemoShop } from "@/lib/demo";
 
 // POST /api/book
 // Body: { slug, serviceId, staffId, startsAt, name, phone, email, password?, notes? }
@@ -36,6 +37,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Pick a future time" }, { status: 400 });
   }
   const end = new Date(start.getTime() + service.duration_minutes * 60000);
+
+  // DEMO SHOPS: the public example businesses are simulations — never
+  // write an appointment, never schedule a reminder, no matter how the
+  // request arrives. The client flow doesn't even call this route; this
+  // is defense in depth. Same honest simulated shape as demo mode below.
+  if (isDemoShop(slug)) {
+    return NextResponse.json({
+      ok: true,
+      demoMode: true,
+      appointment: {
+        serviceName: service.name,
+        startsAt: start.toISOString(),
+        businessName: page.business.name,
+        confirmationCode: generateConfirmationCode(),
+      },
+    });
+  }
 
   // DEMO MODE: no database yet — simulate the confirmation honestly.
   if (page.demoMode || !isSupabaseConfigured()) {
