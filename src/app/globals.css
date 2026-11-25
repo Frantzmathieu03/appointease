@@ -604,17 +604,22 @@ img, video { max-width: 100%; }
    the steps phone mock; no screenshots, no photos. */
 .feature-rows { padding-top: 64px; }
 .feature-row {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px;
   align-items: center; margin-bottom: 88px;
 }
 .feature-row:last-child { margin-bottom: 0; }
 .feature-row.flip .feature-copy { order: 2; }
 .feature-copy h2 { margin-bottom: 10px; }
 .feature-copy .lede { margin-bottom: 0; max-width: 42ch; }
+/* Grid items must be allowed to shrink below their content's
+   preferred size — otherwise a wide mock inside stretches the whole
+   row past the screen on phones (the Nov 25 overflow bug). */
+.feature-copy, .feat-visual { min-width: 0; }
 .mock-panel {
   background: linear-gradient(160deg, #eef4ee 0%, #dfeee2 55%, #cfe4d4 100%);
   border-radius: 20px; box-shadow: 0 12px 40px rgba(20, 60, 35, 0.15);
   padding: 38px 24px; display: flex; justify-content: center; align-items: center;
+  min-width: 0;
 }
 
 /* Chat mock — reuses the phone frame/screen; the screen becomes a
@@ -672,7 +677,7 @@ img, video { max-width: 100%; }
   gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
 }
 .dash-biz { font-weight: 800; font-size: 15.5px; }
-.dash-tabs { display: flex; gap: 12px; align-items: center; font-size: 13px; color: var(--muted); }
+.dash-tabs { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
 .dash-tab.active { color: var(--green); font-weight: 700; }
 .dash-badge {
   background: var(--green); color: #fff; border-radius: 999px;
@@ -683,6 +688,7 @@ img, video { max-width: 100%; }
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   background: #f4f8f4; border-radius: 14px; padding: 11px 14px; margin-bottom: 8px;
 }
+.dash-row > div { min-width: 0; }
 .dash-who { margin: 0; font-size: 14.5px; font-weight: 600; }
 .dash-time { color: var(--green-dark); font-weight: 800; }
 .dash-what { margin: 1px 0 0; font-size: 13px; color: var(--muted); }
@@ -692,6 +698,7 @@ img, video { max-width: 100%; }
   border-radius: 999px; flex: 0 0 auto;
 }
 .dash-linkrow { display: flex; gap: 8px; margin-top: 14px; }
+.dash-linkrow .mock-btn { flex: 0 0 auto; }
 .dash-url {
   flex: 1; min-width: 0; background: #f4f8f4; border-radius: 999px;
   padding: 10px 14px; font-size: 13.5px; color: var(--muted);
@@ -700,7 +707,7 @@ img, video { max-width: 100%; }
 }
 
 @media (max-width: 900px) {
-  .feature-row { grid-template-columns: 1fr; gap: 30px; margin-bottom: 64px; }
+  .feature-row { grid-template-columns: minmax(0, 1fr); gap: 30px; margin-bottom: 64px; }
   .feature-row.flip .feature-copy { order: 0; }
   .feature-copy { text-align: center; }
   .feature-copy .lede { margin-left: auto; margin-right: auto; }
@@ -1159,13 +1166,15 @@ footer.site-footer { padding: 0; text-align: left; }
    as the dashboard mock (.dash-* pieces are reused inside). */
 .ui-mock {
   background: #fff; border-radius: 18px; box-shadow: var(--shadow);
-  padding: 22px; width: 420px; max-width: 100%; text-align: left;
+  padding: 22px; width: 100%; max-width: 420px; min-width: 0; text-align: left;
 }
 .ui-mock .dash-head.tight { justify-content: flex-start; }
+.ui-mock .dash-head > div { min-width: 0; }
 
 /* Customer-history timeline mock */
 .tl { display: grid; margin-top: 4px; }
 .tl-item { display: flex; gap: 12px; position: relative; padding-bottom: 16px; }
+.tl-item > div { min-width: 0; }
 .tl-item:last-child { padding-bottom: 0; }
 .tl-item::before {
   content: ""; position: absolute; left: 12px; top: 28px; bottom: 0;
@@ -1188,7 +1197,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .team-group:last-of-type { margin-bottom: 0; }
 .team-head {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 8px;
+  gap: 10px; margin-bottom: 8px;
 }
 .team-name { font-weight: 800; font-size: 14.5px; }
 
@@ -1227,6 +1236,9 @@ footer.site-footer { padding: 0; text-align: left; }
 .inbox-name {
   margin: 0; font-weight: 700; font-size: 14.5px;
   display: flex; justify-content: space-between; gap: 10px;
+}
+.inbox-name > span:first-child {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .inbox-time { color: var(--muted); font-size: 12px; font-weight: 600; flex: 0 0 auto; }
 .inbox-snip { margin: 1px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.4; }
