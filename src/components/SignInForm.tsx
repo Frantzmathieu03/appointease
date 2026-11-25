@@ -22,6 +22,7 @@ export default function SignInForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
@@ -53,14 +54,29 @@ export default function SignInForm({
     }
   }
 
+  async function forgot() {
+    setError("");
+    if (!email) {
+      setNotice("Type your email above first — then we'll send the reset link there.");
+      return;
+    }
+    const supabase = createBrowserSupabase();
+    // Same message whether or not the account exists — never reveal which.
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/set-password")}`,
+    });
+    setNotice("If that email has an account, we sent a password reset link.");
+  }
+
   return (
     <div className="card">
       <h2>{title}</h2>
       <p className="lede" style={{ marginBottom: 16 }}>{subtitle}</p>
       {error && <div className="error">{error}</div>}
-      <button className="btn btn-block" type="button" onClick={google} style={{ marginBottom: 14 }}>
+      <button className="btn btn-primary btn-block" type="button" onClick={google}>
         Continue with Google
       </button>
+      <p className="small center" style={{ margin: "12px 0 14px" }}>or use email</p>
       <form onSubmit={onSubmit}>
         <label className="field">
           <span>Email</span>
@@ -70,10 +86,30 @@ export default function SignInForm({
           <span>Password</span>
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
         </label>
-        <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
+        <button className="btn btn-block" type="submit" disabled={busy}>
           {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>
+      <p className="small center" style={{ marginTop: 12 }}>
+        <button
+          type="button"
+          onClick={forgot}
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            font: "inherit",
+            color: "inherit",
+            textDecoration: "underline",
+            cursor: "pointer",
+          }}
+        >
+          Forgot password?
+        </button>
+      </p>
+      {notice && (
+        <p className="small center" style={{ marginTop: 10 }}>{notice}</p>
+      )}
       <p className="small center" style={{ marginTop: 14 }}>
         <Link href={signupHref}>{signupText}</Link>
       </p>

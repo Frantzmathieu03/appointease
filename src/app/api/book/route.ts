@@ -7,16 +7,19 @@ import { generateConfirmationCode } from "@/lib/confirmation";
 import { isDemoShop } from "@/lib/demo";
 
 // POST /api/book
-// Body: { slug, serviceId, staffId, startsAt, name, phone, email, password?, notes? }
+// Body: { slug, serviceId, staffId, startsAt, name, phone, email, notes? }
 // - Signed-in customers book as themselves.
-// - New customers: an account is created at checkout (email + password, with
-//   the phone number they gave) — one account across all of AppointEase.
+// - New customers: an account is created at checkout with a random password
+//   they never see — no password is asked for at booking. They manage the
+//   booking through the link in their confirmation text/email, and can set
+//   a real password later from the confirmation screen. One account across
+//   all of AppointEase.
 // - The database exclusion constraint makes double-booking impossible; a
 //   lost race comes back as 409 and the client asks for a new time.
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-  const { slug, serviceId, staffId, startsAt, name, phone, email, password, notes } = body;
+  const { slug, serviceId, staffId, startsAt, name, phone, email, notes } = body;
 
   const page = await getBusinessPageData(slug);
   if (!page) return NextResponse.json({ error: "Business not found" }, { status: 404 });
@@ -80,21 +83,25 @@ export async function POST(req: NextRequest) {
   if (user) customerId = user.id;
 
   if (!customerId) {
-    if (!email || !password) {
+    if (!email) {
       return NextResponse.json(
-        { error: "Create your account (email + password) to finish booking." },
-        { status: 401 }
+        { error: "Add your email to finish booking." },
+        { status: 400 }
       );
     }
+    // Guest booking: create the account with a random, unguessable password
+    // the customer never sees. They manage this booking through the secure
+    // link in their confirmation text/email, and can claim the account by
+    // setting a real password (reset-email flow) whenever they like.
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
       email,
-      password,
+      password: crypto.randomUUID() + crypto.randomUUID(),
       email_confirm: true,
       user_metadata: { full_name: name, phone },
     });
     if (createErr || !created.user) {
       return NextResponse.json(
-        { error: "That email already has an account — sign in to finish booking." },
+        { error: "That email already has an account — sign in to finish booking, or use a different email." },
         { status: 409 }
       );
     }

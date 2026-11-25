@@ -1,4 +1,5 @@
 import SignInForm from "@/components/SignInForm";
+import BusinessContextHeader from "@/components/BusinessContextHeader";
 import { isSupabaseConfigured } from "@/lib/supabase-config";
 
 export default async function LoginPage({
@@ -15,7 +16,11 @@ export default async function LoginPage({
           You can still browse the sample business and try the booking flow.
         </div>
       )}
-      <SignInForm nextPath={next ?? "/my-appointments"} />
+      <BusinessContextHeader next={next} />
+      <SignInForm
+        nextPath={next ?? "/my-appointments"}
+        signupHref={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}
+      />
     </main>
   );
 }

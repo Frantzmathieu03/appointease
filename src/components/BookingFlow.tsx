@@ -9,11 +9,57 @@ import DatePicker from "@/components/DatePicker";
 import { demoSlotsForDay, sampleReminderPreviews } from "@/lib/demo";
 import { generateConfirmationCode } from "@/lib/confirmation";
 
+// Optional account claim shown on the confirmation screen when a guest
+// booking just created the customer's account. Booking as a guest needs
+// no password — the link in the confirmation text/email always works —
+// but a password lets the customer sign in and see everything in one
+// place. This only ever SENDS a set-password email; it never blocks or
+// delays the confirmation itself.
+function ClaimAccountCard({ email }: { email: string }) {
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  async function claim() {
+    setState("sending");
+    const supabase = createBrowserSupabase();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/set-password")}`,
+    });
+    setState(error ? "error" : "sent");
+  }
+
+  return (
+    <div className="card center" style={{ marginTop: 16 }}>
+      <h2>Your booking is saved</h2>
+      <p className="lede">
+        The link in your confirmation text and email always works to change
+        or cancel — no password needed. Want a password too, so you can sign
+        in and see all your appointments in one place?
+      </p>
+      {state === "sent" ? (
+        <p className="small">Check your email — we sent you a link to set your password.</p>
+      ) : (
+        <>
+          <button className="btn btn-primary" onClick={claim} disabled={state === "sending"}>
+            {state === "sending" ? "Sending…" : "Set a password for my account"}
+          </button>
+          {state === "error" && (
+            <p className="small" style={{ marginTop: 10 }}>
+              That didn&apos;t go through — please try again in a moment.
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 // Booking flow: service → time → details → review → confirmed.
-// Signed-in customers skip the account fields; new customers create their
-// one AppointEase account right at checkout (email + password, phone for
-// text reminders) — the /api/book route does the account + booking in one
-// step, and the database makes double-booking impossible.
+// Signed-in customers skip the account fields; new customers book as
+// guests — no password is ever asked for. The /api/book route creates
+// their one AppointEase account behind the scenes, they manage the
+// booking through the link in their confirmation text/email, and the
+// confirmation screen offers (never requires) setting a password.
+// The database makes double-booking impossible.
 export default function BookingFlow({
   slug,
   businessName,
@@ -53,7 +99,7 @@ export default function BookingFlow({
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [slot, setSlot] = useState("");
   const [signedIn, setSignedIn] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", notes: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{
@@ -149,7 +195,6 @@ export default function BookingFlow({
           name: form.name,
           phone: form.phone,
           email: form.email,
-          password: signedIn ? undefined : form.password,
           notes: form.notes || undefined,
         }),
       });
@@ -245,48 +290,51 @@ export default function BookingFlow({
 
   if (step === 5) {
     return (
-      <div className="card center">
-        <div style={{ fontSize: 40, marginBottom: 6 }}>✓</div>
-        <h2>You&apos;re booked!</h2>
-        <p className="lede">
-          {service?.name} at {businessName}
-          <br />
-          {slot && (
-            <>
-              {formatDateInZone(new Date(slot), timezone)} at {formatTimeInZone(new Date(slot), timezone)}
-            </>
-          )}
-        </p>
-        {result?.confirmationCode && (
-          <p style={{ fontSize: 18, margin: "4px 0 10px" }}>
-            Confirmation #: <strong>{result.confirmationCode}</strong>
+      <div>
+        <div className="card center">
+          <div style={{ fontSize: 40, marginBottom: 6 }}>✓</div>
+          <h2>You&apos;re booked!</h2>
+          <p className="lede">
+            {service?.name} at {businessName}
             <br />
-            <span className="small">Keep it handy — quote it if you call the business.</span>
+            {slot && (
+              <>
+                {formatDateInZone(new Date(slot), timezone)} at {formatTimeInZone(new Date(slot), timezone)}
+              </>
+            )}
           </p>
-        )}
-        {result?.demoMode ? (
-          <p className="small">
-            Demo mode: this confirmed on sample data — nothing was saved, and no
-            reminder was sent. Once the live database is connected, bookings save
-            for real and the confirmation + 24 h + 2 h reminders (when the
-            booking is made far enough ahead) go out by text and email.
-          </p>
-        ) : (
-          <p className="small">
-            A confirmation is on its way, with reminders 24 hours and 2 hours
-            before (when the booking is made far enough ahead) — each with a
-            link to reschedule or cancel.
-            {result?.accountCreated &&
-              " Your AppointEase account was created with the email and password you gave — it works at every business here."}
-          </p>
-        )}
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-          {result?.manageToken && (
-            <Link href={`/manage/${result.manageToken}`} className="btn">Manage this appointment</Link>
+          {result?.confirmationCode && (
+            <p style={{ fontSize: 18, margin: "4px 0 10px" }}>
+              Confirmation #: <strong>{result.confirmationCode}</strong>
+              <br />
+              <span className="small">Keep it handy — quote it if you call the business.</span>
+            </p>
           )}
-          <Link href="/my-appointments" className="btn btn-primary">My appointments</Link>
-          <Link href={`/${slug}`} className="btn">Back to {businessName}</Link>
+          {result?.demoMode ? (
+            <p className="small">
+              Demo mode: this confirmed on sample data — nothing was saved, and no
+              reminder was sent. Once the live database is connected, bookings save
+              for real and the confirmation + 24 h + 2 h reminders (when the
+              booking is made far enough ahead) go out by text and email.
+            </p>
+          ) : (
+            <p className="small">
+              A confirmation is on its way, with reminders 24 hours and 2 hours
+              before (when the booking is made far enough ahead) — each with a
+              link to reschedule or cancel.
+            </p>
+          )}
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+            {result?.manageToken && (
+              <Link href={`/manage/${result.manageToken}`} className="btn">Manage this appointment</Link>
+            )}
+            <Link href="/my-appointments" className="btn btn-primary">My appointments</Link>
+            <Link href={`/${slug}`} className="btn">Back to {businessName}</Link>
+          </div>
         </div>
+        {result?.accountCreated && !result?.demoMode && (
+          <ClaimAccountCard email={form.email} />
+        )}
       </div>
     );
   }
@@ -389,14 +437,11 @@ export default function BookingFlow({
             </p>
           )}
           {!signedIn && !isDemo && (
-            <label className="field">
-              <span>Create a password</span>
-              <input type="password" required minLength={8} value={form.password} onChange={set("password")} autoComplete="new-password" />
-              <span className="small" style={{ fontWeight: 400, marginTop: 4 }}>
-                This creates your AppointEase account — one login for every business here.
-                Already have one? <Link href={`/login?next=/${slug}/book`}>Sign in instead</Link>.
-              </span>
-            </label>
+            <p className="small" style={{ fontWeight: 400 }}>
+              No password needed — we text and email your confirmation with a
+              link to change or cancel anytime. Already have one?{" "}
+              <Link href={`/login?next=/${slug}/book`}>Sign in instead</Link>.
+            </p>
           )}
           <label className="field">
             <span>Notes for the business (optional)</span>
@@ -407,7 +452,7 @@ export default function BookingFlow({
             <button
               className="btn btn-primary"
               style={{ flex: 1 }}
-              disabled={!form.name || !form.phone || !form.email || (!isDemo && !signedIn && form.password.length < 8)}
+              disabled={!form.name || !form.phone || !form.email}
               onClick={() => setStep(4)}
             >
               Review booking
