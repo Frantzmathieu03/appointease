@@ -431,6 +431,139 @@ img, video { max-width: 100%; }
 .notify-text { margin: 0; font-size: 17px; line-height: 1.5; color: #f2f7f3; }
 .notify-hl { color: #a9dfb6; font-weight: 600; }
 
+/* Journey strip — the life of one appointment in four connected
+   steps. White cards and whitespace separate the steps; the arrows
+   are the only connectors (no lines). */
+.journey-steps {
+  display: flex; align-items: stretch; gap: 10px;
+  max-width: 980px; margin: 0 auto;
+}
+.journey-step {
+  flex: 1; background: var(--card); border-radius: 18px;
+  box-shadow: var(--shadow); padding: 26px 16px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; gap: 10px;
+}
+.journey-icon {
+  width: 46px; height: 46px; border-radius: 13px; background: var(--mint);
+  display: grid; place-items: center; font-size: 22px;
+}
+.journey-label { margin: 0; font-weight: 700; font-size: 15.5px; line-height: 1.35; }
+.journey-arrow {
+  align-self: center; flex: 0 0 auto;
+  color: var(--green); font-size: 19px; font-weight: 800;
+}
+
+/* Feature rows — alternating copy/visual blocks with generous
+   spacing. Visuals are built mocks on the same soft green panel as
+   the steps phone mock; no screenshots, no photos. */
+.feature-rows { padding-top: 64px; }
+.feature-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+  align-items: center; margin-bottom: 88px;
+}
+.feature-row:last-child { margin-bottom: 0; }
+.feature-row.flip .feature-copy { order: 2; }
+.feature-copy h2 { margin-bottom: 10px; }
+.feature-copy .lede { margin-bottom: 0; max-width: 42ch; }
+.mock-panel {
+  background: linear-gradient(160deg, #eef4ee 0%, #dfeee2 55%, #cfe4d4 100%);
+  border-radius: 20px; box-shadow: 0 12px 40px rgba(20, 60, 35, 0.15);
+  padding: 38px 24px; display: flex; justify-content: center; align-items: center;
+}
+
+/* Chat mock — reuses the phone frame/screen; the screen becomes a
+   flex column so outgoing bubbles can sit on the right. */
+.chat-frame { width: 300px; max-width: 100%; margin-top: 0; }
+.chat-screen { display: flex; flex-direction: column; }
+.chat-screen .bubble { max-width: 88%; }
+.chat-screen .bubble.mine {
+  align-self: flex-end;
+  border-bottom-left-radius: 16px; border-bottom-right-radius: 5px;
+}
+
+/* Mock buttons — spans styled like real buttons, inside role="img"
+   mocks only. Red stays text-only here: destructive, but calm. */
+.mock-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 16px; border-radius: 999px;
+  font-size: 14px; font-weight: 700; white-space: nowrap;
+}
+.mock-btn-primary { background: var(--green); color: #fff; }
+.mock-btn-danger { background: #fff; color: var(--red); border: 1px solid #ecc5c1; }
+
+/* Manage-appointment mock — mirrors the real /manage card: service
+   box, the two actions, then the "new time held" success strip. */
+.manage-mock {
+  background: #fff; border-radius: 18px; box-shadow: var(--shadow);
+  padding: 22px; width: 380px; max-width: 100%;
+}
+.manage-biz {
+  margin: 0 0 2px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+}
+.manage-title { margin: 0 0 14px; font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
+.manage-appt { background: #f4f8f4; border-radius: 14px; padding: 14px 16px; }
+.manage-service { margin: 0 0 3px; font-weight: 700; font-size: 15.5px; }
+.manage-when { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.manage-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.manage-actions .mock-btn { flex: 1; }
+.manage-success {
+  margin: 14px 0 0; background: var(--mint); color: var(--green-dark);
+  border-radius: 12px; padding: 11px 14px;
+  font-size: 14px; font-weight: 600; line-height: 1.45;
+  display: flex; gap: 8px;
+}
+
+/* Dashboard mock — mirrors the real owner Today page: business +
+   tabs header, appointment rows as soft blocks (no divider lines),
+   status chips, and the booking-link row. */
+.dash-mock {
+  background: #fff; border-radius: 18px; box-shadow: var(--shadow);
+  padding: 22px; width: 420px; max-width: 100%;
+}
+.dash-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.dash-biz { font-weight: 800; font-size: 15.5px; }
+.dash-tabs { display: flex; gap: 12px; align-items: center; font-size: 13px; color: var(--muted); }
+.dash-tab.active { color: var(--green); font-weight: 700; }
+.dash-badge {
+  background: var(--green); color: #fff; border-radius: 999px;
+  font-size: 11px; font-weight: 800; padding: 1px 7px; vertical-align: 1px;
+}
+.dash-title { margin: 0 0 12px; font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
+.dash-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  background: #f4f8f4; border-radius: 14px; padding: 11px 14px; margin-bottom: 8px;
+}
+.dash-who { margin: 0; font-size: 14.5px; font-weight: 600; }
+.dash-time { color: var(--green-dark); font-weight: 800; }
+.dash-what { margin: 1px 0 0; font-size: 13px; color: var(--muted); }
+.dash-chip {
+  background: var(--mint); color: var(--green-dark);
+  font-size: 11px; font-weight: 700; padding: 3px 9px;
+  border-radius: 999px; flex: 0 0 auto;
+}
+.dash-linkrow { display: flex; gap: 8px; margin-top: 14px; }
+.dash-url {
+  flex: 1; min-width: 0; background: #f4f8f4; border-radius: 999px;
+  padding: 10px 14px; font-size: 13.5px; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: inline-flex; align-items: center;
+}
+
+@media (max-width: 900px) {
+  .feature-row { grid-template-columns: 1fr; gap: 30px; margin-bottom: 64px; }
+  .feature-row.flip .feature-copy { order: 0; }
+  .feature-copy { text-align: center; }
+  .feature-copy .lede { margin-left: auto; margin-right: auto; }
+  .journey-steps { flex-wrap: wrap; }
+  .journey-step { flex: 1 1 40%; }
+  .journey-arrow { display: none; }
+}
+
 /* Benefits carousel — scroll-snap row of honest benefit cards */
 .carousel {
   display: flex; gap: 16px; overflow-x: auto;

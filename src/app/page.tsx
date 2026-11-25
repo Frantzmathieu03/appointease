@@ -156,6 +156,163 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Journey strip — the life of one appointment, link to front
+            door. The setup steps above are the owner's path; this is
+            the customer's. Labels only, no repeated copy. */}
+        <section className="mkt-section">
+          <div className="section-head">
+            <p className="eyebrow">How a booking flows</p>
+            <h2>From your link to your front door</h2>
+            <p className="lede">Every appointment follows the same path — and most of it runs itself.</p>
+          </div>
+          <div className="journey-steps">
+            <div className="journey-step">
+              <div className="journey-icon" aria-hidden="true">🔗</div>
+              <p className="journey-label">Share your booking link</p>
+            </div>
+            <span className="journey-arrow" aria-hidden="true">→</span>
+            <div className="journey-step">
+              <div className="journey-icon" aria-hidden="true">📅</div>
+              <p className="journey-label">Clients book themselves, 24/7</p>
+            </div>
+            <span className="journey-arrow" aria-hidden="true">→</span>
+            <div className="journey-step">
+              <div className="journey-icon" aria-hidden="true">🔔</div>
+              <p className="journey-label">Reminders go out on their own</p>
+            </div>
+            <span className="journey-arrow" aria-hidden="true">→</span>
+            <div className="journey-step">
+              <div className="journey-icon" aria-hidden="true">✅</div>
+              <p className="journey-label">They show up</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Feature rows — three deeper looks at the product, alternating
+            sides. All visuals are built mocks (like the phone mock
+            above), and each example uses a different business than the
+            sections around it. Claims match the live product only. */}
+        <section className="mkt-section feature-rows">
+          {/* Two-way messaging */}
+          <div className="feature-row">
+            <div className="feature-copy">
+              <p className="eyebrow">Messaging</p>
+              <h2>Questions get answered in one thread</h2>
+              <p className="lede">
+                Customers message you from their booking, and you reply from your
+                dashboard inbox — the unread count keeps anything from slipping by.
+              </p>
+            </div>
+            <div className="mock-panel" role="img" aria-label="A message thread between a client named Daniel and Harbor Lane Law about moving a consultation to Friday at 10:30 AM">
+              <div className="phone-frame chat-frame">
+                <div className="phone-screen chat-screen">
+                  <div className="phone-head">
+                    <span className="phone-avatar">H</span>
+                    <div>
+                      <div className="phone-name">Harbor Lane Law</div>
+                      <div className="phone-sub">Message</div>
+                    </div>
+                  </div>
+                  <div className="bubble">
+                    Hi, this is Daniel. My consultation is Thursday at 2:00 —
+                    could I move it to Friday morning instead?
+                  </div>
+                  <div className="bubble mine">
+                    Hi Daniel — Friday at <strong>10:30 AM</strong> is open. Tap
+                    the link in your confirmation text to move it, and it lands
+                    on my calendar right away.
+                  </div>
+                  <div className="bubble">
+                    Done — Friday at 10:30 it is. Thank you!
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Self-service rescheduling */}
+          <div className="feature-row flip">
+            <div className="feature-copy">
+              <p className="eyebrow">Reschedule &amp; cancel</p>
+              <h2>Clients fix their own appointments</h2>
+              <p className="lede">
+                Every confirmation and reminder carries a secure link, so clients
+                move or cancel their own visits — your calendar updates, and
+                nobody plays phone tag.
+              </p>
+            </div>
+            <div className="mock-panel" role="img" aria-label="A customer's manage-appointment card for a dental visit, with Reschedule and Cancel buttons and a note that a new time is held">
+              <div className="manage-mock">
+                <p className="manage-biz">Northgate Dental</p>
+                <p className="manage-title">Manage your appointment</p>
+                <div className="manage-appt">
+                  <p className="manage-service">Cleaning &amp; checkup</p>
+                  <p className="manage-when">Thursday at 9:00 AM · Confirmation #: AE-4H8K2D</p>
+                </div>
+                <div className="manage-actions">
+                  <span className="mock-btn mock-btn-primary">Reschedule</span>
+                  <span className="mock-btn mock-btn-danger">Cancel appointment</span>
+                </div>
+                <p className="manage-success">
+                  <span aria-hidden="true">✓</span>
+                  <span>New time held — Friday at 11:30 AM. Fresh reminders are on their way.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Owner dashboard */}
+          <div className="feature-row">
+            <div className="feature-copy">
+              <p className="eyebrow">Owner dashboard</p>
+              <h2>The whole day, on one screen</h2>
+              <p className="lede">
+                Today&apos;s appointments, your calendar, your customers and your
+                inbox — plus your booking link, always one tap from being shared.
+              </p>
+            </div>
+            <div className="mock-panel" role="img" aria-label="The owner dashboard showing today's appointments at a hair salon, with a copy booking link button">
+              <div className="dash-mock">
+                <div className="dash-head">
+                  <span className="dash-biz">Luxe Locks Salon</span>
+                  <span className="dash-tabs">
+                    <span className="dash-tab active">Today</span>
+                    <span className="dash-tab">Calendar</span>
+                    <span className="dash-tab">Customers</span>
+                    <span className="dash-tab">Inbox <span className="dash-badge">2</span></span>
+                  </span>
+                </div>
+                <p className="dash-title">Today</p>
+                <div className="dash-row">
+                  <div>
+                    <p className="dash-who"><span className="dash-time">9:00 AM</span> — Alicia Gomez</p>
+                    <p className="dash-what">Cut &amp; color</p>
+                  </div>
+                  <span className="dash-chip">Confirmed</span>
+                </div>
+                <div className="dash-row">
+                  <div>
+                    <p className="dash-who"><span className="dash-time">10:30 AM</span> — Beth Carter</p>
+                    <p className="dash-what">Blowout &amp; finish</p>
+                  </div>
+                  <span className="dash-chip">Confirmed</span>
+                </div>
+                <div className="dash-row">
+                  <div>
+                    <p className="dash-who"><span className="dash-time">12:15 PM</span> — Rosa Diaz</p>
+                    <p className="dash-what">Balayage</p>
+                  </div>
+                  <span className="dash-chip">Confirmed</span>
+                </div>
+                <div className="dash-linkrow">
+                  <span className="dash-url">appointease.io/luxe-locks-salon</span>
+                  <span className="mock-btn mock-btn-primary">Copy booking link</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Benefits carousel — the single benefits section (the old
             Features grid repeated these points and was removed; its one
             unique point, two-way messaging, is a carousel card now).
