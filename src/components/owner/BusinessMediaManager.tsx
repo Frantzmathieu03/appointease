@@ -60,7 +60,8 @@ export default function BusinessMediaManager({
       .from(BUCKET)
       .upload(path, file, { contentType: file.type });
     if (upErr) {
-      setError(`Upload failed: ${upErr.message}`);
+      console.error("Media upload failed", upErr);
+      setError("That upload didn't go through. Check your connection and try again.");
       return null;
     }
     return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
@@ -78,7 +79,8 @@ export default function BusinessMediaManager({
         .update({ logo_url: url })
         .eq("id", businessId);
       if (dbErr) {
-        setError(`Couldn't save the logo: ${dbErr.message}`);
+        console.error("Logo save failed", dbErr);
+        setError("Your logo uploaded but couldn't be saved. Please try again.");
       } else {
         setLogoUrl(url);
         if (old) {
@@ -100,7 +102,8 @@ export default function BusinessMediaManager({
       .update({ logo_url: null })
       .eq("id", businessId);
     if (dbErr) {
-      setError(`Couldn't remove the logo: ${dbErr.message}`);
+      console.error("Logo remove failed", dbErr);
+      setError("That logo couldn't be removed. Please try again.");
     } else {
       const oldPath = logoUrl ? storagePathFromUrl(logoUrl) : null;
       setLogoUrl(null);
@@ -126,7 +129,8 @@ export default function BusinessMediaManager({
         .select("*")
         .single();
       if (dbErr || !data) {
-        setError(`Couldn't save the photo: ${dbErr?.message ?? "unknown error"}`);
+        console.error("Photo save failed", dbErr);
+        setError("That photo couldn't be saved. Please try again.");
         const path = storagePathFromUrl(url);
         if (path) await supabase.storage.from(BUCKET).remove([path]);
       } else {
@@ -143,7 +147,8 @@ export default function BusinessMediaManager({
     const supabase = createBrowserSupabase();
     const { error: dbErr } = await supabase.from("business_photos").delete().eq("id", photo.id);
     if (dbErr) {
-      setError(`Couldn't remove the photo: ${dbErr.message}`);
+      console.error("Photo remove failed", dbErr);
+      setError("That photo couldn't be removed. Please try again.");
     } else {
       setPhotos(photos.filter((p) => p.id !== photo.id));
       const path = storagePathFromUrl(photo.url);
