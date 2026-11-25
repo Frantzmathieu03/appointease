@@ -55,6 +55,41 @@ export default async function MyAppointmentsPage() {
     .eq("customer_id", user.id);
   const reviewed = new Set((myReviews ?? []).map((r) => r.appointment_id));
 
+  // Shared visit summaries (migration 0010): when a business shares a
+  // visit summary, the customer sees it here with their own to-dos.
+  // RLS only ever returns this customer's shared notes — internal notes
+  // are never visible on this side. Empty until the migration lands.
+  interface SharedNote {
+    appointment_id: string;
+    shared_summary: string | null;
+    steps: { id: string; text: string; due_date: string | null; done_at: string | null }[];
+  }
+  const sharedByAppt = new Map<string, SharedNote>();
+  const { data: sharedNotes } = await supabase
+    .from("visit_notes")
+    .select("id, appointment_id, shared_summary")
+    .eq("customer_id", user.id)
+    .eq("visibility", "shared");
+  if (sharedNotes && sharedNotes.length > 0) {
+    const { data: stepRows } = await supabase
+      .from("next_steps")
+      .select("id, visit_note_id, text, due_date, done_at")
+      .in(
+        "visit_note_id",
+        sharedNotes.map((n) => n.id)
+      )
+      .eq("owner", "client");
+    for (const n of sharedNotes) {
+      sharedByAppt.set(n.appointment_id, {
+        appointment_id: n.appointment_id,
+        shared_summary: n.shared_summary,
+        steps: (stepRows ?? [])
+          .filter((s) => s.visit_note_id === n.id)
+          .map((s) => ({ id: s.id, text: s.text, due_date: s.due_date, done_at: s.done_at })),
+      });
+    }
+  }
+
   const now = Date.now();
   const isUpcoming = (a: ApptRow) =>
     a.status === "confirmed" && new Date(a.starts_at).getTime() >= now;
@@ -96,6 +131,25 @@ export default async function MyAppointmentsPage() {
             </Link>
           )}
         </div>
+        {sharedByAppt.get(a.id)?.shared_summary && (
+          <div style={{ margin: "0 0 10px" }}>
+            <p className="small" style={{ margin: "2px 0" }}>
+              <strong>Visit summary from {a.businesses?.name}:</strong>{" "}
+              {sharedByAppt.get(a.id)!.shared_summary}
+            </p>
+            {sharedByAppt.get(a.id)!.steps.length > 0 && (
+              <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
+                {sharedByAppt.get(a.id)!.steps.map((s) => (
+                  <li key={s.id} className="small" style={{ textDecoration: s.done_at ? "line-through" : "none" }}>
+                    {s.text}
+                    {s.due_date ? ` · by ${s.due_date}` : ""}
+                    {s.done_at ? " · done" : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
         {a.status !== "confirmed" || new Date(a.starts_at).getTime() < now ? (
           !reviewed.has(a.id) && a.status !== "cancelled" ? (
             <ReviewForm appointmentId={a.id} />

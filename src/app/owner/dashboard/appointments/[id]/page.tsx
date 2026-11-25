@@ -2,6 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireBusiness, siteUrl } from "@/lib/owner";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
+import AssignControl from "@/components/owner/AssignControl";
+import VisitNotes, { type NoteBundle } from "@/components/owner/VisitNotes";
+import type { NextStep, StaffMember, VisitNote, VisitNoteAddendum } from "@/lib/types";
 
 interface Appt {
   id: string;
@@ -40,7 +43,7 @@ export default async function DashboardAppointmentPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, business } = await requireBusiness();
+  const { supabase, user, business } = await requireBusiness();
   const tz = business.timezone;
 
   const { data } = await supabase
@@ -60,6 +63,53 @@ export default async function DashboardAppointmentPage({
     .eq("appointment_id", appt.id)
     .order("scheduled_at", { ascending: true });
   const reminders = (remData ?? []) as Reminder[];
+
+  // Assignment + staff list (migration 0010). Both degrade quietly until
+  // the migration is applied: no assignment row, empty staff is fine.
+  const { data: staffRows } = await supabase
+    .from("staff")
+    .select("id, business_id, name, active")
+    .eq("business_id", business.id)
+    .eq("active", true)
+    .order("created_at", { ascending: true });
+  const staff = (staffRows ?? []) as StaffMember[];
+  const { data: relRow } = await supabase
+    .from("business_customers")
+    .select("assigned_staff_id")
+    .eq("business_id", business.id)
+    .eq("customer_id", appt.customer_id)
+    .maybeSingle();
+  const assignedStaffId =
+    (relRow as { assigned_staff_id?: string | null } | null)?.assigned_staff_id ?? null;
+
+  // Visit notes for this appointment (migration 0010) — empty until the
+  // migration lands or the first note is written.
+  const { data: noteRows } = await supabase
+    .from("visit_notes")
+    .select("*")
+    .eq("appointment_id", appt.id)
+    .order("created_at", { ascending: true });
+  const notes = (noteRows ?? []) as VisitNote[];
+  let bundles: NoteBundle[] = [];
+  if (notes.length > 0) {
+    const noteIds = notes.map((n) => n.id);
+    const [{ data: addRows }, { data: stepRows }] = await Promise.all([
+      supabase
+        .from("visit_note_addenda")
+        .select("*")
+        .in("visit_note_id", noteIds)
+        .order("created_at", { ascending: true }),
+      supabase.from("next_steps").select("*").in("visit_note_id", noteIds).order("created_at", { ascending: true }),
+    ]);
+    const addenda = (addRows ?? []) as VisitNoteAddendum[];
+    const steps = (stepRows ?? []) as NextStep[];
+    bundles = notes.map((n) => ({
+      note: n,
+      addenda: addenda.filter((a) => a.visit_note_id === n.id),
+      steps: steps.filter((s) => s.visit_note_id === n.id),
+    }));
+  }
+  const isPast = new Date(appt.starts_at).getTime() < Date.now();
 
   const startsAt = new Date(appt.starts_at);
   const statusChip =
@@ -130,9 +180,22 @@ export default async function DashboardAppointmentPage({
             {[appt.customers?.phone, appt.customers?.email].filter(Boolean).join(" · ")}
           </p>
         )}
+        <p style={{ margin: "8px 0 0" }}>
+          <AssignControl
+            businessId={business.id}
+            customerId={appt.customer_id}
+            staff={staff}
+            assignedStaffId={assignedStaffId}
+            actorId={user.id}
+            compact
+          />
+        </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-          <Link href={`/owner/dashboard/inbox/${appt.customer_id}`} className="btn">
+          <Link href={`/owner/dashboard/customers/${appt.customer_id}`} className="btn">
             Customer profile
+          </Link>
+          <Link href={`/owner/dashboard/inbox/${appt.customer_id}`} className="btn">
+            Message customer
           </Link>
           <a href={manageUrl} className="btn" target="_blank" rel="noreferrer">
             Open the customer&apos;s manage page
@@ -167,6 +230,18 @@ export default async function DashboardAppointmentPage({
           );
         })}
       </div>
+
+      {(isPast || bundles.length > 0 || appt.status === "completed" || appt.status === "no_show") && (
+        <VisitNotes
+          businessId={business.id}
+          customerId={appt.customer_id}
+          appointmentId={appt.id}
+          appointmentStatus={appt.status}
+          actorId={user.id}
+          tz={tz}
+          bundles={bundles}
+        />
+      )}
     </div>
   );
 }

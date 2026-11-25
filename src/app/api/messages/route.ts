@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { notifyNewMessage } from "@/lib/dispatch";
 import { ensureCustomerProfile } from "@/lib/profile";
+import { logCustomerEvent } from "@/lib/events";
 
 // POST /api/messages  { businessId, customerId?, body }
 // Sends one chat message in a (business, customer) thread.
@@ -77,6 +78,17 @@ export async function POST(req: NextRequest) {
   if (error || !message) {
     return NextResponse.json({ error: "Message failed to send." }, { status: 500 });
   }
+
+  // Timeline: count-level only — message bodies are never copied into
+  // the event log (migration 0010).
+  await logCustomerEvent(admin, {
+    businessId,
+    customerId,
+    type: "message",
+    actorType: isOwner ? "team_member" : "customer",
+    actorId: user.id,
+    details: { count: 1, sender },
+  });
 
   // Alert the other side — failures here never fail the message itself;
   // every attempt is recorded in notifications_log by the dispatcher.

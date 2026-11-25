@@ -84,6 +84,89 @@ export interface Appointment {
   manage_token: string;
   confirmation_code: string; // "AE-XXXXXX" (migration 0005)
   created_at: string;
+  // Optional: only present when selected. cancellation_reason is from
+  // migration 0002; cancelled_by / completed_at from migration 0010.
+  cancellation_reason?: string | null;
+  cancelled_by?: string | null;
+  completed_at?: string | null;
+}
+
+// --- Customer history (migration 0010) ------------------------------------
+// Payment event types are intentionally absent: AppointEase never receives
+// or holds client money, so there is nothing to log about payments.
+export type CustomerEventType =
+  | "registered"
+  | "booked"
+  | "rescheduled"
+  | "cancelled"
+  | "no_show"
+  | "completed"
+  | "form_submitted"
+  | "reminder_sent"
+  | "message"
+  | "assigned"
+  | "note_added"
+  | "profile_changed";
+
+export type EventActorType = "customer" | "team_member" | "system";
+
+export interface CustomerEvent {
+  id: string;
+  business_id: string;
+  customer_id: string;
+  appointment_id: string | null;
+  type: CustomerEventType;
+  actor_type: EventActorType;
+  actor_id: string | null;
+  details: Record<string, unknown>;
+  created_at: string;
+}
+
+export type VisitNoteOutcome = "completed" | "no_show" | "cancelled_late" | "rescheduled";
+
+export interface VisitNote {
+  id: string;
+  business_id: string;
+  appointment_id: string;
+  customer_id: string;
+  author_id: string | null;
+  outcome: VisitNoteOutcome;
+  discussed: string;
+  customer_actions: string;
+  visibility: "internal" | "shared";
+  shared_summary: string | null;
+  locked_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VisitNoteAddendum {
+  id: string;
+  visit_note_id: string;
+  author_id: string | null;
+  body: string;
+  created_at: string;
+}
+
+export interface NextStep {
+  id: string;
+  visit_note_id: string;
+  business_id: string;
+  customer_id: string;
+  text: string;
+  owner: "client" | "team";
+  due_date: string | null;
+  done_at: string | null;
+  done_by: string | null;
+  created_at: string;
+}
+
+/** Per-business relationship row (business_customers), with assignment. */
+export interface BusinessCustomerRel {
+  business_id: string;
+  customer_id: string;
+  assigned_staff_id: string | null;
+  created_at: string;
 }
 
 export interface Message {

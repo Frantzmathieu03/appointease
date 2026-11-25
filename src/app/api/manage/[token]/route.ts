@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { cancelReminders, rescheduleReminders } from "@/lib/reminders";
+import { logCustomerEvent } from "@/lib/events";
 
 // Secure manage link from reminder messages: /manage/<token>
 // GET                                  — appointment details for the page
@@ -40,7 +41,7 @@ export async function POST(
 
   const { data: appt } = await admin
     .from("appointments")
-    .select("id, starts_at, ends_at, status, service_id, services:service_id ( duration_minutes )")
+    .select("id, starts_at, ends_at, status, business_id, customer_id, service_id, services:service_id ( duration_minutes )")
     .eq("manage_token", token)
     .single();
   if (!appt) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
@@ -49,15 +50,34 @@ export async function POST(
   }
 
   if (body?.action === "cancel") {
-    const { error } = await admin
+    const reason = body.reason ? String(body.reason).slice(0, 200) : null;
+    // cancelled_by arrives with migration 0010; until it is applied, fall
+    // back to the pre-0010 column set so cancelling never breaks.
+    let { error } = await admin
       .from("appointments")
       .update({
         status: "cancelled",
-        cancellation_reason: body.reason ? String(body.reason).slice(0, 200) : null,
+        cancellation_reason: reason,
+        cancelled_by: "customer",
       })
       .eq("id", appt.id);
+    if (error) {
+      ({ error } = await admin
+        .from("appointments")
+        .update({ status: "cancelled", cancellation_reason: reason })
+        .eq("id", appt.id));
+    }
     if (error) return NextResponse.json({ error: "Cancel failed" }, { status: 500 });
     await cancelReminders(admin, appt.id);
+    await logCustomerEvent(admin, {
+      businessId: appt.business_id,
+      customerId: appt.customer_id,
+      appointmentId: appt.id,
+      type: "cancelled",
+      actorType: "customer",
+      actorId: appt.customer_id,
+      details: { reason, was_starts_at: appt.starts_at },
+    });
     return NextResponse.json({ ok: true, status: "cancelled" });
   }
 
@@ -83,6 +103,15 @@ export async function POST(
       return NextResponse.json({ error: "Reschedule failed" }, { status: 500 });
     }
     await rescheduleReminders(admin, appt.id, start);
+    await logCustomerEvent(admin, {
+      businessId: appt.business_id,
+      customerId: appt.customer_id,
+      appointmentId: appt.id,
+      type: "rescheduled",
+      actorType: "customer",
+      actorId: appt.customer_id,
+      details: { from: appt.starts_at, to: start.toISOString() },
+    });
     return NextResponse.json({ ok: true, startsAt: start.toISOString() });
   }
 

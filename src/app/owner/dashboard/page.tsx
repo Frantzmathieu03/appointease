@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireBusiness, siteUrl } from "@/lib/owner";
-import { formatTimeInZone, zonedTimeToUtc } from "@/lib/slots";
+import { formatDateInZone, formatTimeInZone, zonedTimeToUtc } from "@/lib/slots";
 import CopyLinkButton from "@/components/CopyLinkButton";
 
 interface Row {
@@ -71,6 +71,54 @@ export default async function DashboardTodayPage() {
     .eq("sender", "customer")
     .is("read_at", null);
 
+  // Needs attention (PDF §3 / migration 0010): past appointments in the
+  // last 30 days with no visit note, and customers with no staff
+  // assignment. Both queries degrade quietly until the migration lands.
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const { data: pastAppts } = await supabase
+    .from("appointments")
+    .select("id, starts_at, customers:customer_id ( full_name ), services:service_id ( name )")
+    .eq("business_id", business.id)
+    .neq("status", "cancelled")
+    .gte("starts_at", thirtyDaysAgo)
+    .lt("starts_at", new Date().toISOString())
+    .order("starts_at", { ascending: false })
+    .limit(50);
+  let withoutNotes: { id: string; starts_at: string; label: string }[] = [];
+  if (pastAppts && pastAppts.length > 0) {
+    const { data: noteRows, error: noteErr } = await supabase
+      .from("visit_notes")
+      .select("appointment_id")
+      .in(
+        "appointment_id",
+        pastAppts.map((a) => a.id)
+      );
+    if (!noteErr) {
+      const noted = new Set((noteRows ?? []).map((n) => n.appointment_id));
+      withoutNotes = pastAppts
+        .filter((a) => !noted.has(a.id))
+        .slice(0, 5)
+        .map((a) => {
+          const row = a as unknown as {
+            id: string;
+            starts_at: string;
+            customers: { full_name: string } | null;
+            services: { name: string } | null;
+          };
+          return {
+            id: row.id,
+            starts_at: row.starts_at,
+            label: `${row.customers?.full_name ?? "Customer"} · ${row.services?.name ?? "Appointment"}`,
+          };
+        });
+    }
+  }
+  const { count: unassignedCount } = await supabase
+    .from("business_customers")
+    .select("customer_id", { count: "exact", head: true })
+    .eq("business_id", business.id)
+    .is("assigned_staff_id", null);
+
   const niceDate = new Intl.DateTimeFormat("en-US", {
     timeZone: tz,
     weekday: "long",
@@ -104,6 +152,32 @@ export default async function DashboardTodayPage() {
           You have {unread} unread customer message{unread === 1 ? "" : "s"} —{" "}
           <Link href="/owner/dashboard/inbox">open your inbox</Link>. (They were also
           emailed to you when they arrived.)
+        </div>
+      )}
+
+      {(withoutNotes.length > 0 || (unassignedCount ?? 0) > 0) && (
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>Needs attention</h3>
+          {(unassignedCount ?? 0) > 0 && (
+            <p className="small" style={{ margin: "2px 0" }}>
+              {unassignedCount} customer{unassignedCount === 1 ? " is" : "s are"} not assigned
+              to a team member — <Link href="/owner/dashboard/customers">assign them</Link>.
+            </p>
+          )}
+          {withoutNotes.length > 0 && (
+            <>
+              <p className="small" style={{ margin: "6px 0 2px" }}>
+                <strong>Visits without notes</strong> (last 30 days):
+              </p>
+              {withoutNotes.map((a) => (
+                <p key={a.id} className="small" style={{ margin: "2px 0" }}>
+                  <Link href={`/owner/dashboard/appointments/${a.id}`}>
+                    {formatDateInZone(new Date(a.starts_at), tz)} · {a.label}
+                  </Link>
+                </p>
+              ))}
+            </>
+          )}
         </div>
       )}
 

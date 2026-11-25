@@ -5,6 +5,7 @@ import { scheduleReminders } from "@/lib/reminders";
 import { getBillingState } from "@/lib/plans";
 import { generateConfirmationCode } from "@/lib/confirmation";
 import { isDemoShop } from "@/lib/demo";
+import { logCustomerEvent } from "@/lib/events";
 
 // POST /api/book
 // Body: { slug, serviceId, staffId, startsAt, name, phone, email, notes? }
@@ -106,6 +107,15 @@ export async function POST(req: NextRequest) {
       );
     }
     customerId = created.user.id;
+    // Timeline: a brand-new account was created at this checkout.
+    await logCustomerEvent(admin, {
+      businessId: page.business.id,
+      customerId,
+      type: "registered",
+      actorType: "customer",
+      actorId: customerId,
+      details: { via: "guest booking checkout" },
+    });
   }
 
   // Global customer profile (one per person, across all businesses).
@@ -168,6 +178,23 @@ export async function POST(req: NextRequest) {
   }
 
   await scheduleReminders(admin, appt.id, start);
+
+  // Timeline: the booking itself (migration 0010). Guest bookings are
+  // still "by customer" — the account was created for them at checkout.
+  await logCustomerEvent(admin, {
+    businessId: page.business.id,
+    customerId,
+    appointmentId: appt.id,
+    type: "booked",
+    actorType: "customer",
+    actorId: customerId,
+    details: {
+      service_name: service.name,
+      starts_at: start.toISOString(),
+      staff_id: staffId || null,
+      confirmation_code: appt.confirmation_code,
+    },
+  });
 
   return NextResponse.json({
     ok: true,
