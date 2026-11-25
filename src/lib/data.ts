@@ -58,8 +58,7 @@ export async function getBusinessPageData(slug: string): Promise<BusinessPageDat
   };
 }
 
-/** Hours summary like "Mon–Sat · 9:00 AM–6:00 PM" for page headers. */
-export function hoursSummary(availability: Availability[]): string {
+/** Hours summary like "Mon–Sat · 9:00 AM–6:00 PM" for page headers. */export function hoursSummary(availability: Availability[]): string {
   const byDay = new Map<number, Availability>();
   for (const a of availability) {
     if (a.staff_id === null && !byDay.has(a.weekday)) byDay.set(a.weekday, a);
@@ -79,4 +78,90 @@ export function hoursSummary(availability: Availability[]): string {
       ? `${names[days[0]]}–${names[days[days.length - 1]]}`
       : days.map((d) => names[d]).join(", ");
   return `${range} · ${fmt(first.open_time)}–${fmt(first.close_time)}`;
+}
+
+/** One row of the /explore marketplace directory. */
+export interface DirectoryBusiness {
+  id: string;
+  slug: string;
+  name: string;
+  address: string | null;
+  logo_url: string | null;
+  category: string;
+  photoUrl: string | null;
+}
+
+/**
+ * All published businesses for /explore, with each business's first
+ * gallery photo. Defensive about migration 0007: if the category column
+ * doesn't exist yet, the select errors and we retry without it, listing
+ * every business as uncategorized ("other") instead of failing the page.
+ */
+export async function getPublishedBusinesses(): Promise<{
+  businesses: DirectoryBusiness[];
+  demoMode: boolean;
+}> {
+  if (!isSupabaseConfigured()) {
+    return {
+      businesses: [
+        {
+          id: DEMO_BUSINESS.id,
+          slug: DEMO_BUSINESS.slug,
+          name: DEMO_BUSINESS.name,
+          address: DEMO_BUSINESS.address,
+          logo_url: DEMO_BUSINESS.logo_url,
+          category: "barbershops",
+          photoUrl: null,
+        },
+      ],
+      demoMode: true,
+    };
+  }
+
+  const supabase = await createServerSupabase();
+  const baseCols = "id, slug, name, address, logo_url";
+  type Row = Record<string, unknown>;
+  let rows: Row[] = [];
+  const withCategory = await supabase
+    .from("businesses")
+    .select(`${baseCols}, category`)
+    .eq("published", true)
+    .order("name", { ascending: true });
+  if (withCategory.error) {
+    const fallback = await supabase
+      .from("businesses")
+      .select(baseCols)
+      .eq("published", true)
+      .order("name", { ascending: true });
+    rows = ((fallback.data ?? []) as Row[]).map((r) => ({ ...r, category: "other" }));
+  } else {
+    rows = (withCategory.data ?? []) as Row[];
+  }
+
+  const ids = rows.map((r) => r.id as string);
+  const firstPhoto = new Map<string, string>();
+  if (ids.length > 0) {
+    const { data: photos } = await supabase
+      .from("business_photos")
+      .select("business_id, url")
+      .in("business_id", ids)
+      .order("position", { ascending: true })
+      .order("created_at", { ascending: true });
+    for (const p of photos ?? []) {
+      if (!firstPhoto.has(p.business_id)) firstPhoto.set(p.business_id, p.url);
+    }
+  }
+
+  return {
+    businesses: rows.map((r) => ({
+      id: r.id as string,
+      slug: r.slug as string,
+      name: r.name as string,
+      address: (r.address as string | null) ?? null,
+      logo_url: (r.logo_url as string | null) ?? null,
+      category: (r.category as string | null) ?? "other",
+      photoUrl: firstPhoto.get(r.id as string) ?? null,
+    })),
+    demoMode: false,
+  };
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { slugify } from "@/lib/types";
 import { BUSINESS_TYPES } from "@/lib/owner-shared";
+import { CATEGORIES, DEFAULT_CATEGORY } from "@/lib/categories";
 
 /**
  * Creates the owner's business row with its slug reserved
@@ -15,6 +16,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
   const router = useRouter();
   const [name, setName] = useState("");
   const [type, setType] = useState(BUSINESS_TYPES[0]);
+  const [category, setCategory] = useState(DEFAULT_CATEGORY);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -46,6 +48,10 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
       });
       if (!error) {
         created = true;
+        // Category lives in its own column (migration 0007). Set it as a
+        // best-effort follow-up so business creation never breaks if the
+        // migration hasn't been applied yet.
+        await supabase.from("businesses").update({ category }).eq("slug", slug);
       } else if ((error as { code?: string }).code !== "23505") {
         setError("Could not create the business — please try again.");
         break;
@@ -77,6 +83,14 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         <select value={type} onChange={(e) => setType(e.target.value)}>
           {BUSINESS_TYPES.map((t) => (
             <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </label>
+      <label className="field">
+        <span>Category (customers find you by this)</span>
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          {CATEGORIES.map((c) => (
+            <option key={c.slug} value={c.slug}>{c.label}</option>
           ))}
         </select>
       </label>

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { PLANS, formatPlanPrice } from "@/lib/plans";
+import { TILE_CATEGORIES } from "@/lib/categories";
+import CategoryIcon from "@/components/CategoryIcon";
 
 const BENEFITS = [
   { icon: "📞", title: "No more phone tag", line: "Customers book themselves online, so your phone stays free for the work." },
@@ -38,7 +40,7 @@ export default function HomePage() {
             <img className="hero-bg-img" src="/images/salon-action.jpg" alt="" aria-hidden="true" />
             <div className="hero-overlay" />
             <div className="hero-content">
-              <p className="eyebrow">Online booking for small businesses</p>
+              <p className="hero-badge"><span className="hero-badge-dot" />Built for local businesses across the U.S. &amp; beyond</p>
               <h1>Let customers book.<br />Get back to work.</h1>
               <p className="hero-sub">Your booking page with automatic reminders — fewer no-shows, less phone time.</p>
               <div className="hero-ctas">
@@ -55,34 +57,26 @@ export default function HomePage() {
             <p className="eyebrow">How it works</p>
             <h2>Live in three steps</h2>
           </div>
-          <div className="split">
-            <div>
-              <div className="step-row">
-                <span className="step-num">1</span>
-                <div>
-                  <h3>Create your page</h3>
-                  <p>Add your services, prices and hours. Your page gets its own link — appointease.io/your-business.</p>
-                </div>
-              </div>
-              <div className="step-row">
-                <span className="step-num">2</span>
-                <div>
-                  <h3>Share your link</h3>
-                  <p>Put it on Google, Instagram, your website, or send it by text. Customers pick a time and book in under a minute.</p>
-                </div>
-              </div>
-              <div className="step-row">
-                <span className="step-num">3</span>
-                <div>
-                  <h3>Get booked &amp; reminded</h3>
-                  <p>Confirmations and reminders go out by text and email automatically — every booking, every time.</p>
-                </div>
-              </div>
+          <div className="steps-grid">
+            <div className="step">
+              <span className="step-num">1</span>
+              <h3>Create your page</h3>
+              <p>Add your services, prices and hours. Your page gets its own link — appointease.io/your-business.</p>
             </div>
-            <div className="split-media">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/booking-phone.jpg" alt="A business owner checking bookings on a phone" />
+            <div className="step">
+              <span className="step-num">2</span>
+              <h3>Share your link</h3>
+              <p>Put it on Google, Instagram, your website, or send it by text. Customers pick a time and book in under a minute.</p>
             </div>
+            <div className="step">
+              <span className="step-num">3</span>
+              <h3>Get booked &amp; reminded</h3>
+              <p>Confirmations and reminders go out by text and email automatically — every booking, every time.</p>
+            </div>
+          </div>
+          <div className="steps-media">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/booking-phone.jpg" alt="A business owner checking bookings on a phone" />
           </div>
         </section>
 
@@ -171,31 +165,18 @@ export default function HomePage() {
             <p className="eyebrow">Who it&apos;s for</p>
             <h2>Built for your kind of business</h2>
           </div>
-          <div className="img-cards">
-            <div className="img-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/barbershop.jpg" alt="A barber giving a client a fade with clippers in a men's barbershop" />
-              <div className="img-card-body">
-                <h3>Barbershops</h3>
-                <p>Chairs stay full with online booking and reminders that cut no-shows.</p>
-              </div>
-            </div>
-            <div className="img-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/nail-salon.jpg" alt="A nail technician painting a client's nails in a nail salon" />
-              <div className="img-card-body">
-                <h3>Nail salons &amp; spas</h3>
-                <p>Book by service and technician, so every station stays on schedule.</p>
-              </div>
-            </div>
-            <div className="img-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/law-office.jpg" alt="A lawyer reviewing documents with a client in a law office" />
-              <div className="img-card-body">
-                <h3>Law offices &amp; clinics</h3>
-                <p>Consultations booked ahead, with confirmations your clients actually see.</p>
-              </div>
-            </div>
+          <div className="cat-grid">
+            {TILE_CATEGORIES.map((c) => (
+              <Link key={c.slug} href={`/explore?category=${c.slug}`} className="cat-tile">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={c.image ?? ""} alt="" />
+                <span className="cat-tile-shade" />
+                <span className="cat-tile-body">
+                  <CategoryIcon name={c.icon} />
+                  <span className="cat-tile-label">{c.label}</span>
+                </span>
+              </Link>
+            ))}
           </div>
         </section>
 

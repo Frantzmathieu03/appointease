@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <span className="logo-word">Appoint<span className="logo-word-accent">Ease</span></span>
               </Link>
               <nav className="header-links">
+                <Link href="/explore" className="header-link-text">Find a business</Link>
                 <Link href="/my-appointments" className="header-link-text">
                   My appointments
                   <UnreadBadge variant="customer" />
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="footer-col">
                 <h4>Product</h4>
                 <Link href="/owner/signup">Create booking page</Link>
+                <Link href="/explore">Find a business</Link>
                 <Link href="/jesus-barber-shop">See a live example</Link>
                 <Link href="/my-appointments">My appointments</Link>
                 <Link href="/owner">Business sign-in</Link>

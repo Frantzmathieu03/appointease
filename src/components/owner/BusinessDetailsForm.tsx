@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { BUSINESS_TYPES } from "@/lib/owner-shared";
+import { CATEGORIES, DEFAULT_CATEGORY } from "@/lib/categories";
 import type { Business } from "@/lib/types";
 
 const TIMEZONES = [
@@ -25,6 +26,7 @@ export default function BusinessDetailsForm({ business }: { business: Business }
     description: business.description ?? "",
     timezone: business.timezone,
   });
+  const [category, setCategory] = useState(business.category ?? DEFAULT_CATEGORY);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -51,6 +53,9 @@ export default function BusinessDetailsForm({ business }: { business: Business }
         timezone: form.timezone,
       })
       .eq("id", business.id);
+    // Category is its own column (migration 0007) — saved separately,
+    // best-effort, so a missing column can never fail the details save.
+    await supabase.from("businesses").update({ category }).eq("id", business.id);
     setBusy(false);
     setSaved(true);
   }
@@ -66,6 +71,20 @@ export default function BusinessDetailsForm({ business }: { business: Business }
         <select value={form.type} onChange={set("type")}>
           {BUSINESS_TYPES.map((t) => (
             <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </label>
+      <label className="field">
+        <span>Category (customers find you by this)</span>
+        <select
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setSaved(false);
+          }}
+        >
+          {CATEGORIES.map((c) => (
+            <option key={c.slug} value={c.slug}>{c.label}</option>
           ))}
         </select>
       </label>

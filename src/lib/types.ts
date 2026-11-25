@@ -6,6 +6,9 @@ export interface Business {
   slug: string;
   name: string;
   type: string;
+  /** Marketplace category slug from src/lib/categories.ts (migration 0007).
+      Optional: rows fetched before the migration lands won't have it. */
+  category?: string;
   logo_url: string | null;
   description: string | null;
   address: string | null;
