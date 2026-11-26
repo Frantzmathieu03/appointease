@@ -187,7 +187,7 @@ export default async function DashboardTodayPage() {
         <div>
           <h1 style={{ fontSize: 26, marginBottom: 2 }}>Today&apos;s appointments</h1>
           <p className="small" style={{ margin: 0 }}>
-            Daily schedule · {niceDate}
+            {business.name} · Daily schedule · {niceDate}
           </p>
         </div>
         <span style={{ display: "inline-flex", gap: 8, flexWrap: "wrap" }}>
@@ -210,7 +210,9 @@ export default async function DashboardTodayPage() {
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Add your first service</h3>
           <p className="small">
-            Add a service so customers can book you.
+            Customers book a service, so your page is not taking bookings
+            yet. Add one service — just a name and how long it takes — and
+            you are ready.
           </p>
           <Link href="/owner/dashboard/settings#services" className="btn btn-primary">
             Add your first service

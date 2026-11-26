@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { getBusinessPageData } from "@/lib/data";
+import { getBusinessPageDataWithPreview } from "@/lib/data";
 import { getBillingState } from "@/lib/plans";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -22,7 +22,7 @@ export default async function BookPage({
 }) {
   const { slug } = await params;
   const { service, join } = await searchParams;
-  const page = await getBusinessPageData(slug);
+  const page = await getBusinessPageDataWithPreview(slug);
   if (!page) notFound();
 
   // Same billing gate as the business page: paused businesses can't take

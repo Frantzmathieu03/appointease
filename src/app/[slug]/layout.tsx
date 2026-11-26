@@ -1,4 +1,4 @@
-import { getBusinessPageData } from "@/lib/data";
+import { getBusinessPageDataWithPreview } from "@/lib/data";
 import BusinessHeader from "@/components/BusinessHeader";
 
 // Business pages wear the business's own branding only (white label,
@@ -15,7 +15,7 @@ export default async function BusinessLayout({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = await getBusinessPageData(slug);
+  const page = await getBusinessPageDataWithPreview(slug);
   if (!page) return <>{children}</>;
   const { business } = page;
 

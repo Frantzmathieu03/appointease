@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { getBusinessPageData, hoursSummary, openStatus } from "@/lib/data";
+import { getBusinessPageDataWithPreview, hoursSummary, openStatus } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import {
@@ -57,7 +57,7 @@ export default async function BusinessPage({
 }) {
   const { slug } = await params;
   const { join } = await searchParams;
-  const page = await getBusinessPageData(slug);
+  const page = await getBusinessPageDataWithPreview(slug);
   if (!page) notFound();
   const { business, services } = page;
   const tz = business.timezone;

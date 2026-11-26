@@ -53,7 +53,55 @@ export async function getBusinessPageData(slug: string): Promise<BusinessPageDat
     .eq("published", true)
     .single();
   if (!business) return null;
+  return assembleBusinessPageData(supabase, business as Business);
+}
 
+/**
+ * Owner/staff preview of a business page (Frantz 2026-11-25): the
+ * public lookup above only serves PUBLISHED businesses, so the
+ * dashboard's "View booking page" landed the owner of an unpublished
+ * business on a 404. The signed-in owner — and active team members —
+ * can always preview their own page; everyone else (signed-out
+ * visitors, other users) still gets null here and the route 404s,
+ * exactly as before. The booking APIs keep using the published-only
+ * lookup, so an unpublished business can never actually be booked.
+ */
+export async function getBusinessPageDataWithPreview(
+  slug: string
+): Promise<BusinessPageData | null> {
+  const published = await getBusinessPageData(slug);
+  if (published) return published;
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: business } = await supabase
+    .from("businesses")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+  if (!business) return null;
+  if (business.owner_id !== user.id) {
+    const { data: member } = await supabase
+      .from("business_members")
+      .select("id")
+      .eq("business_id", business.id)
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+    if (!member) return null;
+  }
+  return assembleBusinessPageData(supabase, business as Business);
+}
+
+async function assembleBusinessPageData(
+  supabase: Awaited<ReturnType<typeof createServerSupabase>>,
+  business: Business
+): Promise<BusinessPageData> {
   const [{ data: services }, { data: staff }, { data: availability }, { data: photos }] =
     await Promise.all([
       supabase.from("services").select("*").eq("business_id", business.id).eq("active", true),

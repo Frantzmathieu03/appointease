@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { getBusinessPageData } from "@/lib/data";
+import { getBusinessPageDataWithPreview } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createServerSupabase } from "@/lib/supabase";
 import {
@@ -20,7 +20,7 @@ export default async function MessagePage({
 }) {
   const { slug } = await params;
   const { join } = await searchParams;
-  const page = await getBusinessPageData(slug);
+  const page = await getBusinessPageDataWithPreview(slug);
   if (!page) notFound();
   const { business } = page;
 

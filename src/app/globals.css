@@ -290,9 +290,8 @@ textarea { min-height: 84px; resize: vertical; }
 .appt-row:hover { background: var(--mint); }
 @media (max-width: 900px) {
   .dash-shell { flex-direction: column; }
-  /* Mobile: no sidebar card stacked above the content — navigation is
-     the bottom tab bar plus the More page (Frantz 2026-11-25). */
-  .dash-sidebar { display: none; }
+  .dash-sidebar { width: 100%; flex: none; position: static; }
+  .dash-nav { flex-direction: row; flex-wrap: wrap; }
   .dash-main { width: 100%; }
 }
 
@@ -950,14 +949,9 @@ footer.site-footer { padding: 0; text-align: left; }
    calendar time grid. Same palette, no divider hairlines. */
 .dash-wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
 .dash-wrap .dash-shell { max-width: none; margin: 0; padding: 0 0 48px; }
-/* The dashboard header is a proper white bar in the same card
-   language as the business pages (Frantz 2026-11-25): white surface,
-   hairline border, soft shadow — never loose text on the tint. */
 .dash-topbar {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--radius); box-shadow: var(--shadow);
-  padding: 12px 16px; margin: 14px 0 16px; flex-wrap: wrap;
+  padding: 12px 2px; flex-wrap: wrap;
 }
 .dash-topbar-name { font-weight: 800; font-size: 17px; }
 .dash-topbar-actions { display: inline-flex; align-items: center; gap: 16px; }
@@ -966,13 +960,6 @@ footer.site-footer { padding: 0; text-align: left; }
   display: inline-flex; align-items: center; cursor: pointer; list-style: none;
 }
 .dash-topbar-link::-webkit-details-marker { display: none; }
-/* "View booking page" sits quiet next to the Account menu: smaller,
-   muted, only darkening on hover. */
-.dash-topbar-view { color: var(--muted); font-size: 13.5px; }
-.dash-topbar-view:hover { color: var(--green); }
-/* Bell: brand-green line icon, Visit us card sizing. */
-.dash-topbar-bell { color: var(--green); }
-.dash-topbar-bell svg { width: 21px; height: 21px; display: block; }
 .dash-account { position: relative; }
 .dash-account-menu {
   position: absolute; right: 0; top: calc(100% + 6px); z-index: 40;
@@ -1003,23 +990,7 @@ footer.site-footer { padding: 0; text-align: left; }
     display: inline-flex; align-items: center; padding: 6px 8px;
   }
   .dash-wrap { padding-bottom: 64px; }
-  /* One slim row, nothing wrapped, clipped or overlapped: the business
-     name truncates with an ellipsis and the actions stay put. */
-  .dash-topbar { flex-wrap: nowrap; }
-  .dash-topbar-name {
-    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .dash-topbar-actions { flex: 0 0 auto; gap: 12px; }
 }
-
-/* The mobile More page's section list: one clean column of rows. */
-.more-list { display: flex; flex-direction: column; gap: 4px; }
-.more-list a {
-  padding: 12px; border-radius: 10px; color: var(--ink);
-  text-decoration: none; font-size: 15px; font-weight: 600;
-  display: flex; align-items: center; gap: 8px;
-}
-.more-list a:hover { background: #f4f8f4; }
 
 /* Two-column inbox: list + thread side by side on desktop; on mobile
    the list hides when a thread is open (the thread route stands alone). */
