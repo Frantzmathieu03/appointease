@@ -5,9 +5,12 @@ import UnreadBadge from "@/components/UnreadBadge";
 // Owner workspace shell (design-demo layout): business name + section
 // nav in a left sidebar, page content on the right, a slim top bar above
 // both (business name, View booking page, notifications bell, account
-// menu — PDF §2), and a bottom tab bar on mobile. Services lives in
-// Settings; Team has its own page. Staff logins (migration 0011) don't
-// get Team/Settings nav — their RLS view is only their own customers.
+// menu — PDF §2), and a bottom tab bar on mobile. On mobile the sidebar
+// does not stack above the content (Frantz 2026-11-25): the tab bar's
+// "More" opens /owner/dashboard/more with every remaining section.
+// Services lives in Settings; Team has its own page. Staff logins
+// (migration 0011) don't get Team/Settings nav — their RLS view is only
+// their own customers.
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { business, role } = await requireBusiness();
   const link = `${siteUrl()}/${business.slug}`;
@@ -91,7 +94,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <UnreadBadge variant="owner" businessId={business.id} />
         </Link>
         <Link href="/owner/dashboard/customers">Customers</Link>
-        <Link href={isStaff ? "/owner/dashboard/team" : "/owner/dashboard/settings"}>More</Link>
+        <Link href="/owner/dashboard/more">More</Link>
       </nav>
     </div>
   );

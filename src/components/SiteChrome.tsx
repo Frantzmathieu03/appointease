@@ -5,19 +5,22 @@ import { usePathname } from "next/navigation";
 import UnreadBadge from "@/components/UnreadBadge";
 
 /**
- * The AppointEase marketing header/footer. Two kinds of pages show
- * ONLY the business's own branding, so the chrome renders nothing
- * there:
+ * The AppointEase marketing header/footer. Some pages carry their
+ * own shell, so the chrome renders nothing there:
  *   - customer-facing manage pages (/manage/<token> — the
  *     cancel/reschedule links from reminders, PDF §5);
  *   - public business pages (/<slug>, /<slug>/book, /<slug>/message —
  *     white label, Frantz 2026-11-25): the [slug] layout carries the
  *     business's own slim header and a small "Powered by AppointEase"
- *     line at the bottom.
+ *     line at the bottom;
+ *   - the owner workspace (/owner/* — sign-in, signup, setup and the
+ *     dashboard, Frantz 2026-11-25): the dashboard has its own top
+ *     bar, and a signed-in owner must never see the "Create booking
+ *     page" sales button stacked above it.
  * A first path segment that is not a known platform route is treated
  * as a business slug. The platform header (with "Create booking
- * page") stays on the platform's own pages: homepage, /explore,
- * pricing and the owner pages.
+ * page") stays on the platform's own public pages: homepage,
+ * /explore, pricing and the legal pages.
  */
 const PLATFORM_SEGMENTS = new Set([
   "login",
@@ -40,6 +43,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const firstSegment = pathname?.split("/")[1] ?? "";
   if (
     pathname?.startsWith("/manage/") ||
+    pathname?.startsWith("/owner/") ||
     (firstSegment && !PLATFORM_SEGMENTS.has(firstSegment))
   ) {
     return <>{children}</>;
