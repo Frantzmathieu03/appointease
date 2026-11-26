@@ -11,6 +11,7 @@ import BillingPanel from "@/components/owner/BillingPanel";
 import BusinessMediaManager from "@/components/owner/BusinessMediaManager";
 import LocationsManager from "@/components/owner/LocationsManager";
 import PushOptIn from "@/components/PushOptIn";
+import { FaceIdSetting, NotificationPrefs } from "@/components/owner/AppSettings";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import { getBillingState, planById } from "@/lib/plans";
 import { isAnnualBillingConfigured, isBillingConfigured } from "@/lib/stripe";
@@ -142,6 +143,20 @@ export default async function DashboardSettingsPage() {
           the moment it lands. Add push so it reaches this device instantly too:
         </p>
         <PushOptIn />
+      </div>
+
+      <div className="card">
+        <h2>App notifications</h2>
+        <p className="small" style={{ marginBottom: 6 }}>
+          Choose what the AppointEase app on your phone tells you about. Staff
+          only ever get notifications for their own clients.
+        </p>
+        <NotificationPrefs />
+      </div>
+
+      <div className="card">
+        <h2>Face ID sign in</h2>
+        <FaceIdSetting />
       </div>
     </div>
   );

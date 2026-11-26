@@ -6,6 +6,8 @@ import { getBillingState } from "@/lib/plans";
 import { generateConfirmationCode } from "@/lib/confirmation";
 import { isDemoShop } from "@/lib/demo";
 import { logCustomerEvent } from "@/lib/events";
+import { sendNativePush } from "@/lib/native-push";
+import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
 // POST /api/book
 // Body: { slug, serviceId, staffId, startsAt, name, phone, email, notes? }
@@ -258,6 +260,30 @@ export async function POST(req: NextRequest) {
       confirmation_code: appt.confirmation_code,
     },
   });
+
+  // Native app push (app build phase 1): the owner/team learn about
+  // the booking on their phones the moment it lands. Env-gated on
+  // FCM / APNs credentials — until those exist this no-ops silently.
+  // A push failure never fails a booking.
+  try {
+    const tz = page.business.timezone ?? "America/New_York";
+    const when = `${formatDateInZone(start, tz)} · ${formatTimeInZone(start, tz)}`;
+    await sendNativePush(admin, {
+      businessId: page.business.id,
+      kind: "new_booking",
+      title: "New booking",
+      body: `${name || "A customer"} booked ${service.name} · ${when}`,
+      data: {
+        type: "new_booking",
+        appointmentId: appt.id,
+        customerId,
+        url: `/owner/dashboard/appointments/${appt.id}`,
+      },
+      customerId,
+    });
+  } catch (err) {
+    console.error("sendNativePush (new_booking) failed:", err);
+  }
 
   return NextResponse.json({
     ok: true,

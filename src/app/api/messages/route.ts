@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { notifyNewMessage } from "@/lib/dispatch";
+import { sendNativePush } from "@/lib/native-push";
 import { ensureCustomerProfile } from "@/lib/profile";
 import { logCustomerEvent } from "@/lib/events";
 
@@ -101,6 +102,30 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("notifyNewMessage failed:", err);
+  }
+
+  // Native app push (app build phase 1): customer messages also reach
+  // the owner/team phones. Business replies are not pushed — customers
+  // use their booking link, not the app. Env-gated; the helper applies
+  // the toggles, the staff rule, and law-office title-only previews.
+  if (sender === "customer") {
+    try {
+      const snippet = text.length > 140 ? text.slice(0, 140) + "…" : text;
+      await sendNativePush(admin, {
+        businessId,
+        kind: "new_message",
+        title: `New message from ${customer.full_name || "a customer"}`,
+        body: snippet,
+        data: {
+          type: "new_message",
+          customerId,
+          url: `/owner/dashboard/inbox/${customerId}`,
+        },
+        customerId,
+      });
+    } catch (err) {
+      console.error("sendNativePush (new_message) failed:", err);
+    }
   }
 
   return NextResponse.json({ ok: true, message });

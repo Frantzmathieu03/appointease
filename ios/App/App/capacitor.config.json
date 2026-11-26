@@ -1,0 +1,28 @@
+{
+	"appId": "io.appointease.app",
+	"appName": "AppointEase",
+	"webDir": "public",
+	"server": {
+		"url": "https://www.appointease.io",
+		"cleartext": false
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 1000,
+			"launchAutoHide": false,
+			"backgroundColor": "#1E4D33"
+		},
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		}
+	},
+	"packageClassList": [
+		"PushNotificationsPlugin",
+		"SplashScreenPlugin",
+		"NativeBiometricPlugin"
+	]
+}

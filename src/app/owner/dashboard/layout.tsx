@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireBusiness, siteUrl } from "@/lib/owner";
 import UnreadBadge from "@/components/UnreadBadge";
+import NativeBridge from "@/components/NativeBridge";
 import DashNav, { type DashNavItem } from "@/components/DashNav";
 
 // Owner workspace shell — Owner Dashboard Plan (Frantz, 2026-11-26):
@@ -50,6 +51,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="dash2">
+      {/* Native app bridge with this business as context — inert on web. */}
+      <NativeBridge businessId={business.id} />
       {/* Inter (plan spec: 400/600/700), scoped to the dashboard. */}
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { cancelReminders, rescheduleReminders } from "@/lib/reminders";
 import { logCustomerEvent } from "@/lib/events";
+import { sendNativePush } from "@/lib/native-push";
+import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
 // Secure manage link from reminder messages: /manage/<token>
 // GET                                  — appointment details for the page
@@ -139,6 +141,33 @@ export async function POST(
       actorId: appt.customer_id,
       details: { reason, was_starts_at: appt.starts_at },
     });
+    // Native app push (app build phase 1): owner/team hear about the
+    // cancellation on their phones. Env-gated — no-ops silently until
+    // FCM / APNs credentials exist; never fails the cancellation.
+    try {
+      const [{ data: biz }, { data: cust }, { data: svc }] = await Promise.all([
+        admin.from("businesses").select("timezone").eq("id", appt.business_id).single(),
+        admin.from("customers").select("full_name").eq("id", appt.customer_id).single(),
+        admin.from("services").select("name").eq("id", appt.service_id).single(),
+      ]);
+      const tz = (biz?.timezone as string | undefined) ?? "America/New_York";
+      const when = `${formatDateInZone(new Date(appt.starts_at), tz)} · ${formatTimeInZone(new Date(appt.starts_at), tz)}`;
+      await sendNativePush(admin, {
+        businessId: appt.business_id,
+        kind: "cancelled",
+        title: "Appointment cancelled",
+        body: `${cust?.full_name || "A customer"} cancelled ${svc?.name ?? "their appointment"} · ${when}${reason ? ` · ${reason}` : ""}`,
+        data: {
+          type: "cancelled",
+          appointmentId: appt.id,
+          customerId: appt.customer_id,
+          url: "/owner/dashboard/calendar",
+        },
+        customerId: appt.customer_id,
+      });
+    } catch (err) {
+      console.error("sendNativePush (cancelled) failed:", err);
+    }
     return NextResponse.json({ ok: true, status: "cancelled" });
   }
 
