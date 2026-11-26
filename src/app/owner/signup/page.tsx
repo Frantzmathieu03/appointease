@@ -84,17 +84,17 @@ export default function OwnerSignupPage() {
   }
 
   return (
-    <main className="column">
-      <p className="eyebrow">For businesses</p>
-      <h1 style={{ fontSize: 30 }}>Create your booking page</h1>
-      <p className="lede">
+    <main className="column signup-page">
+      <p className="eyebrow center">For businesses</p>
+      <h1 className="center" style={{ fontSize: 30 }}>Create your booking page</h1>
+      <p className="lede center">
         14 days free, no card required. Your page link is reserved the moment
         you name your business.
       </p>
 
       {phase === "account" && (
         <div className="card">
-          <h2>1. Your login</h2>
+          <h2 className="center">Your login</h2>
           {error && <div className="error">{error}</div>}
           <button className="btn btn-primary btn-block btn-google" type="button" onClick={google}>
             <GoogleLogo />
@@ -126,7 +126,7 @@ export default function OwnerSignupPage() {
 
       {phase === "business" && (
         <div className="card">
-          <h2>2. Your business</h2>
+          <h2 className="center">Your business</h2>
           <CreateBusinessForm />
         </div>
       )}

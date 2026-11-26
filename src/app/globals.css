@@ -2067,3 +2067,12 @@ footer.site-footer { padding: 0; text-align: left; }
 @media (max-width: 600px) { .hp .hp-headline { font-size: 36px; } }
 .mkt .btn, .site-header .btn { min-height: 44px; }
 .header-links .header-cta { min-height: 44px; }
+
+/* Owner signup — centered page headings and a comfortable card
+   (Frantz, 2026-11-26). Field labels stay left aligned above their
+   full width fields; the Google and Continue buttons stay full width. */
+.signup-page .card { padding: 26px 24px; }
+.signup-page .card h2 { margin-bottom: 16px; }
+@media (max-width: 600px) {
+  .signup-page .card { padding: 22px 18px; }
+}
