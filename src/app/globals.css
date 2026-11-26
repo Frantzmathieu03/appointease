@@ -950,9 +950,14 @@ footer.site-footer { padding: 0; text-align: left; }
    calendar time grid. Same palette, no divider hairlines. */
 .dash-wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
 .dash-wrap .dash-shell { max-width: none; margin: 0; padding: 0 0 48px; }
+/* The dashboard header is a proper white bar in the same card
+   language as the business pages (Frantz 2026-11-25): white surface,
+   hairline border, soft shadow — never loose text on the tint. */
 .dash-topbar {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  padding: 12px 2px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 12px 16px; margin: 14px 0 16px; flex-wrap: wrap;
 }
 .dash-topbar-name { font-weight: 800; font-size: 17px; }
 .dash-topbar-actions { display: inline-flex; align-items: center; gap: 16px; }
@@ -961,6 +966,13 @@ footer.site-footer { padding: 0; text-align: left; }
   display: inline-flex; align-items: center; cursor: pointer; list-style: none;
 }
 .dash-topbar-link::-webkit-details-marker { display: none; }
+/* "View booking page" sits quiet next to the Account menu: smaller,
+   muted, only darkening on hover. */
+.dash-topbar-view { color: var(--muted); font-size: 13.5px; }
+.dash-topbar-view:hover { color: var(--green); }
+/* Bell: brand-green line icon, Visit us card sizing. */
+.dash-topbar-bell { color: var(--green); }
+.dash-topbar-bell svg { width: 21px; height: 21px; display: block; }
 .dash-account { position: relative; }
 .dash-account-menu {
   position: absolute; right: 0; top: calc(100% + 6px); z-index: 40;
