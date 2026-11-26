@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getBusinessPageDataWithPreview } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
-import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { ensureBusinessMembership, ensureCustomerProfile } from "@/lib/profile";
 import { formatPhone } from "@/lib/types";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
@@ -77,6 +77,40 @@ export default async function BusinessCustomerDashboard({
     .eq("customer_id", user.id)
     .order("starts_at", { ascending: true });
   const appts = (data ?? []) as unknown as ApptRow[];
+
+  // Service names for the appointment cards. The join above runs on
+  // the customer's own session, and RLS hides an unpublished
+  // business's service rows even from its joined customers — so at an
+  // unpublished business the joined name comes back null and the card
+  // would fall back to the word "Appointment". This page only renders
+  // for a verified insider of the business (the page-data lookup
+  // above, plus the membership ensure), so resolve any missing names
+  // the insider-safe way: from the already-fetched page data first,
+  // and for an id it doesn't carry (a service deactivated since the
+  // booking) through the service-role client.
+  const serviceNameById = new Map(page.services.map((s) => [s.id, s.name]));
+  const missingServiceIds = [
+    ...new Set(
+      appts
+        .filter((a) => !a.services?.name && !serviceNameById.has(a.service_id))
+        .map((a) => a.service_id)
+    ),
+  ];
+  if (missingServiceIds.length > 0) {
+    try {
+      const admin = createAdminSupabase();
+      const { data: svcNames } = await admin
+        .from("services")
+        .select("id, name")
+        .eq("business_id", business.id)
+        .in("id", missingServiceIds);
+      for (const s of svcNames ?? []) {
+        serviceNameById.set(s.id as string, s.name as string);
+      }
+    } catch {
+      // Name display is additive — never break the dashboard.
+    }
+  }
 
   // Intake forms for this business's appointments (same pattern as
   // My Appointments; degrades to empty if anything is unavailable).
@@ -190,7 +224,7 @@ export default async function BusinessCustomerDashboard({
   const card = (a: ApptRow) => (
     <div className="card" key={a.id}>
       <h3 style={{ marginTop: 0 }}>
-        {a.services?.name ?? "Appointment"}
+        {a.services?.name ?? serviceNameById.get(a.service_id) ?? "Appointment"}
       </h3>
       <p className="small" style={{ margin: "2px 0 10px" }}>
         {formatDateInZone(new Date(a.starts_at), tz)} at {formatTimeInZone(new Date(a.starts_at), tz)}
