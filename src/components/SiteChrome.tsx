@@ -13,11 +13,15 @@ import UnreadBadge from "@/components/UnreadBadge";
  *   - public business pages (/<slug>, /<slug>/book, /<slug>/message —
  *     white label, Frantz 2026-11-25): the [slug] layout carries the
  *     business's own slim header and a small "Powered by AppointEase"
- *     line at the bottom.
+ *     line at the bottom;
+ *   - the owner dashboard (/owner/dashboard/*, Frantz 2026-11-25
+ *     late): restyled to the business pages' design language, so it
+ *     carries the business's own top row and menu card instead of
+ *     the platform header. The /owner sign-in page keeps the header.
  * A first path segment that is not a known platform route is treated
  * as a business slug. The platform header (with "Create booking
  * page") stays on the platform's own pages: homepage, /explore,
- * pricing and the owner pages.
+ * pricing and the owner sign-in pages.
  */
 const PLATFORM_SEGMENTS = new Set([
   "login",
@@ -40,6 +44,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const firstSegment = pathname?.split("/")[1] ?? "";
   if (
     pathname?.startsWith("/manage/") ||
+    pathname?.startsWith("/owner/dashboard") ||
     (firstSegment && !PLATFORM_SEGMENTS.has(firstSegment))
   ) {
     return <>{children}</>;

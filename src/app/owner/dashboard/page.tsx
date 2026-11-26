@@ -174,28 +174,17 @@ export default async function DashboardTodayPage() {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: 12,
-          flexWrap: "wrap",
-          marginBottom: 14,
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: 26, marginBottom: 2 }}>Today&apos;s appointments</h1>
-          <p className="small" style={{ margin: 0 }}>
-            {business.name} · Daily schedule · {niceDate}
-          </p>
-        </div>
-        <span style={{ display: "inline-flex", gap: 8, flexWrap: "wrap" }}>
-          <Link href="/owner/dashboard/calendar/new" className="btn btn-primary">
-            New appointment
-          </Link>
-          <CopyLinkButton url={link} />
-        </span>
+      <div style={{ marginBottom: 14 }}>
+        <h1 style={{ fontSize: 30, marginBottom: 2 }}>Today&apos;s appointments</h1>
+        <p className="small" style={{ margin: 0 }}>
+          {business.name} · Daily schedule · {niceDate}
+        </p>
+      </div>
+      <div className="dash-today-actions">
+        <Link href="/owner/dashboard/calendar/new" className="btn btn-primary btn-block">
+          New appointment
+        </Link>
+        <CopyLinkButton url={link} />
       </div>
 
       {(unread ?? 0) > 0 && (
@@ -214,7 +203,7 @@ export default async function DashboardTodayPage() {
             yet. Add one service — just a name and how long it takes — and
             you are ready.
           </p>
-          <Link href="/owner/dashboard/settings#services" className="btn btn-primary">
+          <Link href="/owner/dashboard/settings#services" className="btn btn-primary btn-block">
             Add your first service
           </Link>
         </div>
