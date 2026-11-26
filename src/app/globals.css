@@ -827,7 +827,7 @@ img, video { max-width: 100%; }
 /* Footer (multi-column) */
 footer.site-footer { padding: 0; text-align: left; }
 .footer-inner { padding: 38px 0 0; }
-.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 30px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
 .footer-brand p { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 12px 0 0; max-width: 36ch; }
 .footer-col h4 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); margin: 4px 0 12px; }
 .footer-col a { display: block; color: var(--muted); text-decoration: none; font-size: 14.5px; padding: 5px 0; }
@@ -924,17 +924,15 @@ footer.site-footer { padding: 0; text-align: left; }
   .footer-grid { grid-template-columns: 1fr; gap: 22px; }
 }
 
-/* Mobile header (≤760px): logo lockup + one-line CTA only. The text
-   links ("Find a business", "My appointments", "Business sign-in") are
-   hidden here — they remain available in the footer Product links.
-   Nothing can overlap: the logo is flex-fixed with a nowrap wordmark,
-   the CTA is nowrap with white text, and they are the only two items
-   in the bar. This block also carries the mobile explore filters and
-   the 2-column category grid. */
+/* Mobile header (≤760px): the menu wraps under the logo (Homepage
+   New Design, 2026-11-26) — Pricing and Business sign-in stay
+   visible on their own row and Start free stays visible with them.
+   This block also carries the mobile explore filters and the
+   2-column category grid. */
 @media (max-width: 760px) {
-  .header-links { gap: 0; }
-  .header-links .header-link-text { display: none; }
-  .header-links .header-cta { min-height: 40px; padding: 9px 14px; font-size: 14px; }
+  .site-header-wrap .site-header { flex-wrap: wrap; }
+  .header-links { gap: 16px; flex-wrap: wrap; width: 100%; }
+  .header-links .header-cta { min-height: 44px; padding: 9px 14px; font-size: 14px; margin-left: auto; }
   .site-header { gap: 10px; }
   .filters-toggle { display: inline-flex; margin-top: 14px; }
   .explore-filters { display: none; }
@@ -1983,3 +1981,75 @@ footer.site-footer { padding: 0; text-align: left; }
   background: #fff; border: 1.5px solid #b3261e; color: #b3261e;
 }
 .c3-btn-cancel:hover { background: #fdf1f0; }
+
+/* ==========================================================================
+   Homepage New Design (Phase 4, 2026-11-26) — scoped under .hp.
+   Redesign family values: green #1E4D33, background #F3F6F1, cards
+   white with 1px #DCE4DD borders, text #16221B, secondary #5B6B61.
+   ========================================================================== */
+.hp { --hp-green: #1e4d33; --hp-bg: #f3f6f1; --hp-line: #dce4dd; --hp-ink: #16221b; --hp-muted: #5b6b61; }
+.hp-hero { background: var(--hp-bg); padding: 44px 0 52px; }
+.hp-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; }
+.hp-badge {
+  display: inline-block; background: #e1f2e6; color: #1e6b3a;
+  font-size: 13.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; margin: 0 0 20px;
+}
+.hp-headline { font-size: 52px; font-weight: 800; line-height: 1.08; letter-spacing: -0.02em; color: var(--hp-ink); margin: 0 0 18px; }
+.hp-sub { font-size: 18px; line-height: 1.55; color: var(--hp-muted); margin: 0 0 26px; max-width: 52ch; }
+.hp-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.hp .btn-primary { background: var(--hp-green); border-color: var(--hp-green); }
+.hp .btn-primary:hover { background: #173d28; }
+.hp-money-line { margin: 18px 0 0; font-size: 14.5px; font-weight: 600; color: var(--hp-green); }
+.hp-hero-media { position: relative; }
+.hp-hero-video {
+  width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
+  border-radius: 24px; box-shadow: 0 18px 48px rgba(22, 34, 27, 0.22); background: #0e2417;
+}
+.hp-notes { position: absolute; inset: 0; pointer-events: none; }
+.hp-note {
+  position: absolute; display: flex; gap: 9px; align-items: center;
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(22, 34, 27, 0.16);
+  padding: 11px 14px; font-size: 13.5px; color: var(--hp-ink); max-width: 320px;
+}
+.hp-note strong { font-weight: 800; }
+.hp-note-1 { top: 18px; left: -26px; }
+.hp-note-2 { top: 44%; right: -22px; }
+.hp-note-3 { bottom: 18px; left: -18px; }
+.hp-section { padding: 52px 0 8px; }
+.hp-section-pale { background: var(--hp-bg); padding-bottom: 44px; }
+.hp .section-head h2 { font-size: 30px; letter-spacing: -0.01em; color: var(--hp-ink); }
+.hp-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.hp-card {
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 16px;
+  padding: 22px; text-align: left;
+}
+.hp-card-ico {
+  width: 42px; height: 42px; border-radius: 12px; background: #e1f2e6;
+  display: grid; place-items: center; font-size: 20px; margin-bottom: 14px;
+}
+.hp-card h3 { font-size: 17px; font-weight: 700; color: var(--hp-ink); margin: 0 0 8px; }
+.hp-card p { margin: 0; color: var(--hp-muted); font-size: 14.5px; line-height: 1.55; }
+.hp-card-dark { background: var(--hp-green); border-color: var(--hp-green); }
+.hp-card-dark h3 { color: #fff; }
+.hp-card-dark p { color: #d7e8da; }
+.hp-card-dark .hp-card-ico { background: rgba(255, 255, 255, 0.16); }
+.hp-quote blockquote { margin: 0 0 12px; font-size: 16px; line-height: 1.55; color: var(--hp-ink); }
+.hp-quote figcaption { color: var(--hp-muted); font-size: 14px; font-weight: 600; }
+.price-annual { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+.hp-cta { background: var(--hp-green); }
+@media (max-width: 1023px) {
+  .hp-hero-grid { grid-template-columns: 1fr; gap: 30px; }
+  .hp-notes { display: none; }
+}
+@media (max-width: 900px) {
+  .hp-cards { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .hp-hero { padding: 30px 0 38px; }
+  .hp-headline { font-size: 36px; }
+  .hp-sub { font-size: 16.5px; }
+  .hp-ctas { flex-direction: column; }
+  .hp-ctas .btn { width: 100%; min-height: 52px; }
+  .hp .section-head h2 { font-size: 25px; }
+}

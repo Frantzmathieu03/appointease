@@ -39,9 +39,11 @@ export const PLANS: Plan[] = [
     blurb: "For a one-person shop that runs on appointments.",
     features: [
       "1 team member",
-      "Your own booking page & link",
-      "Confirmation, 24-hour & 2-hour reminders — by text and email (when the booking is made far enough ahead)",
-      "Two-way messaging with your customers",
+      "Booking page",
+      "Reminders",
+      "Messaging",
+      "Client history",
+      "Team logins",
     ],
   },
   {
@@ -52,7 +54,10 @@ export const PLANS: Plan[] = [
     blurb: "For a small team sharing one booking page.",
     features: [
       "Up to 5 team members",
-      "Everything in Solo + client assignment and roles",
+      "Everything in Solo",
+      "Assign clients to each person",
+      "Roles",
+      "2 locations",
     ],
   },
   {
@@ -63,7 +68,10 @@ export const PLANS: Plan[] = [
     blurb: "For bigger teams that need more calendars and faster support.",
     features: [
       "Up to 15 team members",
-      "Everything in Team + priority support",
+      "Everything in Team",
+      "Forms + file uploads",
+      "Unlimited locations",
+      "Priority support",
     ],
   },
 ];

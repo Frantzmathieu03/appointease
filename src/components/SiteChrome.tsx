@@ -18,9 +18,9 @@ import { usePathname } from "next/navigation";
  *     carries the business's own top row and menu card instead of
  *     the platform header. The /owner sign-in page keeps the header.
  * A first path segment that is not a known platform route is treated
- * as a business slug. The platform header (with "Create booking
- * page") stays on the platform's own pages: homepage, /explore,
- * pricing and the owner sign-in pages.
+ * as a business slug. The platform header (Pricing · Business
+ * sign-in · Start free) stays on the platform's own pages: homepage,
+ * /explore, pricing and the owner sign-in pages.
  */
 const PLATFORM_SEGMENTS = new Set([
   "login",
@@ -60,10 +60,10 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
               <span className="logo-word">Appoint<span className="logo-word-accent">Ease</span></span>
             </Link>
             <nav className="header-links">
-              <Link href="/explore" className="header-link-text">Find a business</Link>
+              <Link href="/#pricing" className="header-link-text">Pricing</Link>
               <Link href="/owner" className="header-link-text">Business sign-in</Link>
               <Link href="/owner/signup" className="btn btn-primary header-cta">
-                Create booking page
+                Start free
               </Link>
             </nav>
           </header>
@@ -82,21 +82,15 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
               <p>Booking, reminders and messaging for appointment-based businesses.</p>
             </div>
             <div className="footer-col">
-              <h4>Product</h4>
-              <Link href="/owner/signup">Create booking page</Link>
-              <Link href="/explore">Find a business</Link>
-              <Link href="/main-street-barbers">See a live example</Link>
-              <Link href="/owner">Business sign-in</Link>
-            </div>
-            <div className="footer-col">
               <h4>Company</h4>
               <Link href="/about">About</Link>
               <Link href="/contact">Contact</Link>
               <Link href="/terms">Terms of Service</Link>
               <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/owner">Business sign-in</Link>
             </div>
           </div>
-          <div className="footer-bottom">© 2026 AppointEase</div>
+          <div className="footer-bottom">© 2026 AppointEase · support@appointease.io</div>
         </div>
       </footer>
     </>
