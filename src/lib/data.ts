@@ -198,6 +198,9 @@ export interface OpenStatus {
   todayLabel: string | null;
   /** Truthful note, e.g. "Open now · closes 5 PM" / "Closed · opens Sat 9 AM". */
   note: string;
+  /** Status-pill wording for the business page plan (Frantz,
+   *  2026-11-26): "Open now · until 5 PM" / "Closed · opens Mon 9 AM". */
+  pill: string;
 }
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -261,10 +264,20 @@ export function openStatus(availability: Availability[], timeZone: string): Open
       const current = span.rows.find(
         (r) => nowMinutes >= toMinutes(r.open_time) && nowMinutes < toMinutes(r.close_time)
       )!;
-      return { state: "open", todayLabel, note: `Open now · closes ${fmtClock(current.close_time)}` };
+      return {
+        state: "open",
+        todayLabel,
+        note: `Open now · closes ${fmtClock(current.close_time)}`,
+        pill: `Open now · until ${fmtClock(current.close_time)}`,
+      };
     }
     if (nowMinutes < span.open) {
-      return { state: "closed", todayLabel, note: `Closed · opens ${fmtClock(span.openRaw)} today` };
+      return {
+        state: "closed",
+        todayLabel,
+        note: `Closed · opens ${fmtClock(span.openRaw)} today`,
+        pill: `Closed · opens ${fmtClock(span.openRaw)}`,
+      };
     }
     // After today's close: fall through to the next open day.
     for (let d = 1; d <= 7; d++) {
@@ -275,10 +288,11 @@ export function openStatus(availability: Availability[], timeZone: string): Open
           state: "closed",
           todayLabel,
           note: `Closed · opens ${DAY_NAMES[wd]} ${fmtClock(s.openRaw)}`,
+          pill: `Closed · opens ${DAY_NAMES[wd]} ${fmtClock(s.openRaw)}`,
         };
       }
     }
-    return { state: "closed", todayLabel, note: "Closed" };
+    return { state: "closed", todayLabel, note: "Closed", pill: "Closed" };
   }
   for (let d = 1; d <= 7; d++) {
     const wd = (today + d) % 7;
@@ -288,8 +302,116 @@ export function openStatus(availability: Availability[], timeZone: string): Open
         state: "closed",
         todayLabel: null,
         note: `Closed today · opens ${DAY_NAMES[wd]} ${fmtClock(s.openRaw)}`,
+        pill: `Closed · opens ${DAY_NAMES[wd]} ${fmtClock(s.openRaw)}`,
       };
     }
+  }
+  return null;
+}
+
+/**
+ * Grouped hours lines for the business page's "Hours & location"
+ * card (Frantz's plan, 2026-11-26): consecutive days with identical
+ * hours share one line, Monday first — e.g. "Mon – Fri · 9 AM – 5 PM"
+ * and "Sat – Sun · Closed". Days with no availability rows count as
+ * closed. Business-wide rows (staff_id null) define a day's hours;
+ * when a day has only per-staff rows, the widest span counts. Empty
+ * array when the business has no availability at all.
+ */
+export function hoursLines(availability: Availability[]): string[] {
+  if (availability.length === 0) return [];
+  const byDay = new Map<number, Availability[]>();
+  for (const a of availability) {
+    const rows = byDay.get(a.weekday) ?? [];
+    rows.push(a);
+    byDay.set(a.weekday, rows);
+  }
+  const toMinutes = (t: string) => {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  };
+  const spanOf = (weekday: number): string | null => {
+    const rows = byDay.get(weekday) ?? [];
+    if (rows.length === 0) return null;
+    const wide = rows.filter((r) => r.staff_id === null);
+    const use = wide.length > 0 ? wide : rows;
+    const open = use.reduce((a, b) => (toMinutes(a.open_time) <= toMinutes(b.open_time) ? a : b)).open_time;
+    const close = use.reduce((a, b) => (toMinutes(a.close_time) >= toMinutes(b.close_time) ? a : b)).close_time;
+    return `${fmtClock(open)} – ${fmtClock(close)}`;
+  };
+  // Monday-first order: 1,2,3,4,5,6,0.
+  const order = [1, 2, 3, 4, 5, 6, 0];
+  const labels = order.map((wd) => spanOf(wd) ?? "Closed");
+  const lines: string[] = [];
+  let start = 0;
+  while (start < order.length) {
+    let end = start;
+    while (end + 1 < order.length && labels[end + 1] === labels[start]) end++;
+    const range =
+      start === end
+        ? DAY_NAMES[order[start]]
+        : `${DAY_NAMES[order[start]]} – ${DAY_NAMES[order[end]]}`;
+    lines.push(`${range} · ${labels[start]}`);
+    start = end + 1;
+  }
+  return lines;
+}
+
+const US_STATES: Record<string, string> = {
+  alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA",
+  colorado: "CO", connecticut: "CT", delaware: "DE", florida: "FL", georgia: "GA",
+  hawaii: "HI", idaho: "ID", illinois: "IL", indiana: "IN", iowa: "IA",
+  kansas: "KS", kentucky: "KY", louisiana: "LA", maine: "ME", maryland: "MD",
+  massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS",
+  missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV",
+  "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM",
+  "new york": "NY", "north carolina": "NC", "north dakota": "ND", ohio: "OH",
+  oklahoma: "OK", oregon: "OR", pennsylvania: "PA", "rhode island": "RI",
+  "south carolina": "SC", "south dakota": "SD", tennessee: "TN", texas: "TX",
+  utah: "UT", vermont: "VT", virginia: "VA", washington: "WA",
+  "west virginia": "WV", wisconsin: "WI", wyoming: "WY",
+  "district of columbia": "DC",
+};
+
+/**
+ * Best-effort "City, ST" parsed from a free-form address, for the
+ * business page's quiet line under the name ("Family law · Boston,
+ * MA"). Handles "…, Boston, MA", "…, Boston, MA 02109" and a trailing
+ * full state name ("… Boston Massachusetts" — the word right before
+ * the state name is taken as the city). Returns null when no city can
+ * be found — the page then shows the type/category alone.
+ */
+export function parseCityState(address: string | null | undefined): string | null {
+  if (!address) return null;
+  const segments = address.split(",").map((s) => s.trim()).filter(Boolean);
+  const stateOf = (seg: string): string | null => {
+    const abbr = seg.match(/^([A-Za-z]{2})(\s+\d{5}(-\d{4})?)?$/);
+    if (abbr && /^[A-Z]{2}$/.test(abbr[1])) return abbr[1];
+    const full = US_STATES[seg.toLowerCase()];
+    return full ?? null;
+  };
+  for (let i = segments.length - 1; i >= 1; i--) {
+    const st = stateOf(segments[i]);
+    if (st) {
+      const city = segments[i - 1].replace(/\d{5}(-\d{4})?$/, "").trim();
+      if (city) return `${city}, ${st}`;
+    }
+  }
+  // No comma structure: look for a trailing state name or abbreviation
+  // in the last segment and take the word before it as the city.
+  const last = segments[segments.length - 1] ?? "";
+  const lower = last.toLowerCase();
+  for (const [name, abbr] of Object.entries(US_STATES)) {
+    if (lower.endsWith(name)) {
+      const before = last.slice(0, last.length - name.length).trim().replace(/,$/, "");
+      const city = before.split(/\s+/).pop();
+      if (city) return `${city}, ${abbr}`;
+    }
+  }
+  const tail = last.match(/^(.*?)\s+([A-Z]{2})(\s+\d{5}(-\d{4})?)?$/);
+  if (tail) {
+    const city = tail[1].trim().split(/\s+/).pop();
+    if (city) return `${city}, ${tail[2]}`;
   }
   return null;
 }

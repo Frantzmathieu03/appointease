@@ -53,7 +53,7 @@ export default function AccountGate({
         Your account is only with {businessName}.
       </p>
       {error && <div className="error">{error}</div>}
-      <button className="btn btn-primary btn-block" type="button" onClick={google}>
+      <button className="btn btn-primary btn-block btn-google" type="button" onClick={google}>
         <GoogleLogo />
         Continue with Google
       </button>

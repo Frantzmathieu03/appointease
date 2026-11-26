@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import type { BusinessPhoto } from "@/lib/types";
 
-// Owner media manager: one logo + up to 4 work photos (owners can pick
-// many photos at once from their gallery), stored in the public
-// "business-media" Supabase Storage bucket under <business_id>/.
-// Writes are owner-only (RLS + storage policies, migration 0006); the
-// public business page reads the URLs. Validation is honest and plain:
-// JPEG/PNG/WebP only, logo ≤ 2 MB, photos ≤ 5 MB each.
+// Owner media manager: one cover photo + one logo + up to 4 work
+// photos (owners can pick many photos at once from their gallery),
+// stored in the public "business-media" Supabase Storage bucket under
+// <business_id>/. Writes are owner-only (RLS + storage policies,
+// migration 0006); the public business page reads the URLs. The cover
+// is its own image (businesses.cover_url, migration 0014) — the wide
+// photo across the top of the page in Frantz's page plan (2026-11-26).
+// Validation is honest and plain: JPEG/PNG/WebP only, logo ≤ 2 MB,
+// cover and photos ≤ 5 MB each.
 
 const BUCKET = "business-media";
 const MAX_PHOTOS = 4;
@@ -34,26 +37,30 @@ function validate(file: File, maxBytes: number): string | null {
 export default function BusinessMediaManager({
   businessId,
   initialLogoUrl,
+  initialCoverUrl,
   initialPhotos,
 }: {
   businessId: string;
   initialLogoUrl: string | null;
+  initialCoverUrl?: string | null;
   initialPhotos: BusinessPhoto[];
 }) {
   const router = useRouter();
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl);
+  const [coverUrl, setCoverUrl] = useState(initialCoverUrl ?? null);
   const [photos, setPhotos] = useState(initialPhotos);
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const logoInput = useRef<HTMLInputElement>(null);
+  const coverInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
 
   // Returns the public URL, or a plain-words reason it did not work.
   // The caller decides how to show the reason (one file vs. many).
   async function upload(
     file: File,
-    kind: "logo" | "photo"
+    kind: "logo" | "photo" | "cover"
   ): Promise<{ url: string } | { problem: string }> {
     const problem = validate(file, kind === "logo" ? LOGO_MAX_BYTES : PHOTO_MAX_BYTES);
     if (problem) return { problem };
@@ -96,6 +103,56 @@ export default function BusinessMediaManager({
         }
         router.refresh();
       }
+    }
+    setBusy("");
+  }
+
+  async function onCover(file: File) {
+    setBusy("cover");
+    setError("");
+    setNote("");
+    const result = await upload(file, "cover");
+    if ("problem" in result) {
+      setError(result.problem);
+    } else {
+      const url = result.url;
+      const supabase = createBrowserSupabase();
+      const old = coverUrl;
+      const { error: dbErr } = await supabase
+        .from("businesses")
+        .update({ cover_url: url })
+        .eq("id", businessId);
+      if (dbErr) {
+        console.error("Cover save failed", dbErr);
+        setError("Your cover photo uploaded but couldn't be saved. Please try again.");
+      } else {
+        setCoverUrl(url);
+        if (old) {
+          const oldPath = storagePathFromUrl(old);
+          if (oldPath) await supabase.storage.from(BUCKET).remove([oldPath]);
+        }
+        router.refresh();
+      }
+    }
+    setBusy("");
+  }
+
+  async function removeCover() {
+    setBusy("cover");
+    setError("");
+    const supabase = createBrowserSupabase();
+    const { error: dbErr } = await supabase
+      .from("businesses")
+      .update({ cover_url: null })
+      .eq("id", businessId);
+    if (dbErr) {
+      console.error("Cover remove failed", dbErr);
+      setError("That cover photo couldn't be removed. Please try again.");
+    } else {
+      const oldPath = coverUrl ? storagePathFromUrl(coverUrl) : null;
+      setCoverUrl(null);
+      if (oldPath) await supabase.storage.from(BUCKET).remove([oldPath]);
+      router.refresh();
     }
     setBusy("");
   }
@@ -216,7 +273,65 @@ export default function BusinessMediaManager({
     <div>
       {error && <div className="error">{error}</div>}
 
-      <h3 style={{ marginTop: 2 }}>Logo</h3>
+      <h3 style={{ marginTop: 2 }}>Cover photo</h3>
+      {coverUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={coverUrl}
+          alt="Cover"
+          style={{
+            width: "100%",
+            height: 110,
+            objectFit: "cover",
+            borderRadius: 14,
+            border: "1px solid var(--line)",
+            display: "block",
+            marginBottom: 10,
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            height: 110,
+            borderRadius: 14,
+            background: "#dfebdd",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--muted)",
+            fontSize: 13,
+            marginBottom: 10,
+            padding: 10,
+            textAlign: "center",
+          }}
+        >
+          No cover yet — your page shows a plain green space here
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 8 }}>
+        <button className="btn" disabled={busy !== ""} onClick={() => coverInput.current?.click()}>
+          {busy === "cover" ? "Working…" : coverUrl ? "Replace cover photo" : "Upload cover photo"}
+        </button>
+        {coverUrl && (
+          <button className="btn" disabled={busy !== ""} onClick={removeCover}>
+            Remove
+          </button>
+        )}
+      </div>
+      <p className="small">The wide photo across the top of your booking page. JPG, PNG or WebP, up to 5 MB.</p>
+      <input
+        ref={coverInput}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        hidden
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void onCover(f);
+          e.target.value = "";
+        }}
+      />
+
+      <h3 style={{ marginTop: 18 }}>Logo</h3>
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -266,7 +381,7 @@ export default function BusinessMediaManager({
       {photos.length === 0 ? (
         <p className="small">
           No photos yet — add a few shots of your work and they&apos;ll appear
-          in an “Our work” gallery on your booking page.
+          in a gallery on your booking page.
         </p>
       ) : (
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>

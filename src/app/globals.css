@@ -1293,3 +1293,138 @@ footer.site-footer { padding: 0; text-align: left; }
   .home-anim [data-reveal] { opacity: 1; transform: none; transition: none; }
   .home-anim .journey2-step { opacity: 1; transform: none; transition: none; }
 }
+
+/* Google sign-in buttons, slimmed (Frantz, 2026-11-26: the full-size
+   pill read as oversized and unprofessional). A normal professional
+   button: ~46px tall, regular text, the G badge a touch smaller.
+   Green + badge stay exactly as they were. */
+.btn-google { height: 46px; min-height: 46px; padding: 0 20px; font-size: 15px; }
+.btn-google .g-badge { width: 22px; height: 22px; border-radius: 6px; }
+.btn-google .g-badge svg { width: 14px; height: 14px; }
+
+/* ================================================================
+   Business page plan (Frantz's written plan + design pictures,
+   2026-11-26). Scoped to /[slug] pages via .bizpage: Inter font,
+   #F3F6F1 background, a centered 390–480px column, everything
+   centered. The main page's own classes are prefixed .bp-; the
+   book / message / my surfaces keep their existing components and
+   only inherit the font + background from .bizpage.
+   ================================================================ */
+.bizpage {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f3f6f1;
+  color: #16221b;
+  min-height: 100dvh;
+}
+.bp-column { max-width: 480px; margin: 0 auto; padding: 4px 20px 40px; }
+
+/* 1 — the only auth buttons on the page, top right. */
+.bp-auth { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 0 12px; }
+.bp-auth-btn {
+  height: 40px; padding: 0 18px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
+}
+.bp-auth-login { background: #fff; border: 1px solid #c9d4ca; color: #16221b; }
+.bp-auth-signup { background: #1e4d33; border: 1px solid #1e4d33; color: #fff; }
+
+/* 2 — cover photo: inset 16px each side of the column, 150px tall. */
+.bp-cover-wrap { padding: 0 16px; }
+.bp-cover {
+  height: 150px; border-radius: 18px; overflow: hidden; background: #dfebdd;
+}
+.bp-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* 3 — round logo overlapping the cover's bottom by 46px. */
+.bp-logo {
+  width: 92px; height: 92px; border-radius: 50%;
+  border: 4px solid #fff; background: #1e4d33;
+  margin: -46px auto 0; position: relative; z-index: 1;
+  object-fit: cover; display: block;
+  box-shadow: 0 4px 14px rgba(22, 34, 27, 0.14);
+}
+.bp-logo-initial {
+  display: grid; place-items: center;
+  color: #fff; font-size: 36px; font-weight: 700;
+}
+
+/* 4–5 — name, quiet type · city line, open-status pill. */
+.bp-name {
+  font-size: 28px; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em;
+  text-align: center; margin: 10px 0 4px; color: #16221b;
+}
+.bp-tagline { text-align: center; color: #5b6b61; font-size: 15px; margin: 0 0 10px; }
+.bp-status { display: flex; justify-content: center; }
+.bp-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #e1f2e6; color: #1e6b3a;
+  font-size: 13.5px; font-weight: 600;
+  padding: 6px 14px; border-radius: 999px;
+}
+.bp-pill-dot { width: 8px; height: 8px; border-radius: 50%; background: #2e9e57; flex: 0 0 auto; }
+.bp-pill-dot-closed { background: #9db2a0; }
+
+/* The owner's own words, one centered paragraph. */
+.bp-about { text-align: center; font-size: 15px; line-height: 1.55; color: #16221b; margin: 14px 4px 0; }
+
+/* 6 — the Book button. */
+.bp-book {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 56px; margin-top: 16px;
+  border: none; border-radius: 14px; cursor: pointer;
+  background: #1e4d33; color: #fff;
+  font-size: 17px; font-weight: 700; text-decoration: none;
+}
+.bp-notbookable {
+  text-align: center; color: #5b6b61; font-size: 15px; margin: 16px 4px 0;
+}
+
+/* 7 — Call / Message / Directions squares. */
+.bp-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.bp-actions-1 { grid-template-columns: 1fr; }
+.bp-actions-2 { grid-template-columns: repeat(2, 1fr); }
+.bp-square {
+  height: 76px; background: #fff; border: 1px solid #dce4dd; border-radius: 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  color: #16221b; font-size: 13.5px; font-weight: 600; text-decoration: none;
+  cursor: pointer; font-family: inherit; width: 100%;
+}
+.bp-square svg { width: 22px; height: 22px; color: #1e4d33; display: block; }
+
+/* 8–10 — white cards. */
+.bp-card {
+  background: #fff; border: 1px solid #dce4dd; border-radius: 16px;
+  padding: 20px; margin-top: 16px;
+}
+.bp-card-title { font-size: 18px; font-weight: 700; text-align: center; margin: 0 0 12px; color: #16221b; }
+.bp-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bp-photos img {
+  width: 100%; height: 120px; object-fit: cover;
+  border-radius: 12px; display: block;
+}
+.bp-service { text-align: center; padding: 10px 0; }
+.bp-service:first-of-type { padding-top: 2px; }
+.bp-service:last-of-type { padding-bottom: 2px; }
+.bp-service + .bp-service { border-top: 1px solid #edf1ed; }
+.bp-service-name { font-weight: 700; font-size: 16px; color: #16221b; }
+.bp-service-meta { color: #5b6b61; font-size: 14px; margin-top: 2px; }
+.bp-loc { text-align: center; font-size: 15px; line-height: 1.55; margin: 0 0 10px; }
+.bp-hours { text-align: center; font-size: 14.5px; line-height: 1.75; margin: 0; }
+.bp-phone { text-align: center; margin: 10px 0 0; }
+.bp-phone a { color: #16221b; font-weight: 600; font-size: 15px; text-decoration: none; }
+.bp-branch { text-align: center; padding-top: 12px; margin-top: 12px; border-top: 1px solid #edf1ed; }
+.bp-branch-name { font-weight: 700; font-size: 15px; margin: 0 0 2px; }
+.bp-branch-line { color: #5b6b61; font-size: 14px; margin: 0; }
+.bp-branch-line a { color: inherit; text-decoration: none; }
+
+/* Member's next appointment (signed-in members only). */
+.bp-next { text-align: center; }
+.bp-next-when { font-weight: 700; font-size: 16px; margin: 0 0 4px; }
+.bp-next-actions { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+
+/* 11 — footer. */
+.bp-footer { text-align: center; margin-top: 24px; }
+.bp-footer-links { font-size: 13.5px; color: #5b6b61; }
+.bp-footer-links a { color: #5b6b61; text-decoration: none; }
+.bp-powered { font-size: 12.5px; color: #8a978c; margin: 6px 0 0; }
+.bp-powered a { color: #8a978c; text-decoration: none; }

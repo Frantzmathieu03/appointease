@@ -10,8 +10,10 @@ import type { Business, BusinessPhoto } from "@/lib/types";
 import { formatPhone } from "@/lib/types";
 
 // The booking-page editor: one form for the words on the public page,
-// the logo & photos manager, the publish switch, and a live preview
-// that renders the public hero card with the words as you type them.
+// the cover / logo / photos manager (with the photos heading), the
+// publish switch, and a live preview that renders the top of the
+// public page — cover, logo, name, words, Book button — with the
+// words as you type them (Frantz's page plan, 2026-11-26).
 export default function BookingPageEditor({
   business,
   initialPhotos,
@@ -34,14 +36,35 @@ export default function BookingPageEditor({
     address: business.address ?? "",
   });
   const [logoUrl, setLogoUrl] = useState(business.logo_url);
+  const [coverUrl, setCoverUrl] = useState(business.cover_url ?? null);
   const [photos, setPhotos] = useState(initialPhotos);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [galleryTitle, setGalleryTitle] = useState(business.gallery_title ?? "");
+  const [galleryBusy, setGalleryBusy] = useState(false);
+  const [galleryNote, setGalleryNote] = useState("");
 
-  // After a logo/photo upload the media manager refreshes the page —
-  // pick the fresh values up so the preview follows.
+  // After a logo/cover/photo upload the media manager refreshes the
+  // page — pick the fresh values up so the preview follows.
   useEffect(() => setLogoUrl(business.logo_url), [business.logo_url]);
+  useEffect(() => setCoverUrl(business.cover_url ?? null), [business.cover_url]);
   useEffect(() => setPhotos(initialPhotos), [initialPhotos]);
+
+  async function saveGalleryTitle() {
+    setGalleryBusy(true);
+    setGalleryNote("");
+    const supabase = createBrowserSupabase();
+    const { error } = await supabase
+      .from("businesses")
+      .update({ gallery_title: galleryTitle.trim() || null })
+      .eq("id", business.id);
+    setGalleryBusy(false);
+    setGalleryNote(
+      error
+        ? "That heading couldn't be saved. Please try again."
+        : "Heading saved ✓"
+    );
+  }
 
   const set = (k: keyof typeof form) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -114,14 +137,38 @@ export default function BookingPageEditor({
           </div>
 
           <div className="card">
-            <h2>Logo &amp; photos (optional)</h2>
+            <h2>Cover, logo &amp; photos (optional)</h2>
             <p className="small" style={{ marginBottom: 10 }}>
-              Optional — a logo and up to four photos of your work. You can
-              take bookings without them.
+              Optional — a cover photo, a logo and up to four photos of
+              your work. You can take bookings without them.
             </p>
+            <label className="field">
+              <span>Photos heading (shown above your photos)</span>
+              <input
+                value={galleryTitle}
+                onChange={(e) => {
+                  setGalleryTitle(e.target.value);
+                  setGalleryNote("");
+                }}
+                placeholder="Our work"
+                maxLength={60}
+              />
+            </label>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 16 }}>
+              <button
+                className="btn"
+                type="button"
+                onClick={saveGalleryTitle}
+                disabled={galleryBusy}
+              >
+                {galleryBusy ? "Saving…" : "Save heading"}
+              </button>
+              {galleryNote && <span className="small">{galleryNote}</span>}
+            </div>
             <BusinessMediaManager
               businessId={business.id}
               initialLogoUrl={business.logo_url}
+              initialCoverUrl={business.cover_url ?? null}
               initialPhotos={initialPhotos}
             />
           </div>
@@ -133,59 +180,65 @@ export default function BookingPageEditor({
         </div>
 
         <div>
-          <p className="eyebrow" style={{ marginTop: 0 }}>Preview — your page header</p>
-          <div className="hero-card" style={{ margin: 0 }}>
-            {logoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={logoUrl}
-                alt={`${form.name} logo`}
-                style={{
-                  width: 76,
-                  height: 76,
-                  objectFit: "cover",
-                  borderRadius: "50%",
-                  border: "2px solid rgba(255,255,255,0.65)",
-                  marginBottom: 10,
-                  background: "#fff",
-                }}
-              />
-            )}
-            <p className="eyebrow">{categoryText}</p>
-            <h1>{form.name || "Your business name"}</h1>
-            {form.address && (
-              <p className="lede" style={{ marginBottom: 6 }}>📍 {form.address}</p>
-            )}
-            <p className="lede" style={{ marginBottom: 6 }}>{hoursLabel}</p>
-            {form.description && (
-              <p className="lede" style={{ marginBottom: 0 }}>{form.description}</p>
-            )}
-            <div className="action-row" style={{ margin: "16px 0 0" }}>
-              <span
-                className="btn"
-                style={{ background: "#fff", color: "var(--green)", borderColor: "#fff" }}
-              >
-                Book appointment
-              </span>
-              <span
-                className="btn"
-                style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
-              >
-                Message us
-              </span>
-              <span
-                className="btn"
-                style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
-              >
-                Call {form.phone ? formatPhone(form.phone) : "office"}
-              </span>
+          <p className="eyebrow" style={{ marginTop: 0 }}>Preview — the top of your page</p>
+          <div
+            className="bizpage"
+            style={{
+              borderRadius: 16,
+              border: "1px solid var(--line)",
+              overflow: "hidden",
+              minHeight: 0,
+            }}
+          >
+            <div style={{ maxWidth: 480, margin: "0 auto", padding: "16px 20px 22px" }}>
+              <div className="bp-cover-wrap">
+                <div className="bp-cover">
+                  {coverUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={coverUrl} alt="" />
+                  )}
+                </div>
+              </div>
+              {logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="bp-logo" src={logoUrl} alt={`${form.name} logo`} />
+              ) : (
+                <div className="bp-logo bp-logo-initial" aria-hidden="true">
+                  {(form.name.trim().charAt(0) || "Y").toUpperCase()}
+                </div>
+              )}
+              <h1 className="bp-name">{form.name || "Your business name"}</h1>
+              <p className="bp-tagline">{categoryText}</p>
+              {form.description && <p className="bp-about">{form.description}</p>}
+              <span className="bp-book">Book an appointment</span>
+              <div className="bp-actions">
+                <span className="bp-square">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+                  </svg>
+                  Call
+                </span>
+                <span className="bp-square">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M21 12a8 8 0 0 1-8 8H4l2.3-2.9A8 8 0 1 1 21 12z" />
+                  </svg>
+                  Message
+                </span>
+                <span className="bp-square">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 21s-7-5.6-7-11a7 7 0 1 1 14 0c0 5.4-7 11-7 11z" />
+                    <circle cx="12" cy="10" r="2.6" />
+                  </svg>
+                  Directions
+                </span>
+              </div>
             </div>
           </div>
           {photos.length > 0 && (
             <div className="card">
-              <h2>Our work</h2>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                {photos.map((p) => (
+              <h2>{galleryTitle.trim() || "Our work"}</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {photos.slice(0, 4).map((p) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={p.id}
@@ -193,10 +246,9 @@ export default function BookingPageEditor({
                     alt={`Work by ${form.name}`}
                     style={{
                       width: "100%",
-                      aspectRatio: "4 / 3",
+                      height: 120,
                       objectFit: "cover",
-                      borderRadius: 14,
-                      border: "1px solid var(--line)",
+                      borderRadius: 12,
                       display: "block",
                     }}
                   />
@@ -205,8 +257,9 @@ export default function BookingPageEditor({
             </div>
           )}
           <p className="small">
-            The preview shows the top of your page. Services, hours and
-            reviews appear below it on the real page.
+            The preview shows the top of your page. Services and hours
+            appear below it on the real page. Hours today: {hoursLabel}.
+            {form.phone ? ` Callers reach you at ${formatPhone(form.phone)}.` : ""}
           </p>
         </div>
       </div>

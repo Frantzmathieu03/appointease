@@ -10,6 +10,13 @@ export interface Business {
       Optional: rows fetched before the migration lands won't have it. */
   category?: string;
   logo_url: string | null;
+  /** Wide cover photo across the top of the public page (migration
+      0014). Optional: rows fetched before the migration lands won't
+      have it; the page renders a plain soft-green block instead. */
+  cover_url?: string | null;
+  /** The owner's name for the photos section (migration 0014).
+      Null/absent = the page shows "Our work". */
+  gallery_title?: string | null;
   description: string | null;
   address: string | null;
   phone: string | null;
@@ -40,9 +47,14 @@ export interface Service {
   business_id: string;
   name: string;
   duration_minutes: number;
-  /** Null = no public price; the price is confirmed with the business
-      (migration 0009). 0 = explicitly free. */
+  /** Null = no public price (migration 0009). 0 = explicitly free. */
   price_cents: number | null;
+  /** How the price is shown to customers (migration 0014):
+      "none" = no price text, "exact" = "$250", "from" = "from $350",
+      "free" = "Free". Optional: rows fetched before the migration
+      lands won't have it — formatServicePrice derives the same answer
+      from price_cents in that case. */
+  price_type?: PriceType;
   active: boolean;
   /** Attached intake form, if any (migration 0012). Optional: rows
       fetched before the migration lands won't have it. */
@@ -348,6 +360,41 @@ export function formatPrice(priceCents: number | null): string {
   if (priceCents === null) return "Price confirmed with the business";
   if (priceCents === 0) return "Free";
   return `$${(priceCents / 100).toFixed(priceCents % 100 === 0 ? 0 : 2)}`;
+}
+
+/** How a service's price is displayed (migration 0014). */
+export type PriceType = "none" | "exact" | "from" | "free";
+
+function money(cents: number): string {
+  return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
+}
+
+/**
+ * The customer-facing price words for a service, per the business
+ * page plan (Frantz, 2026-11-26): an exact price ("$250"), a starting
+ * price ("from $350"), "Free", or NOTHING when no price is set —
+ * there is deliberately no "price confirmed with the business"
+ * fallback anymore. When price_type is absent (rows from before
+ * migration 0014, demo data), the same answer is derived from
+ * price_cents: null = nothing, 0 = "Free", otherwise the exact price.
+ */
+export function formatServicePrice(s: {
+  price_cents: number | null;
+  price_type?: PriceType | null;
+}): string {
+  const type =
+    s.price_type ??
+    (s.price_cents === null ? "none" : s.price_cents === 0 ? "free" : "exact");
+  switch (type) {
+    case "free":
+      return "Free";
+    case "from":
+      return s.price_cents ? `from ${money(s.price_cents)}` : "";
+    case "exact":
+      return s.price_cents !== null ? money(s.price_cents) : "";
+    default:
+      return "";
+  }
 }
 
 export function slugify(name: string): string {

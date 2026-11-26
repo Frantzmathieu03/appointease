@@ -86,9 +86,9 @@ export default function OwnerSignupPage() {
 
       {phase === "account" && (
         <div className="card">
-          <h2>1 — Your login</h2>
+          <h2>1. Your login</h2>
           {error && <div className="error">{error}</div>}
-          <button className="btn btn-primary btn-block" type="button" onClick={google}>
+          <button className="btn btn-primary btn-block btn-google" type="button" onClick={google}>
             <GoogleLogo />
             Continue with Google
           </button>
@@ -118,7 +118,7 @@ export default function OwnerSignupPage() {
 
       {phase === "business" && (
         <div className="card">
-          <h2>2 — Your business</h2>
+          <h2>2. Your business</h2>
           <CreateBusinessForm />
         </div>
       )}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import {
   formatPhone,
-  formatPrice,
+  formatServicePrice,
   visitTypeLabel,
   type Availability,
   type Service,
@@ -436,7 +436,9 @@ export default function BookingFlow({
               <div>
                 <div className="service-name">{s.name}</div>
                 <div className="service-meta">
-                  {s.duration_minutes} min · {formatPrice(s.price_cents)} · {visitTypeLabel(s.visit_type)}
+                  {[`${s.duration_minutes} min`, formatServicePrice(s), visitTypeLabel(s.visit_type)]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </div>
               </div>
               <button
@@ -551,7 +553,8 @@ export default function BookingFlow({
           </p>
           <p className="small">
             {slot && `${formatDateInZone(new Date(slot), timezone)} at ${formatTimeInZone(new Date(slot), timezone)}`}
-            {service && ` · ${service.duration_minutes} min · ${formatPrice(service.price_cents)}`}
+            {service &&
+              ` · ${service.duration_minutes} min${formatServicePrice(service) ? ` · ${formatServicePrice(service)}` : ""}`}
           </p>
           <p className="small">
             {form.name} · {formatPhone(form.phone)} · {form.email}

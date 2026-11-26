@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { getBusinessPageDataWithPreview, hoursSummary, openStatus } from "@/lib/data";
+import {
+  getBusinessPageDataWithPreview,
+  hoursLines,
+  openStatus,
+  parseCityState,
+} from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import {
@@ -9,44 +15,66 @@ import {
   isBusinessMember,
 } from "@/lib/profile";
 import { getBillingState } from "@/lib/plans";
-import { formatPhone, formatPrice, visitTypeLabel } from "@/lib/types";
+import { formatPhone, formatServicePrice } from "@/lib/types";
 import AddressDirections from "@/components/AddressDirections";
 import { categoryLabel } from "@/lib/categories";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
-// Contact-card line icons (Visit us restyle, Frantz 2026-11-25): one
-// small consistent set, single color via currentColor, no emojis.
-function PinIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 21s-7-5.6-7-11a7 7 0 1 1 14 0c0 5.4-7 11-7 11z" />
-      <circle cx="12" cy="10" r="2.6" />
-    </svg>
-  );
+// The public business page, rebuilt to Frantz's written page plan +
+// design pictures (2026-11-26): everything centered in a 390–480px
+// column — top-right Log in / Sign up (the page's only auth buttons),
+// a cover photo with the round logo overlapping it, the name and a
+// quiet "Type · City, ST" line, an open-status pill, the owner's own
+// words, one big Book button, Call / Message / Directions squares,
+// then white cards for photos, services and hours & location, and a
+// small footer (Privacy · Terms, Powered by AppointEase). Reviews no
+// longer render on this page (the plan has no reviews section; the
+// data and dashboard features are untouched). All data, gates and
+// join behavior are exactly what the previous design ran on.
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const page = await getBusinessPageDataWithPreview(slug);
+  if (!page) return {};
+  const { business, photos } = page;
+  const typeLabel = business.type ?? categoryLabel(business.category);
+  const cityState = parseCityState(business.address);
+  const description =
+    business.description?.trim() ||
+    (cityState ? `${typeLabel} · ${cityState}` : typeLabel);
+  const image =
+    business.cover_url ??
+    business.logo_url ??
+    photos[0]?.url ??
+    "/hero/hero-poster.jpg";
+  return {
+    title: business.name,
+    description,
+    openGraph: { title: business.name, description, images: [{ url: image }] },
+    twitter: {
+      card: "summary_large_image",
+      title: business.name,
+      description,
+      images: [image],
+    },
+  };
 }
-function PhoneIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M5 4h4l1.5 4.5L8 10a12.5 12.5 0 0 0 6 6l1.5-2.5L20 15v4a2 2 0 0 1-2.2 2A17.5 17.5 0 0 1 3 6.2 2 2 0 0 1 5 4z" />
-    </svg>
-  );
-}
-function MailIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="M3.5 6.5 12 13l8.5-6.5" />
-    </svg>
-  );
-}
-function ClockIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M12 7.5V12l3 2" />
-    </svg>
-  );
-}
+
+const PhoneIcon = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+  </svg>
+);
+
+const MessageIcon = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 12a8 8 0 0 1-8 8H4l2.3-2.9A8 8 0 1 1 21 12z" />
+  </svg>
+);
 
 export default async function BusinessPage({
   params,
@@ -129,21 +157,71 @@ export default async function BusinessPage({
     }
   }
 
+  // The top-right auth row (the plan replaces the old slim header on
+  // this page): "My dashboard" ONLY for a signed-in customer who is a
+  // member of THIS business and is not the owner — the exact rule
+  // BusinessHeader applies on the book / message / my surfaces. Demo
+  // shops keep their sample behavior (any signed-in visitor sees the
+  // dashboard pill). Everyone else sees Log in / Sign up, both
+  // carrying next=/<slug>?join=1 so completing auth joins them here.
+  let signedInUser: { id: string } | null = null;
+  let showDashboard = false;
+  if (!page.demoMode && isSupabaseConfigured()) {
+    try {
+      const supabase = await createServerSupabase();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        signedInUser = user;
+        if (demoShop) {
+          showDashboard = true;
+        } else if (user.id !== business.owner_id) {
+          showDashboard = await isBusinessMember(supabase, business.id, user.id);
+        }
+      }
+    } catch {
+      showDashboard = false;
+    }
+  }
+  const nextPath = demoShop ? `/${slug}` : `/${slug}?join=1`;
+  const authRow = (
+    <div className="bp-auth">
+      {showDashboard ? (
+        <Link className="bp-auth-btn bp-auth-signup" href={`/${slug}/my`}>
+          My dashboard
+        </Link>
+      ) : (
+        <>
+          <Link
+            className="bp-auth-btn bp-auth-login"
+            href={`/login?next=${encodeURIComponent(nextPath)}`}
+          >
+            Log in
+          </Link>
+          <Link
+            className="bp-auth-btn bp-auth-signup"
+            href={`/signup?next=${encodeURIComponent(nextPath)}`}
+          >
+            Sign up
+          </Link>
+        </>
+      )}
+    </div>
+  );
+
   // Billing gate: a business whose trial ended with no active subscription
   // (or whose subscription lapsed past its grace window) shows a paused
   // notice instead of the booking page. Nothing is deleted — existing
   // appointments stay manageable and the owner dashboard stays open.
   if (!getBillingState(business).bookingLive) {
     return (
-      <main className="column">
-        <div className="hero-card">
-          <p className="eyebrow">{business.category ? categoryLabel(business.category) : business.type}</p>
-          <h1>{business.name}</h1>
-          {business.address && <p className="lede">{business.address}</p>}
-        </div>
-        <div className="card center">
-          <h2>Online booking is temporarily unavailable</h2>
-          <p className="lede">
+      <main className="bp-column">
+        {authRow}
+        <h1 className="bp-name">{business.name}</h1>
+        <section className="bp-card" style={{ textAlign: "center" }}>
+          <h2 style={{ marginTop: 0 }}>Online booking is temporarily unavailable</h2>
+          <p style={{ color: "#5b6b61" }}>
             {business.name} isn&apos;t taking online bookings right now.
             {business.phone && !demoShop && (
               <>
@@ -156,11 +234,11 @@ export default async function BusinessPage({
             Already have an appointment? You can still view, reschedule or
             cancel it from <Link href="/my-appointments">My appointments</Link>.
           </p>
-          <p className="small">
+          <p className="small" style={{ marginBottom: 0 }}>
             Business owner? <Link href="/owner">Sign in</Link> to reactivate
             your booking page.
           </p>
-        </div>
+        </section>
       </main>
     );
   }
@@ -170,323 +248,278 @@ export default async function BusinessPage({
   // AppointEase does not make you a client of this business — the
   // membership starts at the deliberate join steps: the booking
   // account step, the message join step, or opening the customer's
-  // dashboard for this business. That is what lets the header show
-  // Sign up / Sign in honestly to everyone who is not yet a customer
+  // dashboard for this business. That is what lets the page show
+  // Sign up / Log in honestly to everyone who is not yet a customer
   // here, the owner included.
 
-  // Open/closed for the contact card, from the real hours.
+  // Open/closed pill, from the real hours.
   const status = openStatus(page.availability, tz);
 
-  // Reviews (carried over from the old app): average + latest few, public.
-  let reviewSummary: { avg: number; total: number; latest: { rating: number; comment: string | null; name: string }[] } | null = null;
-  if (!page.demoMode && !demoShop && isSupabaseConfigured()) {
+  // If the signed-in customer has a next appointment here, it sits on
+  // the page — with Reschedule / Cancel one tap away (owner spec).
+  let nextAppt: { starts_at: string; manage_token: string; serviceName: string; confirmationCode: string | null } | null = null;
+  if (!page.demoMode && !demoShop && signedInUser) {
     const supabase = await createServerSupabase();
-    const { data: revs } = await supabase
-      .from("reviews")
-      .select("rating, comment, created_at, customers:customer_id ( full_name )")
+    const { data } = await supabase
+      .from("appointments")
+      .select("starts_at, manage_token, confirmation_code, services:service_id ( name )")
       .eq("business_id", business.id)
-      .order("created_at", { ascending: false });
-    if (revs && revs.length > 0) {
-      const avg = revs.reduce((s, r) => s + r.rating, 0) / revs.length;
-      reviewSummary = {
-        avg: Math.round(avg * 10) / 10,
-        total: revs.length,
-        latest: revs.slice(0, 3).map((r) => ({
-          rating: r.rating,
-          comment: r.comment,
-          name:
-            (r as unknown as { customers: { full_name: string } }).customers?.full_name ?? "Customer",
-        })),
+      .eq("customer_id", signedInUser.id)
+      .eq("status", "confirmed")
+      .gte("starts_at", new Date().toISOString())
+      .order("starts_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      nextAppt = {
+        starts_at: data.starts_at,
+        manage_token: data.manage_token,
+        confirmationCode: data.confirmation_code ?? null,
+        serviceName:
+          (data as unknown as { services: { name: string } }).services?.name ?? "Appointment",
       };
     }
   }
 
-  // If the signed-in customer has a next appointment here, it sits on top —
-  // with Reschedule / Cancel one tap away (owner spec).
-  let nextAppt: { starts_at: string; manage_token: string; serviceName: string; confirmationCode: string | null } | null = null;
-  if (!page.demoMode && !demoShop && isSupabaseConfigured()) {
-    const supabase = await createServerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase
-        .from("appointments")
-        .select("starts_at, manage_token, confirmation_code, services:service_id ( name )")
-        .eq("business_id", business.id)
-        .eq("customer_id", user.id)
-        .eq("status", "confirmed")
-        .gte("starts_at", new Date().toISOString())
-        .order("starts_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-      if (data) {
-        nextAppt = {
-          starts_at: data.starts_at,
-          manage_token: data.manage_token,
-          confirmationCode: data.confirmation_code ?? null,
-          serviceName:
-            (data as unknown as { services: { name: string } }).services?.name ?? "Appointment",
-        };
-      }
+  const typeLabel = business.type ?? categoryLabel(business.category);
+  const cityState = parseCityState(business.address);
+  const tagline = cityState ? `${typeLabel} · ${cityState}` : typeLabel;
+  const hourLines = hoursLines(page.availability);
+
+  // The address on two lines: split at the first comma when that
+  // reads sensibly ("120 Harbor Walk" / "Suite 4, Boston, MA"); if it
+  // cannot be split, it shows as stored, wrapped.
+  const addressLines = ((): string[] => {
+    const addr = business.address?.trim();
+    if (!addr) return [];
+    const idx = addr.indexOf(",");
+    if (idx > 0) {
+      const first = addr.slice(0, idx).trim();
+      const rest = addr.slice(idx + 1).trim();
+      if (first && rest) return [first, rest];
     }
-  }
+    return [addr];
+  })();
+
+  // The three squares. Demo shops keep their behavior: no Call and no
+  // Message (booking there is a simulation), Directions only.
+  const squares: ("call" | "message" | "directions")[] = [];
+  if (business.phone && !demoShop) squares.push("call");
+  if (!demoShop && !page.demoMode) squares.push("message");
+  if (business.address) squares.push("directions");
 
   return (
-    <main className="column">
+    <main className="bp-column">
+      {authRow}
+
       {page.demoMode && !demoShop && (
-        <div className="notice">Demo business — running on sample data until the live database is connected.</div>
+        <div className="notice" style={{ marginBottom: 14 }}>
+          Demo business — running on sample data until the live database is connected.
+        </div>
       )}
       {demoShop && (
-        <div className="notice" role="note">
+        <div className="notice" role="note" style={{ marginBottom: 14 }}>
           <strong>Demo shop</strong> — this is a live demo of an AppointEase
           booking page. Try booking, nothing is real: no appointment is
           saved and no messages are sent.
         </div>
       )}
 
-      <div className="hero-card biz-hero">
-        {business.logo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={business.logo_url}
-            alt={`${business.name} logo`}
-            className="biz-hero-logo"
-          />
-        ) : (
-          <div className="biz-hero-logo biz-hero-initial" aria-hidden="true">
-            {business.name.trim().charAt(0).toUpperCase() || "?"}
-          </div>
-        )}
-        <p className="eyebrow" style={{ marginTop: 14 }}>{business.category ? categoryLabel(business.category) : business.type}</p>
-        <h1 style={{ marginBottom: 8 }}>{business.name}</h1>
-        {demoShop && (
-          <p style={{ margin: "0 0 8px" }}>
-            <span className="demo-badge">Demo shop</span>
-          </p>
-        )}
-        {business.description && (
-          <p className="biz-hero-about">{business.description}</p>
-        )}
-        <p className="biz-hero-line">
-          {[business.address, hoursSummary(page.availability)].filter(Boolean).join(" · ")}
-        </p>
-        {!hasServices && (
-          <p className="lede" style={{ margin: "10px 0 0" }}>
-            This business is not taking bookings yet.
-          </p>
-        )}
-
-        <div
-          className="action-row"
-          style={{
-            margin: "18px 0 0",
-            ...(demoShop
-              ? { gridTemplateColumns: "1fr" }
-              : !hasServices
-                ? { gridTemplateColumns: "1fr 1fr" }
-                : {}),
-          }}
-        >
-          {hasServices && (
-            <Link
-              href={`/${slug}/book`}
-              className="btn"
-              style={{ background: "#fff", color: "var(--green)", borderColor: "#fff" }}
-            >
-              Book appointment
-            </Link>
-          )}
-          {!demoShop && (
-            <Link
-              href={`/${slug}/message`}
-              className="btn"
-              style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
-            >
-              Message us
-            </Link>
-          )}
-          {!demoShop &&
-            (business.phone ? (
-              <a
-                href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}
-                className="btn"
-                style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
-              >
-                Call {formatPhone(business.phone)}
-              </a>
-            ) : (
-              <span
-                className="btn"
-                aria-disabled="true"
-                style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,0.65)" }}
-              >
-                Call office
-              </span>
-            ))}
+      {/* Cover photo — its own image (businesses.cover_url); with no
+          cover set, a plain soft-green block of the same size. */}
+      <div className="bp-cover-wrap">
+        <div className="bp-cover">
+          {business.cover_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={business.cover_url} alt="" />
+          ) : null}
         </div>
       </div>
 
+      {/* Round logo overlapping the cover's bottom edge. */}
+      {business.logo_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="bp-logo" src={business.logo_url} alt={`${business.name} logo`} />
+      ) : (
+        <div className="bp-logo bp-logo-initial" aria-hidden="true">
+          {business.name.trim().charAt(0).toUpperCase() || "?"}
+        </div>
+      )}
+
+      <h1 className="bp-name">{business.name}</h1>
+      <p className="bp-tagline">{tagline}</p>
+      {demoShop && (
+        <div style={{ textAlign: "center", marginBottom: 8 }}>
+          <span className="demo-badge">Demo shop</span>
+        </div>
+      )}
+
+      {/* Open status pill — hidden when the business has no hours. */}
+      {status && (
+        <div className="bp-status">
+          <span className="bp-pill">
+            <span className={`bp-pill-dot${status.state === "open" ? "" : " bp-pill-dot-closed"}`} />
+            {status.pill}
+          </span>
+        </div>
+      )}
+
+      {/* The owner's own words — one centered paragraph, no card. */}
+      {business.description?.trim() && (
+        <p className="bp-about">{business.description.trim()}</p>
+      )}
+
       {nextAppt && (
-        <div className="card">
-          <p className="eyebrow">Your next appointment</p>
-          <h3>
+        <section className="bp-card bp-next">
+          <p className="eyebrow" style={{ margin: "0 0 6px" }}>Your next appointment</p>
+          <p className="bp-next-when">
             {nextAppt.serviceName} — {formatDateInZone(new Date(nextAppt.starts_at), tz)} at{" "}
             {formatTimeInZone(new Date(nextAppt.starts_at), tz)}
-          </h3>
+          </p>
           {nextAppt.confirmationCode && (
-            <p className="small" style={{ margin: "0 0 4px" }}>
+            <p className="small" style={{ margin: 0 }}>
               Confirmation #: <strong>{nextAppt.confirmationCode}</strong>
             </p>
           )}
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <div className="bp-next-actions">
             <Link href={`/manage/${nextAppt.manage_token}`} className="btn">Reschedule</Link>
             <Link href={`/manage/${nextAppt.manage_token}`} className="btn">Cancel</Link>
           </div>
+        </section>
+      )}
+
+      {/* The one big Book button — same destination and gates as
+          before (the booking page runs its account/join steps). With
+          no services there is no button into an empty flow, just the
+          plain not-taking-bookings line. */}
+      {hasServices ? (
+        <Link className="bp-book" href={`/${slug}/book`}>
+          Book an appointment
+        </Link>
+      ) : (
+        <p className="bp-notbookable">This business is not taking bookings yet.</p>
+      )}
+
+      {squares.length > 0 && (
+        <div
+          className={`bp-actions${squares.length === 2 ? " bp-actions-2" : ""}${squares.length === 1 ? " bp-actions-1" : ""}`}
+        >
+          {squares.map((sq) =>
+            sq === "call" ? (
+              <a
+                key="call"
+                className="bp-square"
+                href={`tel:${business.phone!.replace(/[^+\d]/g, "")}`}
+              >
+                {PhoneIcon}
+                Call
+              </a>
+            ) : sq === "message" ? (
+              <Link key="message" className="bp-square" href={`/${slug}/message`}>
+                {MessageIcon}
+                Message
+              </Link>
+            ) : (
+              <AddressDirections
+                key="directions"
+                address={business.address!}
+                variant="square"
+              />
+            )
+          )}
         </div>
       )}
 
+      {/* Photos — the whole card is hidden when the owner has none. */}
       {page.photos.length > 0 && (
-        <div className="card">
-          <h2>Our work</h2>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 10,
-            }}
-          >
-            {page.photos.map((p) => (
+        <section className="bp-card">
+          <h2 className="bp-card-title">{business.gallery_title?.trim() || "Our work"}</h2>
+          <div className="bp-photos">
+            {page.photos.slice(0, 4).map((p) => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={p.id}
-                src={p.url}
-                alt={`Work by ${business.name}`}
-                style={{
-                  width: "100%",
-                  aspectRatio: "4 / 3",
-                  objectFit: "cover",
-                  borderRadius: 14,
-                  border: "1px solid var(--line)",
-                  display: "block",
-                }}
-              />
+              <img key={p.id} src={p.url} alt={`Work by ${business.name}`} loading="lazy" />
             ))}
           </div>
-        </div>
-      )}
-
-      {(business.address || business.phone || business.email) && (
-        <div className="card">
-          <h2>Visit us</h2>
-          {/* Clean contact card (Frantz, 2026-11-25): line icons on a
-              shared left edge, plain text with NO underlined links,
-              even rows with thin dividers. The address row keeps the
-              directions sheet (Google Maps / Apple Maps / Waze / Copy
-              address) behind a quiet "Get directions" action. */}
-          <div className="contact-list">
-            {business.address && (
-              <div className="contact-row">
-                <span className="contact-icon"><PinIcon /></span>
-                <span style={{ flex: 1 }}>{business.address}</span>
-                <AddressDirections address={business.address} variant="action" />
-              </div>
-            )}
-            {business.phone && !demoShop && (
-              <div className="contact-row">
-                <span className="contact-icon"><PhoneIcon /></span>
-                <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>{formatPhone(business.phone)}</a>
-              </div>
-            )}
-            {business.email && !demoShop && (
-              <div className="contact-row">
-                <span className="contact-icon"><MailIcon /></span>
-                <a href={`mailto:${business.email}`}>{business.email}</a>
-              </div>
-            )}
-            <div className="contact-row">
-              <span className="contact-icon"><ClockIcon /></span>
-              <span style={{ flex: 1 }}>
-                {status
-                  ? status.todayLabel
-                    ? `Today · ${status.todayLabel}`
-                    : "Today · Closed"
-                  : hoursSummary(page.availability)}
-              </span>
-              {status && (
-                <span className="open-note">
-                  <span className={status.state === "open" ? "open-dot" : "closed-dot"} aria-hidden="true" />
-                  {status.note}
-                </span>
-              )}
-            </div>
-          </div>
-          {status && (
-            <p className="small" style={{ margin: "10px 0 0" }}>
-              Hours: {hoursSummary(page.availability)}
-            </p>
-          )}
-          {page.locations.length > 0 && (
-            <div style={{ marginTop: 6 }}>
-              <p style={{ margin: "10px 0 0", fontWeight: 600 }}>Our locations</p>
-              {page.locations.map((loc) => (
-                <div key={loc.id} className="contact-loc">
-                  <p style={{ margin: "0 0 2px", fontWeight: 600 }}>{loc.name}</p>
-                  {loc.address && (
-                    <div className="contact-loc-row">
-                      <span style={{ flex: 1 }}>{loc.address}</span>
-                      <AddressDirections address={loc.address} variant="action" />
-                    </div>
-                  )}
-                  {loc.phone && !demoShop && (
-                    <div className="contact-loc-row">
-                      <a href={`tel:${loc.phone.replace(/[^+\d]/g, "")}`}>{formatPhone(loc.phone)}</a>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        </section>
       )}
 
       {hasServices && (
-        <div className="card">
-          <h2>Services</h2>
-          {services.map((s) => (
-            <div key={s.id} className="service-row">
-              <div>
-                <div className="service-name">{s.name}</div>
-                <div className="service-meta">
-                  {s.duration_minutes} min · {formatPrice(s.price_cents)} · {visitTypeLabel(s.visit_type)}
-                </div>
+        <section className="bp-card">
+          <h2 className="bp-card-title">Services</h2>
+          {services.map((s) => {
+            const price = formatServicePrice(s);
+            const meta = [`${s.duration_minutes} min`, price]
+              .filter(Boolean)
+              .join(" · ");
+            return (
+              <div className="bp-service" key={s.id}>
+                <div className="bp-service-name">{s.name}</div>
+                <div className="bp-service-meta">{meta}</div>
               </div>
-              <Link href={`/${slug}/book?service=${s.id}`} className="btn" style={{ padding: "8px 14px" }}>
-                Select
-              </Link>
-            </div>
-          ))}
-        </div>
+            );
+          })}
+        </section>
       )}
 
-      {reviewSummary && (
-        <div className="card">
-          <h2>
-            {reviewSummary.avg} ★ <span className="small">· {reviewSummary.total} review{reviewSummary.total === 1 ? "" : "s"}</span>
-          </h2>
-          {reviewSummary.latest.map((r, i) => (
-            <div key={i} style={{ padding: "8px 0", borderBottom: i < reviewSummary!.latest.length - 1 ? "1px solid var(--line)" : "none" }}>
-              <div style={{ fontWeight: 600 }}>
-                {"★".repeat(r.rating)}
-                <span style={{ color: "var(--line)" }}>{"★".repeat(5 - r.rating)}</span>
-                <span className="small" style={{ fontWeight: 400 }}> — {r.name}</span>
+      {(addressLines.length > 0 || hourLines.length > 0 || (business.phone && !demoShop) || page.locations.length > 0) && (
+        <section className="bp-card">
+          <h2 className="bp-card-title">Hours &amp; location</h2>
+          {addressLines.length > 0 && (
+            <p className="bp-loc">
+              {addressLines.map((line, i) => (
+                <span key={i}>
+                  {line}
+                  {i < addressLines.length - 1 && <br />}
+                </span>
+              ))}
+            </p>
+          )}
+          {hourLines.length > 0 && (
+            <p className="bp-hours">
+              {hourLines.map((line, i) => (
+                <span key={line}>
+                  {line}
+                  {i < hourLines.length - 1 && <br />}
+                </span>
+              ))}
+            </p>
+          )}
+          {business.phone && !demoShop && (
+            <p className="bp-phone">
+              <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>
+                {formatPhone(business.phone)}
+              </a>
+            </p>
+          )}
+          {page.locations.length > 0 &&
+            page.locations.map((loc) => (
+              <div className="bp-branch" key={loc.id}>
+                <p className="bp-branch-name">{loc.name}</p>
+                {loc.address && <p className="bp-branch-line">{loc.address}</p>}
+                {loc.phone && !demoShop && (
+                  <p className="bp-branch-line">
+                    <a href={`tel:${loc.phone.replace(/[^+\d]/g, "")}`}>
+                      {formatPhone(loc.phone)}
+                    </a>
+                  </p>
+                )}
               </div>
-              {r.comment && <p className="small" style={{ margin: "2px 0 0" }}>{r.comment}</p>}
-            </div>
-          ))}
-        </div>
+            ))}
+        </section>
       )}
 
+      <footer className="bp-footer">
+        <div className="bp-footer-links">
+          <Link href="/privacy">Privacy</Link>
+          {" · "}
+          <Link href="/terms">Terms</Link>
+        </div>
+        <p className="bp-powered">
+          <a href="https://www.appointease.io" target="_blank" rel="noreferrer">
+            Powered by AppointEase
+          </a>
+        </p>
+      </footer>
     </main>
   );
 }

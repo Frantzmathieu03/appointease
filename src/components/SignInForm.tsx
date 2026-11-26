@@ -100,7 +100,7 @@ export default function SignInForm({
       <h2>{title}</h2>
       <p className="lede" style={{ marginBottom: 16 }}>{subtitle}</p>
       {error && <div className="error">{error}</div>}
-      <button className="btn btn-primary btn-block" type="button" onClick={google}>
+      <button className="btn btn-primary btn-block btn-google" type="button" onClick={google}>
         <GoogleLogo />
         Continue with Google
       </button>
