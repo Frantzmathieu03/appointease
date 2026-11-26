@@ -1044,11 +1044,6 @@ footer.site-footer { padding: 0; text-align: left; }
   padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
 .inbox-filters button.active { background: var(--green); color: #fff; border-color: var(--green); }
-.quick-replies { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.quick-replies button {
-  border: 1px solid var(--line); background: #f4f8f4; border-radius: 999px;
-  padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
-}
 @media (max-width: 900px) {
   .inbox-shell { grid-template-columns: 1fr; }
   .inbox-shell.has-thread .inbox-list-col { display: none; }
@@ -1056,8 +1051,10 @@ footer.site-footer { padding: 0; text-align: left; }
 
 /* Calendar time grid: columns are days (week) or staff (day); each
    column is a relative stack of 30-minute slot cells with appointment
-   blocks positioned over them. */
-.cal-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+   blocks positioned over them. NOTE: this class must never be named
+   .cal-grid — that name belongs to the DatePicker month grid above,
+   and a shared name silently crushed the picker into a flex strip. */
+.cal-time-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
 .cal-col { flex: 1 0 150px; min-width: 150px; }
 .cal-col-head { font-weight: 700; font-size: 14px; margin-bottom: 6px; text-align: center; }
 .cal-col-body { position: relative; }

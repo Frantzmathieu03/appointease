@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import UnreadBadge from "@/components/UnreadBadge";
 
 /**
  * The AppointEase marketing header/footer. Two kinds of pages show
@@ -62,10 +61,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
             </Link>
             <nav className="header-links">
               <Link href="/explore" className="header-link-text">Find a business</Link>
-              <Link href="/my-appointments" className="header-link-text">
-                My appointments
-                <UnreadBadge variant="customer" />
-              </Link>
               <Link href="/owner" className="header-link-text">Business sign-in</Link>
               <Link href="/owner/signup" className="btn btn-primary header-cta">
                 Create booking page
@@ -91,7 +86,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
               <Link href="/owner/signup">Create booking page</Link>
               <Link href="/explore">Find a business</Link>
               <Link href="/main-street-barbers">See a live example</Link>
-              <Link href="/my-appointments">My appointments</Link>
               <Link href="/owner">Business sign-in</Link>
             </div>
             <div className="footer-col">

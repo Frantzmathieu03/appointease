@@ -18,14 +18,10 @@ export default function ThreadView({
   businessId,
   customerId,
   viewer,
-  quickReplies,
 }: {
   businessId: string;
   customerId: string;
   viewer: "customer" | "business";
-  /** One-tap replies (owner inbox, PDF §4): clicking FILLS the composer
-      with the text — it never sends on its own. */
-  quickReplies?: { label: string; text: string }[];
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -143,15 +139,6 @@ export default function ThreadView({
         <div ref={bottomRef} />
       </div>
       {error && <div className="error">{error}</div>}
-      {quickReplies && quickReplies.length > 0 && (
-        <div className="quick-replies" aria-label="Quick replies">
-          {quickReplies.map((q) => (
-            <button key={q.label} type="button" onClick={() => setDraft(q.text)}>
-              {q.label}
-            </button>
-          ))}
-        </div>
-      )}
       <form onSubmit={send}>
         <label className="field" style={{ marginBottom: 8 }}>
           <span>Your message</span>

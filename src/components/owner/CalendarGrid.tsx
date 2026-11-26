@@ -55,7 +55,7 @@ export default function CalendarGrid({
     `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
 
   return (
-    <div className="cal-grid">
+    <div className="cal-time-grid">
       {columns.map((col) => {
         const blocks = appointments.filter((a) =>
           mode === "week"

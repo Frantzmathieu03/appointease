@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireBusiness, siteUrl } from "@/lib/owner";
+import { requireBusiness } from "@/lib/owner";
 import ThreadView from "@/components/ThreadView";
 import AssignControl from "@/components/owner/AssignControl";
 import InboxShell from "@/components/owner/InboxShell";
@@ -10,7 +10,7 @@ import { formatPhone } from "@/lib/types";
 
 // One open thread inside the two-column inbox (PDF §4): header carries
 // the customer's next appointment, their assignment, and a profile
-// link; quick replies fill the composer (never auto-send).
+// link.
 export default async function DashboardThreadPage({
   params,
 }: {
@@ -58,13 +58,6 @@ export default async function DashboardThreadPage({
     services: { name: string } | null;
   } | null;
 
-  const bookingUrl = `${siteUrl()}/${business.slug}`;
-  const quickReplies = [
-    { label: "Running 10 min late", text: "Hi — I'm running about 10 minutes late. Thanks for your patience!" },
-    { label: "Please upload your documents", text: "Please upload your documents ahead of your appointment so we can prepare." },
-    { label: "Here's your booking link", text: `Here's your booking link: ${bookingUrl}` },
-  ];
-
   return (
     <div>
       <h1 style={{ fontSize: 26 }}>Inbox</h1>
@@ -108,7 +101,6 @@ export default async function DashboardThreadPage({
               businessId={business.id}
               customerId={customerId}
               viewer="business"
-              quickReplies={quickReplies}
             />
           </div>
           <p className="small">
