@@ -66,10 +66,10 @@ export default async function BusinessPage({
     // run. Look the business up by slug without the published filter
     // (service-role, minimal fields; RLS hides the row from a new
     // customer), and when it exists and the signed-in user is not the
-    // owner, join them and redirect to the clean page — which now
-    // renders for them as a member. A business that truly does not
-    // exist still 404s, signed-out returns still 404, and the owner
-    // never joins their own business.
+    // owner, join them and redirect to their customer dashboard
+    // (/<slug>/my) — which now renders for them as a member. A
+    // business that truly does not exist still 404s, signed-out
+    // returns still 404, and the owner never joins their own business.
     if (join && !isDemoShop(slug) && isSupabaseConfigured()) {
       const supabase = await createServerSupabase();
       const {
@@ -85,7 +85,7 @@ export default async function BusinessPage({
         if (biz && biz.owner_id !== user.id) {
           await ensureCustomerProfile(supabase, user);
           await ensureBusinessMembership(supabase, biz.id, user.id);
-          redirect(`/${slug}`);
+          redirect(`/${slug}/my`);
         }
       }
     }
@@ -107,10 +107,13 @@ export default async function BusinessPage({
   // visitor who just completed sign-up or sign-in through them lands
   // back here WITH the marker — that deliberate completion is what
   // joins them to this business, exactly like the booking and
-  // message gates. Join, then redirect to the clean page so the
-  // header renders their new "My dashboard". A plain page view (no
-  // marker) never joins anyone, and the owner never joins their own
-  // business as a customer.
+  // message gates. Join, then land them on their own customer
+  // dashboard (/<slug>/my) — after sign-in a customer should see
+  // THEIR name and THEIR information, not the business storefront
+  // again (Frantz, 2026-11-26). An already-joined member returning
+  // through the same buttons lands there too. A plain page view (no
+  // marker) never joins anyone and still renders the storefront, and
+  // the owner never joins their own business as a customer.
   if (join && !page.demoMode && !demoShop && isSupabaseConfigured()) {
     const supabase = await createServerSupabase();
     const {
@@ -121,8 +124,8 @@ export default async function BusinessPage({
       if (!member) {
         await ensureCustomerProfile(supabase, user);
         await ensureBusinessMembership(supabase, business.id, user.id);
-        redirect(`/${slug}`);
       }
+      redirect(`/${slug}/my`);
     }
   }
 

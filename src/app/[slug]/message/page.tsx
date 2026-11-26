@@ -90,7 +90,10 @@ export default async function MessagePage({
     if (!isOwner && join) {
       await ensureCustomerProfile(supabase, user);
       await ensureBusinessMembership(supabase, business.id, user.id);
-      redirect(`/${slug}/message`);
+      // Joined through this business's sign-in link: land on the
+      // customer's own dashboard (their thread lives there too),
+      // not back at the storefront (Frantz, 2026-11-26).
+      redirect(`/${slug}/my`);
     }
     return (
       <main className="column">

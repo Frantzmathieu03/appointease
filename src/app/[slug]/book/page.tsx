@@ -54,8 +54,10 @@ export default async function BookPage({
   //     their own page included): the join step — one tap joins this
   //     business and continues into booking. A visitor who just
   //     completed sign-in/sign-up through this business's own account
-  //     step arrives with the join marker, is joined on the spot, and
-  //     continues with nothing re-asked;
+  //     step arrives with the join marker and is joined on the spot;
+  //     they land on their own customer dashboard (/<slug>/my),
+  //     never back on the storefront (Frantz, 2026-11-26), and book
+  //     from there;
   //   - signed-in member: straight into the booking flow.
   // Demo shops and demo mode stay account-free simulations, as before.
   if (!page.demoMode && !isDemoShop(slug) && isSupabaseConfigured()) {
@@ -83,11 +85,11 @@ export default async function BookPage({
       if (!isOwner && join) {
         await ensureCustomerProfile(supabase, user);
         await ensureBusinessMembership(supabase, business.id, user.id);
-        redirect(
-          service
-            ? `/${slug}/book?service=${encodeURIComponent(service)}`
-            : `/${slug}/book`
-        );
+        // Joined through this business's account step: land on the
+        // customer's own dashboard, not back at the storefront or
+        // into a half-started flow (Frantz, 2026-11-26). Their
+        // dashboard's Book button starts the booking from there.
+        redirect(`/${slug}/my`);
       }
       return (
         <main className="column">

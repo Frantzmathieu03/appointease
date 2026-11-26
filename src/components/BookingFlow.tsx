@@ -387,6 +387,32 @@ export default function BookingFlow({
     );
   }
 
+  // No services yet: step 1 would render an empty "Service" card —
+  // services.map() emits nothing and Continue stays disabled with no
+  // explanation (Frantz hit exactly this on a brand-new business,
+  // 2026-11-26). Show one clear card instead of the dead flow. The
+  // business page already says the same thing and hides its Book
+  // button, but the flow is still reachable (e.g. the Book button on
+  // the customer's own dashboard), so it must stand on its own.
+  if (services.length === 0) {
+    return (
+      <div>
+        <p className="eyebrow">{businessName}</p>
+        <h1 style={{ fontSize: 28 }}>Book an appointment</h1>
+        <div className="card" style={{ marginTop: 16 }}>
+          <h2>Not taking bookings yet</h2>
+          <p className="lede">
+            This business has not added any services yet. Please check back
+            later.
+          </p>
+          <Link href={`/${slug}`} className="btn btn-primary">
+            Back to {businessName}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <p className="eyebrow">{businessName}</p>

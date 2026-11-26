@@ -68,6 +68,25 @@ export default async function BusinessCustomerDashboard({
   // per-business membership) if they somehow arrived without one.
   await ensureBusinessMembership(supabase, business.id, user.id);
 
+  // The dashboard leads with the CUSTOMER, not the business (Frantz,
+  // 2026-11-26): their own name is the heading — from their customer
+  // profile first, then the sign-in account's name — with the
+  // business as the smaller line under it. No name on file falls
+  // back to their email, then to a plain "My dashboard".
+  const { data: profile } = await supabase
+    .from("customers")
+    .select("full_name, email")
+    .eq("id", user.id)
+    .maybeSingle();
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const customerName =
+    (profile?.full_name && profile.full_name.trim()) ||
+    (meta.full_name as string) ||
+    (meta.name as string) ||
+    "";
+  const heading =
+    customerName || profile?.email || user.email || "My dashboard";
+
   const { data } = await supabase
     .from("appointments")
     .select(
@@ -289,9 +308,9 @@ export default async function BusinessCustomerDashboard({
   return (
     <main className="column">
       <p className="eyebrow">{business.name}</p>
-      <h1 style={{ fontSize: 28, marginBottom: 4 }}>My dashboard</h1>
+      <h1 style={{ fontSize: 28, marginBottom: 4 }}>{heading}</h1>
       <p className="small" style={{ margin: "0 0 16px" }}>
-        Your appointments, messages and history with {business.name} — all
+        Your appointments, messages and history at {business.name} — all
         in one place.
         {business.phone ? <> Questions? Call {formatPhone(business.phone)}.</> : null}
       </p>
