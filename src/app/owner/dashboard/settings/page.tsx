@@ -57,7 +57,7 @@ export default async function DashboardSettingsPage() {
         <HoursManager businessId={business.id} initial={hours} />
       </div>
 
-      <div className="card">
+      <div className="card" id="locations">
         <h2>Locations</h2>
         <LocationsManager businessId={business.id} />
       </div>
@@ -73,6 +73,7 @@ export default async function DashboardSettingsPage() {
         </p>
       </div>
 
+      {role === "owner" && (
       <div className="card" id="billing">
         <h2>Plan &amp; billing</h2>
         <p className="small" style={{ marginTop: 0 }}>
@@ -92,6 +93,7 @@ export default async function DashboardSettingsPage() {
           pausesAtLabel={billing.pausesAt ? fmtDate(billing.pausesAt) : null}
         />
       </div>
+      )}
 
       <div className="card">
         <h2>Booking page</h2>

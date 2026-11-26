@@ -9,7 +9,7 @@ import { formatPhone } from "@/lib/types";
 export default async function DashboardNewAppointmentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string; time?: string; staffId?: string }>;
+  searchParams: Promise<{ date?: string; time?: string; staffId?: string; customerId?: string }>;
 }) {
   const sp = await searchParams;
   const { supabase, business, memberStaffId } = await requireBusiness();
@@ -63,6 +63,7 @@ export default async function DashboardNewAppointmentPage({
           initialDate={sp.date}
           initialTime={sp.time}
           initialStaffId={sp.staffId}
+          initialCustomerId={sp.customerId}
         />
       </div>
     </div>

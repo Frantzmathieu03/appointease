@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
@@ -15,14 +15,24 @@ export interface CustomerRow {
   assigned_staff_id: string | null;
   total: number;
   lastLabel: string | null;
+  nextLabel: string | null;
+  hasUpcoming: boolean;
+  joinedAt: string | null;
   unread: number;
 }
 
+type Chip = "all" | "unassigned" | "upcoming" | "new";
+
 /**
- * Customers list with per-row assignment and bulk "Assign to…"
- * (PDF §4 / migration 0010). Selection is local state; assignments write
- * through the browser client under the owner's RLS policies and each one
- * appends an `assigned` timeline event.
+ * Customers (Owner Dashboard Plan, 2026-11-26): count line, Export
+ * (CSV of the visible list), search, filter chips (All / Not
+ * assigned / Upcoming / New this month) and a table — checkbox,
+ * Name, Phone (with dashes), Assigned to, Next appointment, Visits.
+ * Ticking rows raises the dark green Assign bar; assignments write
+ * through the browser client under RLS and each one appends an
+ * `assigned` timeline event. There is deliberately NO "+ Add
+ * customer" button: customers are accounts people create themselves
+ * on the business's page — the business cannot create one for them.
  */
 export default function CustomersManager({
   businessId,
@@ -40,8 +50,32 @@ export default function CustomersManager({
   const [bulkStaff, setBulkStaff] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
+  const [query, setQuery] = useState("");
+  const [chip, setChip] = useState<Chip>("all");
 
   const staffName = (id: string | null) => staff.find((s) => s.id === id)?.name ?? null;
+  const notAssigned = rows.filter((r) => !r.assigned_staff_id).length;
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const now = new Date();
+    return rows.filter((r) => {
+      if (chip === "unassigned" && r.assigned_staff_id) return false;
+      if (chip === "upcoming" && !r.hasUpcoming) return false;
+      if (chip === "new") {
+        if (!r.joinedAt) return false;
+        const j = new Date(r.joinedAt);
+        if (j.getFullYear() !== now.getFullYear() || j.getMonth() !== now.getMonth()) return false;
+      }
+      if (q) {
+        const hay = [r.full_name, r.phone ?? "", formatPhone(r.phone), r.email ?? ""]
+          .join(" ")
+          .toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [rows, chip, query]);
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -94,6 +128,30 @@ export default function CustomersManager({
     router.refresh();
   }
 
+  function exportCsv() {
+    const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const lines = [
+      ["Name", "Phone", "Email", "Assigned to", "Next appointment", "Visits"].join(","),
+      ...visible.map((r) =>
+        [
+          esc(r.full_name || "Customer"),
+          esc(r.phone ? formatPhone(r.phone) : ""),
+          esc(r.email ?? ""),
+          esc(staffName(r.assigned_staff_id) ?? "Not assigned"),
+          esc(r.nextLabel ?? ""),
+          String(r.total),
+        ].join(",")
+      ),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "customers.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (rows.length === 0) {
     return (
       <div className="card">
@@ -104,69 +162,122 @@ export default function CustomersManager({
     );
   }
 
+  const chips: { id: Chip; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "unassigned", label: "Not assigned" },
+    { id: "upcoming", label: "Upcoming" },
+    { id: "new", label: "New this month" },
+  ];
+
   return (
     <div>
-      {selected.size > 0 && (
-        <div className="card" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <strong>
-            {selected.size} selected — Assign to…
-          </strong>
-          <select
-            aria-label="Assign selected customers to"
-            value={bulkStaff}
-            onChange={(e) => setBulkStaff(e.target.value)}
-            style={{ maxWidth: 220 }}
+      <p className="d2-count-line">
+        {rows.length} client{rows.length === 1 ? "" : "s"} · {notAssigned} not assigned
+      </p>
+      <div className="d2-toolbar">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by name, phone or email"
+          aria-label="Search customers"
+        />
+        <button className="btn" type="button" onClick={exportCsv}>
+          Export
+        </button>
+      </div>
+      <div className="d2-chips" style={{ marginBottom: 14 }} role="tablist" aria-label="Filter customers">
+        {chips.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            className={chip === c.id ? "d2-chipbtn active" : "d2-chipbtn"}
+            onClick={() => setChip(c.id)}
           >
-            <option value="">Unassigned</option>
-            {staff.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <button className="btn btn-primary" onClick={applyBulk} disabled={busy}>
-            {busy ? "Assigning…" : "Apply"}
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      {selected.size > 0 && (
+        <div className="d2-assignbar">
+          <strong>
+            {selected.size} selected
+          </strong>
+          <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+            Assign to
+            <select
+              aria-label="Assign selected customers to"
+              value={bulkStaff}
+              onChange={(e) => setBulkStaff(e.target.value)}
+            >
+              <option value="">Unassigned</option>
+              {staff.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </span>
+          <button className="btn btn-assign" onClick={applyBulk} disabled={busy}>
+            {busy ? "Assigning…" : "Assign"}
           </button>
           <button className="btn" onClick={() => setSelected(new Set())} disabled={busy}>
             Clear
           </button>
-          {note && <span className="small">{note}</span>}
+          {note && <span style={{ fontSize: 13 }}>{note}</span>}
         </div>
       )}
-      {rows.map((c) => (
-        <div
-          className="card"
-          key={c.id}
-          style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}
-        >
-          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-            <input
-              type="checkbox"
-              aria-label={`Select ${c.full_name || "customer"}`}
-              checked={selected.has(c.id)}
-              onChange={() => toggle(c.id)}
-              style={{ marginTop: 4 }}
-            />
-            <div>
-              <h3 style={{ marginBottom: 2 }}>{c.full_name || "Customer"}</h3>
-              <p className="small" style={{ margin: 0 }}>
-                {[c.phone ? formatPhone(c.phone) : null, c.email].filter(Boolean).join(" · ")}
-                {c.total > 0
-                  ? ` · ${c.total} appointment${c.total === 1 ? "" : "s"}` +
-                    (c.lastLabel ? ` · last ${c.lastLabel}` : "")
-                  : ""}
-              </p>
-              <p className="small" style={{ margin: "2px 0 0" }}>
-                Assigned to: <strong>{staffName(c.assigned_staff_id) ?? "Unassigned"}</strong>
-              </p>
-            </div>
-          </div>
-          <Link href={`/owner/dashboard/customers/${c.id}`} className="btn">
-            Open profile
-            {c.unread > 0 && <span className="badge">{c.unread}</span>}
-          </Link>
-        </div>
-      ))}
+
+      <div className="d2-table-wrap">
+        <table className="d2-table">
+          <thead>
+            <tr>
+              <th style={{ width: 36 }} aria-label="Select" />
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Assigned to</th>
+              <th>Next appointment</th>
+              <th>Visits</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((c) => (
+              <tr key={c.id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${c.full_name || "customer"}`}
+                    checked={selected.has(c.id)}
+                    onChange={() => toggle(c.id)}
+                  />
+                </td>
+                <td>
+                  <Link href={`/owner/dashboard/customers/${c.id}`} className="who">
+                    {c.full_name || "Customer"}
+                  </Link>
+                  {c.unread > 0 && <span className="badge">{c.unread}</span>}
+                </td>
+                <td>{c.phone ? formatPhone(c.phone) : "—"}</td>
+                <td>
+                  {staffName(c.assigned_staff_id) ?? (
+                    <span className="d2-notassigned">Not assigned</span>
+                  )}
+                </td>
+                <td>{c.nextLabel ?? "—"}</td>
+                <td>{c.total}</td>
+              </tr>
+            ))}
+            {visible.length === 0 && (
+              <tr>
+                <td colSpan={6} style={{ color: "#5b6b61" }}>
+                  No customers match. Try a different search or filter.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

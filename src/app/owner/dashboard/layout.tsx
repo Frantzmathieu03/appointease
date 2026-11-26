@@ -3,25 +3,31 @@ import { requireBusiness, siteUrl } from "@/lib/owner";
 import UnreadBadge from "@/components/UnreadBadge";
 import DashNav, { type DashNavItem } from "@/components/DashNav";
 
-// Owner workspace shell, restyled 2026-11-25 (late) to the business
-// pages' design language at Frantz's order — the dashboard "has to
-// look exactly like" the Mustard Seed business page: pale tint
-// background, NO platform header (SiteChrome renders nothing on
-// these routes), a simple top row (round business logo + name on
-// the left, bell and an Account pill on the right), and the section
-// nav as ONE white menu card of full-width rows — business identity
-// block on top, a green "Finish setup" pill while unpublished, and
-// "View booking page" + "Sign out" as full-width pills at the
-// bottom. Desktop keeps the two-column structure with the same card
-// as the left sidebar; the mobile bottom tab bar is unchanged.
-// Every href, label and role rule is the same as before the
-// restyle. Services lives in Settings; Team has its own page.
-// Staff logins (migration 0011) don't get Team/Settings nav —
-// their RLS view is only their own customers.
+// Owner workspace shell — Owner Dashboard Plan (Frantz, 2026-11-26):
+// a white top bar across the full width (round logo + business name
+// on the left; View booking page, a bell with a red dot when there
+// are unread messages, and the signed-in person's initials on the
+// right), a 220px white side menu (items 40px tall, the open section
+// on #E4EEE7 + bold, Sign out small at the bottom), and the content
+// on #F3F6F1, max 1180px, in Inter. Phones keep the bottom tab bar.
+// Role rules (migration 0011): staff logins see only their own
+// sections; managers see everything except Billing and Team
+// management (the Team page itself is read-only for them).
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { business, role } = await requireBusiness();
+  const { business, role, user } = await requireBusiness();
   const link = `${siteUrl()}/${business.slug}`;
   const isStaff = role === "staff";
+  const isOwner = role === "owner";
+
+  const fullName =
+    (user.user_metadata?.full_name as string | undefined) ??
+    (user.user_metadata?.name as string | undefined) ??
+    "";
+  const initialsSource = fullName.trim() || user.email || "?";
+  const parts = initialsSource.replace(/@.*$/, "").split(/[\s._-]+/).filter(Boolean);
+  const initials = (
+    (parts[0]?.[0] ?? "?") + (parts.length > 1 ? parts[parts.length - 1][0] : "")
+  ).toUpperCase();
 
   const navItems: DashNavItem[] = [
     { href: "/owner/dashboard", label: "Today" },
@@ -30,89 +36,98 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { href: "/owner/dashboard/customers", label: "Customers" },
     ...(!isStaff
       ? [
-          { href: "/owner/dashboard/booking-page", label: "Booking page" },
-          { href: "/owner/dashboard/forms", label: "Forms" },
           { href: "/owner/dashboard/settings#services", label: "Services" },
           { href: "/owner/dashboard/team", label: "Team" },
+          { href: "/owner/dashboard/forms", label: "Forms" },
+          { href: "/owner/dashboard/booking-page", label: "Booking page" },
+          { href: "/owner/dashboard/settings#locations", label: "Locations" },
           { href: "/owner/dashboard/reports", label: "Reports" },
-          { href: "/owner/dashboard/billing", label: "Billing" },
           { href: "/owner/dashboard/settings", label: "Settings" },
+          ...(isOwner ? [{ href: "/owner/dashboard/billing", label: "Billing" }] : []),
         ]
       : []),
   ];
 
   return (
-    <div className="dash-wrap">
-      <div className="dash-toprow">
-        <span className="biz-header-brand">
-          {business.logo_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={business.logo_url} alt="" className="biz-header-logo" />
-          ) : (
-            <span className="biz-header-initial" aria-hidden="true">
-              {business.name.trim().charAt(0).toUpperCase() || "?"}
-            </span>
-          )}
-          <span className="biz-header-name">{business.name}</span>
-        </span>
-        <span className="dash-toprow-actions">
-          <Link
-            href="/owner/dashboard/inbox"
-            className="dash-bell"
-            aria-label="Notifications — customer messages"
-          >
-            🔔
-            <UnreadBadge variant="owner" businessId={business.id} />
-          </Link>
-          <details className="dash-account">
-            <summary className="dash-account-pill">Account</summary>
-            <div className="dash-account-menu">
-              <Link href="/owner/dashboard/settings#profile">Profile</Link>
-              <Link href="/owner/dashboard/billing">Billing</Link>
-              <form action="/auth/signout" method="post">
-                <button type="submit" className="dash-account-signout">
-                  Sign out
-                </button>
-              </form>
-            </div>
-          </details>
-        </span>
-      </div>
-
-      <div className="dash-shell">
-        <aside className="dash-sidebar">
-          <div className="dash-identity">
-            <p className="dash-identity-name">{business.name}</p>
-            <p className="small" style={{ margin: 0 }}>
-              {link.replace(/^https?:\/\//, "")}
-              {!business.published && (
-                <>
-                  {" "}· <span className="chip chip-grey">Not published yet</span>
-                </>
-              )}
-            </p>
-          </div>
-          {!business.published && role === "owner" && (
-            <div className="dash-finish">
-              <Link href="/owner/setup" className="btn btn-primary btn-block">
-                Finish setup
-              </Link>
-              <span className="small">to publish your page.</span>
-            </div>
-          )}
-          <DashNav items={navItems} businessId={business.id} />
-          <div className="dash-menu-actions">
-            <Link href={`/${business.slug}`} className="btn btn-block">
+    <div className="dash2">
+      {/* Inter (plan spec: 400/600/700), scoped to the dashboard. */}
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+      <header className="d2-topbar">
+        <div className="d2-topbar-in">
+          <span className="d2-brand">
+            {business.logo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={business.logo_url} alt="" />
+            ) : (
+              <span className="d2-brand-initial" aria-hidden="true">
+                {business.name.trim().charAt(0).toUpperCase() || "?"}
+              </span>
+            )}
+            <span className="d2-brand-name">{business.name}</span>
+          </span>
+          <span className="d2-top-actions">
+            <Link href={`/${business.slug}`} className="d2-view-link">
               View booking page
             </Link>
+            <Link
+              href="/owner/dashboard/inbox"
+              className="d2-bell"
+              aria-label="Notifications — customer messages"
+            >
+              <svg
+                width="21"
+                height="21"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+              </svg>
+              <UnreadBadge variant="owner" businessId={business.id} />
+            </Link>
+            <span className="d2-avatar" title={user.email ?? undefined} aria-label="Your account">
+              {initials}
+            </span>
+          </span>
+        </div>
+      </header>
+
+      <div className="d2-shell">
+        <aside className="d2-side">
+          <DashNav items={navItems} businessId={business.id} />
+          <div className="d2-signout">
             <form action="/auth/signout" method="post">
-              <button className="btn btn-block" type="submit">
-                Sign out
-              </button>
+              <button type="submit">Sign out</button>
             </form>
           </div>
         </aside>
-        <main className="dash-main">{children}</main>
+        <main className="d2-main">
+          <div className="d2-main-in">
+            {!business.published && isOwner && (
+              <div className="d2-setupbar">
+                <span>
+                  Your booking page isn&apos;t published yet — {link.replace(/^https?:\/\//, "")}{" "}
+                  is not live for customers.
+                </span>
+                <Link href="/owner/setup" style={{ fontWeight: 700 }}>
+                  Finish setup
+                </Link>
+              </div>
+            )}
+            {children}
+          </div>
+        </main>
       </div>
 
       <nav className="dash-tabbar" aria-label="Dashboard">

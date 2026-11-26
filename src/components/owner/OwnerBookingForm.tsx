@@ -31,6 +31,7 @@ export default function OwnerBookingForm({
   initialDate,
   initialTime,
   initialStaffId,
+  initialCustomerId,
 }: {
   businessId: string;
   slug: string;
@@ -43,10 +44,16 @@ export default function OwnerBookingForm({
   initialDate?: string;
   initialTime?: string;
   initialStaffId?: string;
+  /** Pre-picked customer (e.g. "Book for <name>" on the profile). */
+  initialCustomerId?: string;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"existing" | "new">(customers.length > 0 ? "existing" : "new");
-  const [customerId, setCustomerId] = useState(customers[0]?.id ?? "");
+  const [customerId, setCustomerId] = useState(
+    initialCustomerId && customers.some((c) => c.id === initialCustomerId)
+      ? initialCustomerId
+      : (customers[0]?.id ?? "")
+  );
   const [search, setSearch] = useState("");
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");

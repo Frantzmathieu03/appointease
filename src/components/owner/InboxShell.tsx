@@ -44,12 +44,14 @@ export default async function InboxShell({
     .select("id, name")
     .eq("business_id", business.id);
   const initials = new Map<string, string>();
+  const staffNames = new Map<string, string>();
   for (const s of staffRows ?? []) {
     const parts = String(s.name).trim().split(/\s+/);
     initials.set(
       s.id as string,
       ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase()
     );
+    staffNames.set(s.id as string, String(s.name));
   }
 
   const { data: msgs } = await supabase
@@ -71,6 +73,7 @@ export default async function InboxShell({
         lastSender: m.sender,
         unread: 0,
         assignedStaffId: sid,
+        assignedName: sid ? (staffNames.get(sid) ?? null) : null,
         staffInitials: sid ? (initials.get(sid) ?? null) : null,
       };
       byThread.set(m.customer_id, t);

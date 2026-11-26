@@ -56,10 +56,16 @@ function describe(e: CustomerEvent, fmt: (iso: string) => string): string {
       if (typeof d.answers === "number") parts.push(`${d.answers} answer${d.answers === 1 ? "" : "s"}`);
       if (typeof d.files === "number" && d.files > 0)
         parts.push(`${d.files} file${d.files === 1 ? "" : "s"}`);
-      return `Submitted ${str(d.form_name) ?? "intake form"}${parts.length ? ` (${parts.join(", ")})` : ""}`;
+      return `Submitted ${str(d.form_name) ?? "form"}${parts.length ? ` (${parts.join(", ")})` : ""}`;
     }
     case "profile_changed":
       return "Profile updated";
+    case "marked_paid": {
+      const cents = typeof d.amount_cents === "number" ? d.amount_cents : null;
+      const amount =
+        cents !== null ? `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}` : "Payment";
+      return `${amount} paid at the office — marked by ${str(d.marked_by_name) ?? "the team"}`;
+    }
     default:
       return "Event";
   }

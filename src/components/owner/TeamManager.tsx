@@ -1,17 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
-import type { BusinessMember, MemberRole, StaffMember, TeamInvite } from "@/lib/types";
+import type { BusinessMember, MemberRole, Service, StaffMember, TeamInvite } from "@/lib/types";
 
 /**
- * Team logins (migration 0011): the owner invites people by email with a
- * role. Managers can invite but cannot remove anyone (owner-only, in the
- * UI and in RLS). Staff logins are linked to a bookable staff row — that
- * link is what scopes everything they see to their assigned customers.
- * Before migration 0011 is applied, `available` is false and the page
- * says so plainly instead of failing.
+ * Team (Owner Dashboard Plan, 2026-11-26): member cards on the left
+ * (owner first — dark green Owner tag; Manager blue-grey; Staff
+ * light green; invited people on a dashed card with an orange
+ * Invited tag and a Resend button), the invite card on the right
+ * (Name / Email or mobile number / Role buttons with Owner disabled
+ * / Services they offer / Send invite).
+ *
+ * Only the OWNER manages the team. Managers see everything at the
+ * business EXCEPT Billing and Team management, so for them (and for
+ * staff logins) this renders read-only: no invite card, no Edit, no
+ * Remove. The server enforces the same rule (POST /api/team/invite
+ * is owner-only; migration 0015 makes the RLS insert policies
+ * owner-only too). Sending an invite goes through that route, which
+ * also emails the join link via Resend; the copy-link stays as a
+ * fallback either way.
  */
 export default function TeamManager({
   businessId,
@@ -21,10 +31,13 @@ export default function TeamManager({
   members,
   invites,
   staff,
+  services,
+  staffServices,
   assignedCounts,
-  seatsUsed,
-  seatLimit,
+  ownerName,
+  ownerEmail,
   siteUrl,
+  showGrowNote,
 }: {
   businessId: string;
   currentUserId: string;
@@ -33,89 +46,128 @@ export default function TeamManager({
   members: BusinessMember[];
   invites: TeamInvite[];
   staff: StaffMember[];
+  services: Service[];
+  staffServices: Record<string, string[]>;
   assignedCounts: Record<string, number>;
-  seatsUsed: number;
-  seatLimit: number;
+  ownerName: string;
+  ownerEmail: string | null;
   siteUrl: string;
+  /** At/over the plan's seat count: inviting still works; the plan
+   * simply grows (Frantz's revised Build Plan, 2026-11-26). */
+  showGrowNote?: boolean;
 }) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const isOwner = role === "owner";
+  const [name, setName] = useState("");
+  const [contact, setContact] = useState("");
   const [inviteRole, setInviteRole] = useState<"manager" | "staff">("staff");
-  const [staffChoice, setStaffChoice] = useState("");
-  const [newStaffName, setNewStaffName] = useState("");
+  const [pickedServices, setPickedServices] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [lastLink, setLastLink] = useState("");
   const [copied, setCopied] = useState("");
+  const [resending, setResending] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editRole, setEditRole] = useState<"manager" | "staff">("staff");
+  const [editServices, setEditServices] = useState<Set<string>>(new Set());
+  const [editNote, setEditNote] = useState("");
 
-  const canInvite = role === "owner" || role === "manager";
-  const isOwner = role === "owner";
   const pending = invites.filter((i) => !i.accepted_at && new Date(i.expires_at).getTime() > Date.now());
+  const staffName = (id: string | null) => staff.find((s) => s.id === id)?.name ?? null;
+  const initialsOf = (label: string) => {
+    const p = label.replace(/@.*$/, "").trim().split(/[\s._-]+/).filter(Boolean);
+    return ((p[0]?.[0] ?? "?") + (p.length > 1 ? p[p.length - 1][0] : "")).toUpperCase();
+  };
+
+  async function copy(text: string, key: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(key);
+      setTimeout(() => setCopied(""), 2000);
+    } catch {
+      setCopied("");
+    }
+  }
 
   async function sendInvite(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError("");
+    setSuccess("");
     setLastLink("");
-    const supabase = createBrowserSupabase();
-    let staffId: string | null = null;
-    if (inviteRole === "staff") {
-      if (staffChoice === "__new") {
-        if (!isOwner) {
-          setError("Only the owner can create a new staff calendar — pick an existing team member.");
-          setBusy(false);
-          return;
-        }
-        const { data, error: staffErr } = await supabase
-          .from("staff")
-          .insert({ business_id: businessId, name: newStaffName.trim() })
-          .select("id")
-          .single();
-        if (staffErr || !data) {
-          setError("Could not create that staff calendar — please try again.");
-          setBusy(false);
-          return;
-        }
-        staffId = data.id as string;
-      } else if (staffChoice) {
-        staffId = staffChoice;
+    try {
+      const res = await fetch("/api/team/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          contact: contact.trim(),
+          role: inviteRole,
+          serviceIds: inviteRole === "staff" ? [...pickedServices] : [],
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Could not send the invite — please try again.");
       } else {
-        setError("Pick which staff calendar this login belongs to (or create a new one).");
-        setBusy(false);
-        return;
+        setLastLink(data.link as string);
+        setSuccess(
+          data.emailed
+            ? `Invite emailed to ${contact.trim().toLowerCase()}. You can also send them the link yourself:`
+            : "Invite created. Email isn't sending right now, so send them this link yourself:"
+        );
+        setName("");
+        setContact("");
+        setPickedServices(new Set());
+        router.refresh();
       }
-    }
-    const { data, error: invErr } = await supabase
-      .from("team_invites")
-      .insert({
-        business_id: businessId,
-        email: email.trim().toLowerCase(),
-        role: inviteRole,
-        staff_id: staffId,
-        created_by: currentUserId,
-      })
-      .select("token")
-      .single();
-    if (invErr || !data) {
+    } catch {
       setError("Could not send the invite — please try again.");
-      setBusy(false);
-      return;
     }
-    setLastLink(`${siteUrl}/invite/${data.token}`);
-    setEmail("");
-    setNewStaffName("");
-    setStaffChoice("");
     setBusy(false);
-    router.refresh();
+  }
+
+  async function resendInvite(i: TeamInvite) {
+    setResending(i.id);
+    try {
+      const res = await fetch("/api/team/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resendOf: i.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setLastLink(data.link as string);
+        setSuccess(
+          data.emailed
+            ? `Invite emailed to ${i.email} again. The link, if you want to send it yourself:`
+            : "Email isn't sending right now — send them this link yourself:"
+        );
+        setError("");
+      } else {
+        setError(data.error ?? "Could not re-send that invite.");
+      }
+    } catch {
+      setError("Could not re-send that invite.");
+    }
+    setResending("");
   }
 
   async function removeMember(m: BusinessMember) {
     const ok = window.confirm(
-      `Remove ${m.email ?? "this team member"} from the team? They will no longer be able to sign in to this business's dashboard. Their past work stays in your customer histories.`
+      `Remove ${m.email ?? "this team member"} from the team? They will no longer be able to sign in to this business's dashboard. Their customers become unassigned, and their past work stays in your customer histories.`
     );
     if (!ok) return;
     const supabase = createBrowserSupabase();
     await supabase.from("business_members").update({ status: "removed" }).eq("id", m.id);
+    if (m.staff_id) {
+      await supabase
+        .from("business_customers")
+        .update({ assigned_staff_id: null })
+        .eq("business_id", businessId)
+        .eq("assigned_staff_id", m.staff_id);
+    }
     router.refresh();
   }
 
@@ -129,157 +181,304 @@ export default function TeamManager({
     router.refresh();
   }
 
-  async function copy(text: string, key: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(key);
-      setTimeout(() => setCopied(""), 2000);
-    } catch {
-      setCopied("");
+  function openEdit(m: BusinessMember) {
+    setEditId(m.id);
+    setEditRole(m.role === "manager" ? "manager" : "staff");
+    setEditServices(new Set(m.staff_id ? (staffServices[m.staff_id] ?? []) : []));
+    setEditNote("");
+  }
+
+  async function saveEdit(m: BusinessMember) {
+    setEditNote("");
+    const supabase = createBrowserSupabase();
+    const { error: roleErr } = await supabase
+      .from("business_members")
+      .update({ role: editRole })
+      .eq("id", m.id);
+    if (roleErr) {
+      setEditNote("That change didn't save — please try again.");
+      return;
     }
+    if (m.staff_id) {
+      await supabase.from("staff_services").delete().eq("staff_id", m.staff_id);
+      const rows = [...editServices].map((sid) => ({ staff_id: m.staff_id as string, service_id: sid }));
+      if (rows.length > 0) await supabase.from("staff_services").insert(rows);
+    }
+    setEditId(null);
+    router.refresh();
   }
 
   if (!available) {
     return (
-      <p className="small">
-        Team sign-ins turn on with the next database update — for now your
-        team works under your one owner login.
-      </p>
+      <div className="card">
+        <p className="small" style={{ margin: 0 }}>
+          Team sign-ins turn on with the next database update — for now your
+          team works under your one owner login.
+        </p>
+      </div>
     );
   }
 
-  const staffName = (id: string | null) => staff.find((s) => s.id === id)?.name ?? null;
+  const ownerSelf = role === "owner";
 
   return (
-    <div>
-      <p className="small" style={{ marginTop: 0 }}>
-        <strong>
-          {seatsUsed} of {seatLimit} seats used
-        </strong>{" "}
-        on your current plan (the owner plus everyone with a team login).
-      </p>
-
-      <div className="service-row">
-        <div>
-          <div className="service-name">Business owner</div>
-          <div className="service-meta">Owner · Active · sees everything, manages billing and the team</div>
-        </div>
-      </div>
-      {members.map((m) => (
-        <div key={m.id} className="service-row">
-          <div>
-            <div className="service-name">{m.email ?? "Team member"}</div>
-            <div className="service-meta">
-              {m.role === "manager" ? "Manager" : "Staff"} · Active
-              {m.staff_id
-                ? ` · calendar: ${staffName(m.staff_id) ?? "—"} · ${assignedCounts[m.staff_id] ?? 0} assigned client${(assignedCounts[m.staff_id] ?? 0) === 1 ? "" : "s"}`
-                : ""}
-              {m.user_id === currentUserId ? " · You" : ""}
-            </div>
+    <div className={isOwner ? "d2-team-grid" : undefined}>
+      <div>
+        {/* Owner card */}
+        <div className="d2-member">
+          <span className="d2-ava" aria-hidden="true">{initialsOf(ownerName)}</span>
+          <div className="d2-member-main">
+            <p className="d2-member-name">
+              {ownerName}
+              {ownerSelf ? " (you)" : ""}
+            </p>
+            <p className="d2-member-sub">{ownerEmail ?? "The account holder"} · Sees everything</p>
           </div>
-          {isOwner && m.user_id !== currentUserId && (
-            <button className="btn" style={{ padding: "7px 13px" }} onClick={() => removeMember(m)}>
-              Remove
-            </button>
-          )}
+          <span className="tag tag-owner">Owner</span>
         </div>
-      ))}
-      {members.length === 0 && (
-        <p className="small">No team logins yet — invite your first team member below.</p>
-      )}
 
-      {pending.length > 0 && (
-        <>
-          <h3 style={{ marginBottom: 6 }}>Pending invites</h3>
-          {pending.map((i) => (
-            <div key={i.id} className="service-row">
-              <div>
-                <div className="service-name">{i.email}</div>
-                <div className="service-meta">
-                  Invited · {i.role === "manager" ? "Manager" : "Staff"}
-                  {i.staff_id ? ` · calendar: ${staffName(i.staff_id) ?? "—"}` : ""} · expires{" "}
-                  {new Date(i.expires_at).toLocaleDateString([], { month: "short", day: "numeric" })}
+        {/* Member cards */}
+        {members.map((m) => {
+          const label = m.email ?? "Team member";
+          const isSelf = m.user_id === currentUserId;
+          return (
+            <div key={m.id} style={{ marginBottom: 12 }}>
+              <div className="d2-member" style={{ marginBottom: 0 }}>
+                <span className="d2-ava" aria-hidden="true">{initialsOf(label)}</span>
+                <div className="d2-member-main">
+                  <p className="d2-member-name">
+                    {label}
+                    {isSelf ? " (you)" : ""}
+                  </p>
+                  <p className="d2-member-sub">
+                    {m.staff_id
+                      ? `Calendar: ${staffName(m.staff_id) ?? "—"}`
+                      : m.role === "manager"
+                        ? "Sees the whole business"
+                        : "No calendar linked"}
+                  </p>
                 </div>
+                <span className={m.role === "manager" ? "tag tag-manager" : "tag tag-staff"}>
+                  {m.role === "manager" ? "Manager" : "Staff"}
+                </span>
+                <span style={{ fontWeight: 700, fontSize: 14.5, minWidth: 52, textAlign: "right" }}>
+                  {m.staff_id ? (assignedCounts[m.staff_id] ?? 0) : ""}
+                  {m.staff_id ? <span className="small" style={{ display: "block", fontWeight: 500 }}>clients</span> : null}
+                </span>
+                {isOwner && !isSelf && (
+                  <button className="btn" style={{ minHeight: 38, padding: "0 13px" }} onClick={() => (editId === m.id ? setEditId(null) : openEdit(m))}>
+                    Edit
+                  </button>
+                )}
               </div>
-              <span style={{ display: "flex", gap: 6 }}>
+              {isOwner && editId === m.id && (
+                <div className="d2-member" style={{ marginBottom: 0, borderTop: "none", borderRadius: "0 0 16px 16px" }}>
+                  <div className="d2-editbox" style={{ borderTop: "none", marginTop: 0, paddingTop: 0 }}>
+                    <label className="field">
+                      <span>Role</span>
+                      <span className="d2-rolebtns">
+                        <button type="button" className={editRole === "manager" ? "sel" : ""} onClick={() => setEditRole("manager")}>
+                          Manager
+                        </button>
+                        <button type="button" className={editRole === "staff" ? "sel" : ""} onClick={() => setEditRole("staff")}>
+                          Staff
+                        </button>
+                      </span>
+                    </label>
+                    {m.staff_id && services.length > 0 && (
+                      <div style={{ marginBottom: 12 }}>
+                        <p className="small" style={{ fontWeight: 600, margin: "0 0 6px" }}>Services they offer</p>
+                        <span className="d2-svc-chips">
+                          {services.map((s) => (
+                            <button
+                              key={s.id}
+                              type="button"
+                              className={editServices.has(s.id) ? "d2-svc-chip sel" : "d2-svc-chip"}
+                              onClick={() =>
+                                setEditServices((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(s.id)) next.delete(s.id);
+                                  else next.add(s.id);
+                                  return next;
+                                })
+                              }
+                            >
+                              {s.name}
+                            </button>
+                          ))}
+                        </span>
+                      </div>
+                    )}
+                    <p className="small" style={{ margin: "0 0 10px" }}>
+                      Working hours live in{" "}
+                      <Link href="/owner/dashboard/settings">Settings → Opening hours</Link>.
+                    </p>
+                    {editNote && <div className="error">{editNote}</div>}
+                    <span style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button className="btn btn-primary" onClick={() => saveEdit(m)}>
+                        Save changes
+                      </button>
+                      <button className="btn btn-outline-danger" onClick={() => removeMember(m)}>
+                        Remove from team
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {members.length === 0 && pending.length === 0 && (
+          <p className="small">No team logins yet — invite your first team member.</p>
+        )}
+
+        {/* Invited cards */}
+        {pending.map((i) => (
+          <div key={i.id} className="d2-member invited">
+            <span className="d2-ava" aria-hidden="true">{initialsOf(i.name || i.email)}</span>
+            <div className="d2-member-main">
+              <p className="d2-member-name">{i.name || i.email}</p>
+              <p className="d2-member-sub">
+                {i.name ? `${i.email} · ` : ""}Invite sent{" "}
+                {new Date(i.created_at).toLocaleDateString([], { month: "short", day: "numeric" })} · not
+                accepted yet
+              </p>
+            </div>
+            <span className="tag tag-invited">Invited</span>
+            {isOwner && (
+              <span style={{ display: "inline-flex", gap: 6 }}>
                 <button
                   className="btn"
-                  style={{ padding: "7px 13px" }}
+                  style={{ minHeight: 38, padding: "0 13px" }}
+                  onClick={() => resendInvite(i)}
+                  disabled={resending === i.id}
+                >
+                  {resending === i.id ? "Sending…" : "Resend"}
+                </button>
+                <button
+                  className="btn"
+                  style={{ minHeight: 38, padding: "0 13px" }}
                   onClick={() => copy(`${siteUrl}/invite/${i.token}`, i.id)}
                 >
                   {copied === i.id ? "Copied" : "Copy link"}
                 </button>
-                {isOwner && (
-                  <button className="btn" style={{ padding: "7px 13px" }} onClick={() => revokeInvite(i)}>
-                    Revoke
-                  </button>
-                )}
+                <button
+                  className="btn"
+                  style={{ minHeight: 38, padding: "0 13px" }}
+                  onClick={() => revokeInvite(i)}
+                >
+                  Revoke
+                </button>
               </span>
-            </div>
-          ))}
-        </>
-      )}
+            )}
+          </div>
+        ))}
+      </div>
 
-      {canInvite && (
-        <>
-          <h3 style={{ marginBottom: 6 }}>Invite a team member</h3>
-          <p className="small">
-            They get a link to join with their own sign-in. Staff members see only the
-            customers assigned to their calendar; managers see the whole business but
-            can&apos;t remove team members or manage billing.
-          </p>
+      {/* Invite card — owner only */}
+      {isOwner && (
+        <div className="card" style={{ marginBottom: 0 }}>
+          <h2 style={{ marginTop: 0 }}>Invite a team member</h2>
+          {showGrowNote && (
+            <p className="small" style={{ marginTop: 0 }}>
+              Your plan grows with your team — we&apos;ll let you know when
+              it&apos;s time to upgrade.
+            </p>
+          )}
           {error && <div className="error">{error}</div>}
-          {lastLink && (
+          {success && (
             <div className="success">
-              Invite created — send them this link: <strong>{lastLink}</strong>{" "}
-              <button className="btn" style={{ padding: "4px 10px" }} onClick={() => copy(lastLink, "new")}>
-                {copied === "new" ? "Copied" : "Copy"}
-              </button>
+              {success}{" "}
+              {lastLink && (
+                <>
+                  <strong style={{ wordBreak: "break-all" }}>{lastLink}</strong>{" "}
+                  <button className="btn" style={{ padding: "4px 10px", minHeight: 32 }} onClick={() => copy(lastLink, "new")}>
+                    {copied === "new" ? "Copied" : "Copy"}
+                  </button>
+                </>
+              )}
             </div>
           )}
-          <form onSubmit={sendInvite} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
-            <label className="field" style={{ flex: "1 1 220px", marginBottom: 0 }}>
-              <span>Email</span>
+          <form onSubmit={sendInvite}>
+            <label className="field">
+              <span>Name</span>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Jordan Patel" />
+            </label>
+            <label className="field">
+              <span>Email or mobile number</span>
               <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
                 placeholder="teammate@example.com"
+                required
               />
             </label>
-            <label className="field" style={{ marginBottom: 0 }}>
-              <span>Role</span>
-              <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as "manager" | "staff")}>
-                <option value="staff">Staff</option>
-                <option value="manager">Manager</option>
-              </select>
-            </label>
-            {inviteRole === "staff" && (
-              <label className="field" style={{ marginBottom: 0 }}>
-                <span>Their calendar</span>
-                <select value={staffChoice} onChange={(e) => setStaffChoice(e.target.value)}>
-                  <option value="">Choose…</option>
-                  {staff.map((s) => (
-                    <option key={s.id} value={s.id}>
+            <div style={{ marginBottom: 14 }}>
+              <p className="small" style={{ fontWeight: 600, margin: "0 0 6px", color: "inherit" }}>Role</p>
+              <span className="d2-rolebtns">
+                <button type="button" disabled title="The owner is the account holder">
+                  Owner
+                </button>
+                <button
+                  type="button"
+                  className={inviteRole === "manager" ? "sel" : ""}
+                  onClick={() => setInviteRole("manager")}
+                >
+                  Manager
+                </button>
+                <button
+                  type="button"
+                  className={inviteRole === "staff" ? "sel" : ""}
+                  onClick={() => setInviteRole("staff")}
+                >
+                  Staff
+                </button>
+              </span>
+              <p className="small" style={{ margin: "8px 0 0" }}>
+                {inviteRole === "staff"
+                  ? "Staff see only their own calendar, clients and messages."
+                  : "Managers see the whole business, but can't manage the team or billing."}{" "}
+                The owner is the account holder — there's one owner per business.
+              </p>
+            </div>
+            {inviteRole === "staff" && services.length > 0 && (
+              <div style={{ marginBottom: 14 }}>
+                <p className="small" style={{ fontWeight: 600, margin: "0 0 6px", color: "inherit" }}>
+                  Services they offer
+                </p>
+                <span className="d2-svc-chips">
+                  {services.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      className={pickedServices.has(s.id) ? "d2-svc-chip sel" : "d2-svc-chip"}
+                      onClick={() =>
+                        setPickedServices((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(s.id)) next.delete(s.id);
+                          else next.add(s.id);
+                          return next;
+                        })
+                      }
+                    >
                       {s.name}
-                    </option>
+                    </button>
                   ))}
-                  {isOwner && <option value="__new">+ New staff calendar…</option>}
-                </select>
-              </label>
+                </span>
+              </div>
             )}
-            {inviteRole === "staff" && staffChoice === "__new" && (
-              <label className="field" style={{ marginBottom: 0 }}>
-                <span>New calendar name</span>
-                <input value={newStaffName} onChange={(e) => setNewStaffName(e.target.value)} placeholder="Attorney Chen" required />
-              </label>
-            )}
-            <button className="btn btn-primary" type="submit" disabled={busy || !email.trim()}>
+            <button className="btn btn-primary btn-block" type="submit" disabled={busy || !contact.trim()}>
               {busy ? "Sending…" : "Send invite"}
             </button>
           </form>
-        </>
+        </div>
+      )}
+      {!isOwner && (
+        <div className="card">
+          <p className="small" style={{ margin: 0 }}>
+            Only the business owner can invite or remove team members.
+          </p>
+        </div>
       )}
     </div>
   );

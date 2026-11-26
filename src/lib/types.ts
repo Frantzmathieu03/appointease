@@ -159,7 +159,11 @@ export type CustomerEventType =
   | "message"
   | "assigned"
   | "note_added"
-  | "profile_changed";
+  | "profile_changed"
+  // Offline bookkeeping only (migration 0015): the front desk marked
+  // the customer as having paid AT THE OFFICE. No money ever moves
+  // through AppointEase.
+  | "marked_paid";
 
 export type EventActorType = "customer" | "team_member" | "system";
 
@@ -251,6 +255,8 @@ export interface TeamInvite {
   id: string;
   business_id: string;
   email: string;
+  /** The person's name from the invite card (migration 0015). */
+  name?: string | null;
   role: "manager" | "staff";
   staff_id: string | null;
   token: string;

@@ -5,6 +5,7 @@ import {
   PLANS,
   annualCents,
   formatPlanPrice,
+  staffLimitLabel,
   type BillingPhase,
   type PlanId,
 } from "@/lib/plans";
@@ -142,7 +143,7 @@ export default function BillingPanel(props: Props) {
                     {isCurrent ? " · your plan" : ""}
                   </strong>
                   <div className="small">
-                    Up to {plan.staffLimit} team member{plan.staffLimit === 1 ? "" : "s"} · {plan.blurb}
+                    Up to {staffLimitLabel(plan)} team members · {plan.blurb}
                   </div>
                 </div>
                 <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>

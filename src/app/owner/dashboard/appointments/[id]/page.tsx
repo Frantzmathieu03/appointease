@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { requireBusiness, siteUrl } from "@/lib/owner";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import AssignControl from "@/components/owner/AssignControl";
+import MarkPaid, { type PaidMark } from "@/components/owner/MarkPaid";
 import VisitNotes, { type NoteBundle } from "@/components/owner/VisitNotes";
 import type { NextStep, NoteTemplate, StaffMember, VisitNote, VisitNoteAddendum } from "@/lib/types";
-import { formatPhone } from "@/lib/types";
+import { formatPhone, formatServicePrice } from "@/lib/types";
 
 interface Appt {
   id: string;
@@ -16,7 +17,12 @@ interface Appt {
   customer_id: string;
   service_id: string;
   customers: { full_name: string; phone: string | null; email: string | null } | null;
-  services: { name: string; duration_minutes: number } | null;
+  services: {
+    name: string;
+    duration_minutes: number;
+    price_cents?: number | null;
+    price_type?: "none" | "exact" | "from" | "free" | null;
+  } | null;
   staff: { name: string } | null;
 }
 
@@ -48,14 +54,30 @@ export default async function DashboardAppointmentPage({
   const { supabase, user, business } = await requireBusiness();
   const tz = business.timezone;
 
-  const { data } = await supabase
-    .from("appointments")
-    .select(
-      "id, starts_at, status, confirmation_code, manage_token, customer_id, service_id, customers:customer_id ( full_name, phone, email ), services:service_id ( name, duration_minutes ), staff:staff_id ( name )"
-    )
-    .eq("id", id)
-    .eq("business_id", business.id)
-    .maybeSingle();
+  // The service price columns ride along when migration 0014 has
+  // landed; before that the narrower select keeps the page working.
+  const apptSelect =
+    "id, starts_at, status, confirmation_code, manage_token, customer_id, service_id, customers:customer_id ( full_name, phone, email ), staff:staff_id ( name ), services:service_id ( ";
+  let data: unknown = null;
+  {
+    const wide = await supabase
+      .from("appointments")
+      .select(`${apptSelect}name, duration_minutes, price_cents, price_type )`)
+      .eq("id", id)
+      .eq("business_id", business.id)
+      .maybeSingle();
+    if (!wide.error) {
+      data = wide.data;
+    } else {
+      const narrow = await supabase
+        .from("appointments")
+        .select(`${apptSelect}name, duration_minutes )`)
+        .eq("id", id)
+        .eq("business_id", business.id)
+        .maybeSingle();
+      data = narrow.data;
+    }
+  }
   if (!data) notFound();
   const appt = data as unknown as Appt;
 
@@ -156,6 +178,36 @@ export default async function DashboardAppointmentPage({
     .order("created_at", { ascending: true });
   const templates = (templateRows ?? []) as NoteTemplate[];
 
+  // Marked-paid events for this appointment (migration 0015's
+  // 'marked_paid' timeline type; the query is safe before it lands —
+  // it simply finds nothing). Offline bookkeeping only.
+  const { data: paidRows } = await supabase
+    .from("customer_events")
+    .select("created_at, details")
+    .eq("appointment_id", appt.id)
+    .eq("type", "marked_paid")
+    .order("created_at", { ascending: true });
+  const paidMarks: PaidMark[] = ((paidRows ?? []) as {
+    created_at: string;
+    details: Record<string, unknown>;
+  }[])
+    .filter((r) => typeof r.details?.amount_cents === "number")
+    .map((r) => ({
+      dateLabel: `${formatDateInZone(new Date(r.created_at), tz)}`,
+      amountCents: r.details.amount_cents as number,
+    }));
+  const priceWords = appt.services
+    ? formatServicePrice({
+        price_cents: appt.services.price_cents ?? null,
+        price_type: appt.services.price_type ?? null,
+      })
+    : "";
+  const priceLine = priceWords ? `${priceWords} · Pay at the office` : "Pay at the office";
+  const prefillCents =
+    appt.services?.price_cents != null && appt.services.price_cents > 0
+      ? appt.services.price_cents
+      : null;
+
   const startsAt = new Date(appt.starts_at);
   const statusChip =
     appt.status === "confirmed"
@@ -224,6 +276,14 @@ export default async function DashboardAppointmentPage({
           <p className="small" style={{ margin: "4px 0" }}>
             {[appt.customers?.phone ? formatPhone(appt.customers.phone) : null, appt.customers?.email].filter(Boolean).join(" · ")}
           </p>
+        )}
+        {appt.status !== "cancelled" && (
+          <MarkPaid
+            appointmentId={appt.id}
+            priceLine={priceLine}
+            prefillCents={prefillCents}
+            marks={paidMarks}
+          />
         )}
         <p style={{ margin: "8px 0 0" }}>
           <AssignControl

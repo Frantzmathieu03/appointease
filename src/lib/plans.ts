@@ -1,8 +1,11 @@
 // Subscription plans — the single source of truth for AppointEase pricing.
 // Owner decision (Frantz, 2026-11-24, FINAL): Solo $29.99/mo ·
-// Team $49.99/mo · Business $149.99/mo, priced by team size (staff
-// calendars). 30-day free trial, no card upfront. Customers who book
-// never pay anything — only businesses subscribe.
+// Team $49.99/mo · Business $149.99/mo. 30-day free trial, no card
+// upfront. Customers who book never pay anything — only businesses
+// subscribe.
+// Team-size bands updated 2026-11-26 (Frantz's Homepage Fix List,
+// MUST FIX #1): Solo up to 4 team members, Team up to 9, Business
+// unlimited (shown as "10+"). Prices did NOT change.
 // Change prices HERE and every surface (settings UI, gating, checkout)
 // follows. Stripe price IDs live in env (see src/lib/stripe.ts).
 
@@ -25,42 +28,43 @@ export const PLANS: Plan[] = [
     id: "solo",
     name: "Solo",
     monthlyCents: 2999,
-    staffLimit: 1,
-    blurb: "For a one-person shop that runs on appointments.",
+    staffLimit: 4,
+    blurb: "For a small shop that runs on appointments.",
     features: [
-      "1 staff calendar",
+      "Up to 4 team members",
       "Your own booking page & link",
       "Confirmation, 24-hour & 2-hour reminders — by text and email (when the booking is made far enough ahead)",
       "Two-way messaging with your customers",
-      "Listed in Find-a-Business search",
     ],
   },
   {
     id: "team",
     name: "Team",
     monthlyCents: 4999,
-    staffLimit: 5,
-    blurb: "For a small team sharing one booking page.",
+    staffLimit: 9,
+    blurb: "For a growing team sharing one booking page.",
     features: [
-      "Up to 5 staff calendars",
-      "Each staff member's own services & hours",
-      "Customers book the right person, every time",
-      "Everything in Solo",
+      "Up to 9 team members",
+      "Everything in Solo + client assignment and roles",
     ],
   },
   {
     id: "business",
     name: "Business",
     monthlyCents: 14999,
-    staffLimit: 15,
-    blurb: "For bigger teams that need more calendars and faster support.",
+    staffLimit: Number.POSITIVE_INFINITY,
+    blurb: "For bigger teams that need room to grow and faster support.",
     features: [
-      "Up to 15 staff calendars",
-      "Priority support — your questions jump the queue",
-      "Everything in Team",
+      "10+ team members",
+      "Everything in Team + priority support",
     ],
   },
 ];
+
+/** The team-size label for plan cards: "4", "9", or "10+" (unlimited). */
+export function staffLimitLabel(plan: Plan): string {
+  return Number.isFinite(plan.staffLimit) ? String(plan.staffLimit) : "10+";
+}
 
 export function planById(id: string | null | undefined): Plan {
   return PLANS.find((p) => p.id === id) ?? PLANS[0];

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { PLANS, formatPlanPrice } from "@/lib/plans";
+import { PLANS, formatPlanPrice, staffLimitLabel } from "@/lib/plans";
 import { TILE_CATEGORIES } from "@/lib/categories";
 import CategoryIcon from "@/components/CategoryIcon";
 import HomeAnimations from "@/components/HomeAnimations";
@@ -644,10 +644,14 @@ export default function HomePage() {
               </thead>
               <tbody>
                 <tr>
-                  <th scope="row">Staff calendars</th>
-                  <td>1</td>
-                  <td>Up to 5</td>
-                  <td>Up to 15</td>
+                  <th scope="row">Team members</th>
+                  {PLANS.map((plan) => (
+                    <td key={plan.id}>
+                      {Number.isFinite(plan.staffLimit)
+                        ? `Up to ${staffLimitLabel(plan)}`
+                        : staffLimitLabel(plan)}
+                    </td>
+                  ))}
                 </tr>
                 <tr>
                   <th scope="row">Booking page with your own link</th>

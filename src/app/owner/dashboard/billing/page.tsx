@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireBusiness } from "@/lib/owner";
 import BillingPanel from "@/components/owner/BillingPanel";
-import { formatPlanPrice, getBillingState, planById } from "@/lib/plans";
+import { formatPlanPrice, getBillingState, planById, staffLimitLabel } from "@/lib/plans";
 import { isAnnualBillingConfigured, isBillingConfigured } from "@/lib/stripe";
 
 // Billing: the owner's own AppointEase subscription — the ONLY money
@@ -10,7 +10,9 @@ import { isAnnualBillingConfigured, isBillingConfigured } from "@/lib/stripe";
 // outside AppointEase, and never appears here.
 export default async function DashboardBillingPage() {
   const { supabase, business, role } = await requireBusiness();
-  if (role === "staff") redirect("/owner/dashboard");
+  // Billing is the owner's alone — managers see everything at the
+  // business EXCEPT billing and team management (2026-11-26 plan).
+  if (role !== "owner") redirect("/owner/dashboard");
 
   const billing = getBillingState(business);
   const plan = planById(business.plan);
@@ -81,7 +83,9 @@ export default async function DashboardBillingPage() {
         <div className="card" style={{ margin: 0 }}>
           <p className="eyebrow">Team seats</p>
           <p className="lede" style={{ margin: "4px 0" }}>
-            {staffCount ?? 0} of {plan.staffLimit} staff calendar{plan.staffLimit === 1 ? "" : "s"} used
+            {Number.isFinite(plan.staffLimit)
+              ? `${staffCount ?? 0} of ${plan.staffLimit} staff calendars used`
+              : `${staffCount ?? 0} staff calendars used · ${staffLimitLabel(plan)} on this plan, no cap`}
           </p>
           <p className="small" style={{ margin: 0 }}>
             {memberCount !== null

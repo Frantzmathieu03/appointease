@@ -23,6 +23,7 @@ export default async function DashboardCustomersPage({
   interface Rel {
     customer_id: string;
     assigned_staff_id?: string | null;
+    created_at?: string;
     customers: { full_name: string; email: string | null; phone: string | null } | null;
   }
   type ApptRow = {
@@ -35,12 +36,12 @@ export default async function DashboardCustomersPage({
   const fetchRels = async (): Promise<Rel[]> => {
     const withAssign = await supabase
       .from("business_customers")
-      .select("customer_id, assigned_staff_id, customers:customer_id ( full_name, email, phone )")
+      .select("customer_id, assigned_staff_id, created_at, customers:customer_id ( full_name, email, phone )")
       .eq("business_id", business.id);
     if (withAssign.error) {
       const basic = await supabase
         .from("business_customers")
-        .select("customer_id, customers:customer_id ( full_name, email, phone )")
+        .select("customer_id, created_at, customers:customer_id ( full_name, email, phone )")
         .eq("business_id", business.id);
       return (basic.data ?? []) as unknown as Rel[];
     }
@@ -104,12 +105,16 @@ export default async function DashboardCustomersPage({
   const locations = locRes.error ? [] : ((locRes.data ?? []) as { id: string; name: string }[]);
   const locFilter =
     locations.length >= 2 && sp.loc && locations.some((l) => l.id === sp.loc) ? sp.loc : null;
-  const stats = new Map<string, { total: number; last: string | null }>();
+  const stats = new Map<string, { total: number; last: string | null; next: string | null }>();
   const customersAtLocation = new Set<string>();
+  const nowMs = Date.now();
   for (const a of apptRows) {
-    const s = stats.get(a.customer_id) ?? { total: 0, last: null };
+    const s = stats.get(a.customer_id) ?? { total: 0, last: null, next: null };
     s.total += 1;
     if (!s.last) s.last = a.starts_at;
+    if (a.status === "confirmed" && new Date(a.starts_at).getTime() >= nowMs) {
+      if (!s.next || a.starts_at < s.next) s.next = a.starts_at;
+    }
     stats.set(a.customer_id, s);
     if (locFilter && a.location_id === locFilter) customersAtLocation.add(a.customer_id);
   }
@@ -121,6 +126,21 @@ export default async function DashboardCustomersPage({
 
   const visibleRels = locFilter ? rels.filter((r) => customersAtLocation.has(r.customer_id)) : rels;
 
+  const fmtNext = (iso: string) => {
+    const d = new Date(iso);
+    const datePart = formatDateInZone(d, tz);
+    const today = formatDateInZone(new Date(), tz);
+    const tomorrow = formatDateInZone(new Date(Date.now() + 86400000), tz);
+    const time = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(d);
+    if (datePart === today) return `Today · ${time}`;
+    if (datePart === tomorrow) return `Tomorrow · ${time}`;
+    return `${datePart} · ${time}`;
+  };
+
   const rows: CustomerRow[] = visibleRels.map((r) => {
     const s = stats.get(r.customer_id);
     return {
@@ -131,6 +151,9 @@ export default async function DashboardCustomersPage({
       assigned_staff_id: r.assigned_staff_id ?? null,
       total: s?.total ?? 0,
       lastLabel: s?.last ? formatDateInZone(new Date(s.last), tz) : null,
+      nextLabel: s?.next ? fmtNext(s.next) : null,
+      hasUpcoming: !!s?.next,
+      joinedAt: r.created_at ?? null,
       unread: unreadBy.get(r.customer_id) ?? 0,
     };
   });

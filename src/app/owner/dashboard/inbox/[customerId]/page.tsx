@@ -68,39 +68,45 @@ export default async function DashboardThreadPage({
         selectedCustomerId={customerId}
       >
         <div>
-          <p className="eyebrow">
-            <Link href="/owner/dashboard/inbox">← All conversations</Link>
-            {"  ·  "}
-            <Link href={`/owner/dashboard/customers/${customerId}`}>View customer</Link>
+          <p style={{ margin: "0 0 10px" }}>
+            <Link href="/owner/dashboard/inbox" style={{ fontWeight: 600, fontSize: 14 }}>
+              ← All conversations
+            </Link>
           </p>
-          <h2 style={{ fontSize: 22, marginBottom: 2 }}>
-            Conversation with {customer.full_name || "Customer"}
-          </h2>
-          <p className="small" style={{ marginTop: 0, marginBottom: 4 }}>
-            {[customer.phone ? formatPhone(customer.phone) : null, customer.email].filter(Boolean).join(" · ")}
-          </p>
-          {next && (
-            <p className="small" style={{ margin: "0 0 4px" }}>
-              Next appointment: {next.services?.name ?? "Appointment"} ·{" "}
-              {formatDateInZone(new Date(next.starts_at), tz)} at{" "}
-              {formatTimeInZone(new Date(next.starts_at), tz)}
-            </p>
-          )}
-          <p style={{ margin: "0 0 14px" }}>
-            <AssignControl
-              businessId={business.id}
-              customerId={customerId}
-              staff={staff}
-              assignedStaffId={assignedStaffId}
-              actorId={user.id}
-              compact
-            />
-          </p>
+          <div className="d2-thread-head">
+            <div style={{ minWidth: 0 }}>
+              <h2 style={{ fontSize: 19, margin: 0 }}>{customer.full_name || "Customer"}</h2>
+              <p className="small" style={{ margin: "3px 0 0" }}>
+                {next
+                  ? `Next: ${next.services?.name ?? "Appointment"} · ${formatDateInZone(new Date(next.starts_at), tz)}, ${formatTimeInZone(new Date(next.starts_at), tz)}`
+                  : "No upcoming appointment"}
+                {" · "}
+                {[customer.phone ? formatPhone(customer.phone) : null, customer.email]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+              <p style={{ margin: "6px 0 0" }}>
+                <AssignControl
+                  businessId={business.id}
+                  customerId={customerId}
+                  staff={staff}
+                  assignedStaffId={assignedStaffId}
+                  actorId={user.id}
+                  compact
+                />
+              </p>
+            </div>
+            <Link href={`/owner/dashboard/customers/${customerId}`} className="btn">
+              View profile
+            </Link>
+          </div>
           <div className="card">
             <ThreadView
               businessId={business.id}
               customerId={customerId}
               viewer="business"
+              customerName={customer.full_name ?? undefined}
+              teamName={business.name}
             />
           </div>
           <p className="small">

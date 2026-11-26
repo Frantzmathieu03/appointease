@@ -18,10 +18,18 @@ export default function ThreadView({
   businessId,
   customerId,
   viewer,
+  customerName,
+  teamName,
 }: {
   businessId: string;
   customerId: string;
   viewer: "customer" | "business";
+  /** For the captions under bubbles (owner inbox): the customer's name. */
+  customerName?: string;
+  /** For the captions under bubbles: the business's name. Individual
+   *  team authors aren't stored on messages, so business replies are
+   *  captioned with the business name. */
+  teamName?: string;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -117,25 +125,47 @@ export default function ThreadView({
     setSending(false);
   }
 
+  const dayLabel = (iso: string) => {
+    const d = new Date(iso);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) return "Today";
+    if (d.toDateString() === new Date(now.getTime() - 86400000).toDateString()) return "Yesterday";
+    return d.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
+  };
+  const timeLabel = (iso: string) =>
+    new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const firstNameOf = (n?: string) => (n ?? "").trim().split(/\s+/)[0] ?? "";
+
+  let lastDay = "";
   return (
     <div>
       <div className="thread" style={{ marginBottom: 12 }}>
         {messages.length === 0 && (
           <p className="small">No messages yet — say hello below.</p>
         )}
-        {messages.map((m) => (
-          <div key={m.id} className={m.sender === viewer ? "bubble mine" : "bubble"}>
-            <div>{m.body}</div>
-            <div className="small">
-              {new Date(m.created_at).toLocaleString([], {
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
+        {messages.map((m) => {
+          const day = dayLabel(m.created_at);
+          const showDay = day !== lastDay;
+          lastDay = day;
+          const mine = m.sender === viewer;
+          const caption =
+            viewer === "business"
+              ? m.sender === "customer"
+                ? `${firstNameOf(customerName) || "Customer"} · ${timeLabel(m.created_at)} · in app`
+                : `${teamName ?? "Your team"} · ${timeLabel(m.created_at)}${m.read_at ? " · Read" : ""}`
+              : `${timeLabel(m.created_at)}`;
+          return (
+            <div key={m.id} style={{ display: "contents" }}>
+              {showDay && <div className="d2-daylabel">{day}</div>}
+              <div className={mine ? "msg-wrap mine" : "msg-wrap"}>
+                <div className={mine ? "bubble mine" : "bubble"}>
+                  <div>{m.body}</div>
+                </div>
+                <div className="msg-cap">{caption}</div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={bottomRef} />
       </div>
       {error && <div className="error">{error}</div>}

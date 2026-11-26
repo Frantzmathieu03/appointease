@@ -5,8 +5,9 @@ import { createBrowserSupabase } from "@/lib/supabase-browser";
 import type { StaffMember } from "@/lib/types";
 
 /**
- * Team members = calendars. Plan size is measured here:
- * Solo 1 · Team up to 5 · Business up to 15.
+ * Bookable staff calendars. Plan team-size bands live in
+ * src/lib/plans.ts (Solo up to 4 team members · Team up to 9 ·
+ * Business 10+, updated 2026-11-26).
  */
 export default function StaffManager({ businessId }: { businessId: string }) {
   const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -71,7 +72,7 @@ export default function StaffManager({ businessId }: { businessId: string }) {
         </button>
       </form>
       <p className="small" style={{ marginTop: 10 }}>
-        {staff.length} active — Solo includes 1, Team up to 5, Business up to 15.
+        {staff.length} active — Solo includes up to 4 team members, Team up to 9, Business 10+.
       </p>
     </div>
   );
