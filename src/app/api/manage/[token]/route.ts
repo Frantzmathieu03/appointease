@@ -20,11 +20,44 @@ export async function GET(
   const { data: appt } = await admin
     .from("appointments")
     .select(
-      "id, starts_at, ends_at, status, staff_id, service_id, confirmation_code, businesses:business_id ( name, slug, address, timezone, logo_url, phone ), services:service_id ( name, duration_minutes ), customers:customer_id ( full_name ), staff:staff_id ( name )"
+      "id, starts_at, ends_at, status, staff_id, service_id, business_id, confirmation_code, businesses:business_id ( name, slug, address, timezone, logo_url, phone ), services:service_id ( name, duration_minutes ), customers:customer_id ( full_name ), staff:staff_id ( name )"
     )
     .eq("manage_token", token)
     .single();
   if (!appt) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
+
+  // The business's booking rules (migration 0016): its cancellation
+  // words and the reschedule cut-off / cancellation window hours.
+  // Feature-detected — before the migration lands the query errors
+  // and the page runs on the defaults (no policy words, 12 / 24).
+  let settings: {
+    cancellationPolicy: string | null;
+    rescheduleCutoffHours: number;
+    cancelWindowHours: number;
+  } | null = null;
+  try {
+    const { data: biz, error: bizErr } = await admin
+      .from("businesses")
+      .select("cancellation_policy, reschedule_cutoff_hours, cancel_window_hours")
+      .eq("id", (appt as unknown as { business_id: string }).business_id)
+      .single();
+    if (!bizErr && biz) {
+      const b = biz as unknown as {
+        cancellation_policy: string | null;
+        reschedule_cutoff_hours: number | null;
+        cancel_window_hours: number | null;
+      };
+      settings = {
+        cancellationPolicy: b.cancellation_policy,
+        rescheduleCutoffHours:
+          typeof b.reschedule_cutoff_hours === "number" ? b.reschedule_cutoff_hours : 12,
+        cancelWindowHours:
+          typeof b.cancel_window_hours === "number" ? b.cancel_window_hours : 24,
+      };
+    }
+  } catch {
+    settings = null;
+  }
 
   // Intake form state (migration 0012): does this appointment's service
   // have a form attached, and has the customer already submitted it?
@@ -53,7 +86,7 @@ export async function GET(
     intake = null;
   }
 
-  return NextResponse.json({ appointment: appt, intake });
+  return NextResponse.json({ appointment: appt, intake, settings });
 }
 
 export async function POST(

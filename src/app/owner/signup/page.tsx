@@ -43,7 +43,14 @@ export default function OwnerSignupPage() {
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { data: { full_name: form.name } },
+      options: {
+        data: { full_name: form.name },
+        // Confirming the email lands the owner straight in "Name
+        // your business" (/owner/setup shows exactly that when no
+        // business exists yet) — no confirm-then-sign-in-again loop
+        // (Customer Side Plan friction fix, Frantz 2026-11-26).
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/owner/setup")}`,
+      },
     });
     if (error) {
       setError(error.message);
@@ -66,8 +73,9 @@ export default function OwnerSignupPage() {
         <div className="card center">
           <h2>Check your email</h2>
           <p className="lede">
-            We sent a confirmation link to {form.email}. Confirm it, sign in,
-            and we&apos;ll reserve your business link right away.
+            We sent a confirmation link to {form.email}. Click it and
+            you&apos;ll go straight to naming your business — no extra
+            sign-in needed.
           </p>
           <Link href="/owner" className="btn btn-primary">Go to business sign-in</Link>
         </div>

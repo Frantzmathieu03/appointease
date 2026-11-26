@@ -9,16 +9,31 @@ import { weekdayOf } from "@/lib/slots";
 // no endless sideways scrolling through a strip of day buttons.
 // Only the days in `dates` are enabled; slots are still computed per
 // selected day by the caller, never precomputed for the whole window.
+//
+// Customer Side Plan (Frantz, 2026-11-26): callers that know each
+// day's state pass `dayStates` — open days render as white boxes with
+// a green outline, closed and fully booked days as plain grey numbers
+// (never strikethrough, per the plan's pictures), and only open days
+// are tappable. `markedDate` outlines one day with a dashed border —
+// the reschedule screen marks the appointment's current day that way.
+// Without `dayStates` the original behavior stands: days in `dates`
+// are enabled, the rest are disabled and faded.
+export type DayState = "open" | "closed" | "full";
+
 export default function DatePicker({
   dates,
   value,
   onChange,
   timeZone,
+  dayStates,
+  markedDate,
 }: {
   dates: string[];
   value: string;
   onChange: (date: string) => void;
   timeZone: string;
+  dayStates?: Record<string, DayState>;
+  markedDate?: string;
 }) {
   const allowed = useMemo(() => new Set(dates), [dates]);
   const firstMonth = dates[0]?.slice(0, 7) ?? "";
@@ -79,21 +94,33 @@ export default function DatePicker({
         ))}
       </div>
       <div className="cal-grid">
-        {cells.map((ds, i) =>
-          ds === null ? (
-            <span key={`blank-${i}`} />
-          ) : (
+        {cells.map((ds, i) => {
+          if (ds === null) return <span key={`blank-${i}`} />;
+          const state = dayStates?.[ds];
+          const disabled = dayStates
+            ? state !== "open" && ds !== value
+            : !allowed.has(ds);
+          const cls = [
+            "cal-day",
+            ds === value ? "selected" : "",
+            dayStates && state === "open" && ds !== value ? "open" : "",
+            dayStates && state && state !== "open" ? "closed" : "",
+            markedDate && ds === markedDate ? "marked" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          return (
             <button
               type="button"
               key={ds}
-              className={ds === value ? "cal-day selected" : "cal-day"}
-              disabled={!allowed.has(ds)}
+              className={cls}
+              disabled={disabled}
               onClick={() => onChange(ds)}
             >
               {Number(ds.slice(8))}
             </button>
-          )
-        )}
+          );
+        })}
       </div>
     </div>
   );

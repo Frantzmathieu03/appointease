@@ -60,7 +60,8 @@ export async function isBusinessMember(
 export async function ensureBusinessMembership(
   supabase: SupabaseClient,
   businessId: string,
-  userId: string
+  userId: string,
+  opts?: { smsConsent?: boolean }
 ) {
   try {
     await supabase.from("business_customers").upsert(
@@ -70,5 +71,41 @@ export async function ensureBusinessMembership(
   } catch {
     // Membership is created at booking time as well (via /api/book) —
     // a failed join here must never take the page down.
+  }
+  if (opts?.smsConsent) {
+    await recordSmsConsent(supabase, businessId, userId);
+  }
+}
+
+/**
+ * Record the customer's texting consent for THIS business (Customer
+ * Side Plan, Frantz 2026-11-26): the "Text me reminders and replies.
+ * Reply STOP anytime." box on the business's sign-up screen starts
+ * unchecked; when it is ticked, the join that follows carries the
+ * consent marker and the moment is stamped on the membership row
+ * (business_customers.sms_consent_at, migration 0016). Only the
+ * first stamp is kept — re-joining never moves it. Feature-detected:
+ * before the migration lands the update errors and is quietly
+ * ignored, like every other membership write. Never throws.
+ */
+export async function recordSmsConsent(
+  supabase: SupabaseClient,
+  businessId: string,
+  userId: string
+) {
+  try {
+    const { error } = await supabase
+      .from("business_customers")
+      .update({ sms_consent_at: new Date().toISOString() })
+      .eq("business_id", businessId)
+      .eq("customer_id", userId)
+      .is("sms_consent_at", null);
+    if (error) {
+      // Column missing (pre-0016) or policy refusal — consent is
+      // additive; the join itself already succeeded.
+      return;
+    }
+  } catch {
+    // Never break the page over a consent stamp.
   }
 }

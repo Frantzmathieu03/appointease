@@ -30,7 +30,7 @@ export default async function DashboardCalendarPage({
   const sp = await searchParams;
   const { supabase, business, memberStaffId } = await requireBusiness();
   const tz = business.timezone;
-  const view = sp.view === "day" ? "day" : "week";
+  const view = sp.view === "week" ? "week" : "day";
 
   const dateFmt = new Intl.DateTimeFormat("en-CA", {
     timeZone: tz,

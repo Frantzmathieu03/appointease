@@ -18,10 +18,10 @@ export default async function BookPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ service?: string; join?: string }>;
+  searchParams: Promise<{ service?: string; join?: string; consent?: string }>;
 }) {
   const { slug } = await params;
-  const { service, join } = await searchParams;
+  const { service, join, consent } = await searchParams;
   const page = await getBusinessPageDataWithPreview(slug);
   if (!page) notFound();
 
@@ -48,6 +48,8 @@ export default async function BookPage({
   // BUSINESS. Being signed in to AppointEase alone is not enough —
   // the gate keys off membership of this business, never the bare
   // session:
+  let accountPrefill: { name: string; email: string; phone: string } | null =
+    null;
   //   - signed out: the short account step (Google, or email
   //     sign-up/sign-in), which returns here carrying the join marker;
   //   - signed in, not a member of this business (the owner testing
@@ -84,7 +86,9 @@ export default async function BookPage({
     if (!member) {
       if (!isOwner && join) {
         await ensureCustomerProfile(supabase, user);
-        await ensureBusinessMembership(supabase, business.id, user.id);
+        await ensureBusinessMembership(supabase, business.id, user.id, {
+          smsConsent: consent === "1",
+        });
         // Joined through this business's account step: land on the
         // customer's own dashboard, not back at the storefront or
         // into a half-started flow (Frantz, 2026-11-26). Their
@@ -114,6 +118,22 @@ export default async function BookPage({
       );
     }
     await ensureCustomerProfile(supabase, user);
+    // The member's own details, resolved here on the server so step 3
+    // of the flow starts filled from their account.
+    const { data: profile } = await supabase
+      .from("customers")
+      .select("full_name, email, phone")
+      .eq("id", user.id)
+      .maybeSingle();
+    accountPrefill = {
+      name:
+        profile?.full_name ??
+        (user.user_metadata?.full_name as string) ??
+        (user.user_metadata?.name as string) ??
+        "",
+      email: profile?.email ?? user.email ?? "",
+      phone: profile?.phone ?? "",
+    };
   }
 
   return (
@@ -130,6 +150,8 @@ export default async function BookPage({
         demoMode={page.demoMode}
         demoShop={isDemoShop(slug)}
         preselectedServiceId={service}
+        cancellationPolicy={page.business.cancellation_policy ?? null}
+        prefill={accountPrefill}
       />
     </main>
   );

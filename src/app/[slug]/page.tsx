@@ -13,6 +13,7 @@ import {
   ensureBusinessMembership,
   ensureCustomerProfile,
   isBusinessMember,
+  recordSmsConsent,
 } from "@/lib/profile";
 import { getBillingState } from "@/lib/plans";
 import { formatPhone, formatServicePrice } from "@/lib/types";
@@ -81,10 +82,10 @@ export default async function BusinessPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ join?: string }>;
+  searchParams: Promise<{ join?: string; consent?: string }>;
 }) {
   const { slug } = await params;
-  const { join } = await searchParams;
+  const { join, consent } = await searchParams;
   const page = await getBusinessPageDataWithPreview(slug);
   if (!page) {
     // Join on return for an UNPUBLISHED business (Frantz, 2026-11-25):
@@ -112,7 +113,9 @@ export default async function BusinessPage({
           .maybeSingle();
         if (biz && biz.owner_id !== user.id) {
           await ensureCustomerProfile(supabase, user);
-          await ensureBusinessMembership(supabase, biz.id, user.id);
+          await ensureBusinessMembership(supabase, biz.id, user.id, {
+            smsConsent: consent === "1",
+          });
           redirect(`/${slug}/my`);
         }
       }
@@ -151,7 +154,11 @@ export default async function BusinessPage({
       const member = await isBusinessMember(supabase, business.id, user.id);
       if (!member) {
         await ensureCustomerProfile(supabase, user);
-        await ensureBusinessMembership(supabase, business.id, user.id);
+        await ensureBusinessMembership(supabase, business.id, user.id, {
+          smsConsent: consent === "1",
+        });
+      } else if (consent === "1") {
+        await recordSmsConsent(supabase, business.id, user.id);
       }
       redirect(`/${slug}/my`);
     }

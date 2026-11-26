@@ -16,10 +16,10 @@ export default async function MessagePage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ join?: string }>;
+  searchParams: Promise<{ join?: string; consent?: string }>;
 }) {
   const { slug } = await params;
-  const { join } = await searchParams;
+  const { join, consent } = await searchParams;
   const page = await getBusinessPageDataWithPreview(slug);
   if (!page) notFound();
   const { business } = page;
@@ -89,7 +89,9 @@ export default async function MessagePage({
   if (!member) {
     if (!isOwner && join) {
       await ensureCustomerProfile(supabase, user);
-      await ensureBusinessMembership(supabase, business.id, user.id);
+      await ensureBusinessMembership(supabase, business.id, user.id, {
+        smsConsent: consent === "1",
+      });
       // Joined through this business's sign-in link: land on the
       // customer's own dashboard (their thread lives there too),
       // not back at the storefront (Frantz, 2026-11-26).

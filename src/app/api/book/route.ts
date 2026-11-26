@@ -159,6 +159,23 @@ export async function POST(req: NextRequest) {
       { business_id: page.business.id, customer_id: customerId },
       { onConflict: "business_id,customer_id", ignoreDuplicates: true }
     );
+  // Booking with a specific person makes that person the customer's
+  // person at this business — only when nobody is assigned yet (the
+  // owner can reassign anytime; a later booking never silently moves
+  // a customer). Customer Side Plan, Frantz 2026-11-26. The column
+  // arrives with migration 0010; a failure here never fails a booking.
+  if (staffId) {
+    try {
+      await admin
+        .from("business_customers")
+        .update({ assigned_staff_id: staffId })
+        .eq("business_id", page.business.id)
+        .eq("customer_id", customerId)
+        .is("assigned_staff_id", null);
+    } catch {
+      // Assignment is additive — the booking itself already landed.
+    }
+  }
 
   // Insert with a fresh confirmation code per attempt: the unique
   // constraint on confirmation_code makes collisions come back as 23505,

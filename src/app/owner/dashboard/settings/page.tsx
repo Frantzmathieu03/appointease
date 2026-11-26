@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireBusiness, siteUrl } from "@/lib/owner";
 import BusinessDetailsForm from "@/components/owner/BusinessDetailsForm";
+import BookingRulesForm from "@/components/owner/BookingRulesForm";
+import { businessCancelNote, cancelWindowHours, rescheduleCutoffHours } from "@/lib/types";
 import ServicesManager from "@/components/owner/ServicesManager";
 import HoursManager from "@/components/owner/HoursManager";
 import PublishButton from "@/components/owner/PublishButton";
@@ -60,6 +62,16 @@ export default async function DashboardSettingsPage() {
       <div className="card" id="locations">
         <h2>Locations</h2>
         <LocationsManager businessId={business.id} />
+      </div>
+
+      <div className="card">
+        <h2>Booking rules</h2>
+        <BookingRulesForm
+          businessId={business.id}
+          initialNote={businessCancelNote(business) ?? ""}
+          initialCutoff={rescheduleCutoffHours(business)}
+          initialWindow={cancelWindowHours(business)}
+        />
       </div>
 
       <div className="card">

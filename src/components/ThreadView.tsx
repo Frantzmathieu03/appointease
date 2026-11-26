@@ -20,6 +20,7 @@ export default function ThreadView({
   viewer,
   customerName,
   teamName,
+  signatureName,
 }: {
   businessId: string;
   customerId: string;
@@ -30,6 +31,12 @@ export default function ThreadView({
    *  team authors aren't stored on messages, so business replies are
    *  captioned with the business name. */
   teamName?: string;
+  /** Customer view only (Customer Side Plan, Frantz 2026-11-26):
+   *  business bubbles carry a "— <name>" signature line inside the
+   *  bubble — the customer's own person's first name when they have
+   *  one, else the business's name (message authors aren't stored,
+   *  so this names the customer's contact, not a per-message author). */
+  signatureName?: string;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -160,6 +167,9 @@ export default function ThreadView({
               <div className={mine ? "msg-wrap mine" : "msg-wrap"}>
                 <div className={mine ? "bubble mine" : "bubble"}>
                   <div>{m.body}</div>
+                  {viewer === "customer" && m.sender === "business" && signatureName && (
+                    <div className="c3-sig">— {signatureName}</div>
+                  )}
                 </div>
                 <div className="msg-cap">{caption}</div>
               </div>

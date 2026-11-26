@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import {
+  businessCancelNote,
   formatPhone,
   formatServicePrice,
   visitTypeLabel,
@@ -13,7 +14,7 @@ import {
   type StaffService,
 } from "@/lib/types";
 import { BOOKING_WINDOW_DAYS, formatDateInZone, formatTimeInZone, nextDates } from "@/lib/slots";
-import DatePicker from "@/components/DatePicker";
+import DatePicker, { type DayState } from "@/components/DatePicker";
 import { demoSlotsForDay, sampleReminderPreviews } from "@/lib/demo";
 import { generateConfirmationCode } from "@/lib/confirmation";
 
@@ -61,6 +62,37 @@ function ClaimAccountCard({ email }: { email: string }) {
   );
 }
 
+function tzAbbrev(d: Date, tz: string): string {
+  return (
+    new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
+      .formatToParts(d)
+      .find((p) => p.type === "timeZoneName")?.value ?? ""
+  );
+}
+
+function icsStamp(d: Date): string {
+  return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+}
+
+/** Calendar legend per the plan's pictures: tiny example day numbers. */
+function CalLegend() {
+  return (
+    <div className="c3-legend" aria-hidden="true">
+      <span className="c3-legend-item">
+        <span className="c3-legend-day open">5</span> Open
+      </span>
+      <span className="c3-legend-item">
+        <span className="c3-legend-day">9</span> Closed
+      </span>
+      <span className="c3-legend-item">
+        <span className="c3-legend-day">12</span> Fully booked
+      </span>
+    </div>
+  );
+}
+
+const STEP_NAMES = ["Service", "Pick a time", "Your details", "Review"];
+
 // Booking flow: service → time → details → review → confirmed.
 // ACCOUNT-FIRST (Frantz, 2026-11-25): the book page gates signed-out
 // customers into a short account step (AccountGate) before this flow
@@ -71,6 +103,12 @@ function ClaimAccountCard({ email }: { email: string }) {
 // for a session that expires mid-flow; the confirmation screen then
 // offers (never requires) setting a password via the claim card.
 // The database makes double-booking impossible.
+//
+// Customer Side Plan (Frantz, 2026-11-26): segment-bar progress,
+// service + person cards on step 1, a calendar that greys closed and
+// fully booked days so they never look bookable, sticky bottom
+// actions, a Review with the customer's note and the "Pay at the
+// office" line, and the "You're booked!" screen with calendar adds.
 export default function BookingFlow({
   slug,
   businessName,
@@ -83,6 +121,8 @@ export default function BookingFlow({
   demoMode,
   demoShop,
   preselectedServiceId,
+  cancellationPolicy,
+  prefill,
 }: {
   slug: string;
   businessName: string;
@@ -99,6 +139,13 @@ export default function BookingFlow({
    *  no API calls, no database writes, no messages sent. */
   demoShop?: boolean;
   preselectedServiceId?: string;
+  /** The business's own cancellation words (migration 0016), shown
+      on the Review when set. Absent before the migration lands. */
+  cancellationPolicy?: string | null;
+  /** The signed-in member's own details, resolved on the server by
+      the book page: step 3 starts filled from their account. The
+      client-side profile read below stays as a refresh. */
+  prefill?: { name: string; email: string; phone: string } | null;
 }) {
   const isDemo = !!demoShop;
   const [step, setStep] = useState(1);
@@ -113,8 +160,14 @@ export default function BookingFlow({
   const [slots, setSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [slot, setSlot] = useState("");
-  const [signedIn, setSignedIn] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "" });
+  const [dayStates, setDayStates] = useState<Record<string, DayState> | null>(null);
+  const [signedIn, setSignedIn] = useState(!!prefill);
+  const [form, setForm] = useState({
+    name: prefill?.name ?? "",
+    phone: prefill?.phone ?? "",
+    email: prefill?.email ?? "",
+    notes: "",
+  });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{
@@ -127,6 +180,8 @@ export default function BookingFlow({
   } | null>(null);
 
   const service = services.find((s) => s.id === serviceId);
+  const person = staff.find((m) => m.id === staffId);
+  const cancelNote = businessCancelNote({ cancellation_policy: cancellationPolicy });
 
   // Team members who offer the selected service. Unrestricted (no rows
   // for the service) = the whole team.
@@ -171,6 +226,53 @@ export default function BookingFlow({
     })();
   }, [isDemo]);
 
+  // Per-day states for the calendar: closed days must never look
+  // bookable. Real businesses ask the day-status route; demo shops
+  // classify locally from their sample hours.
+  useEffect(() => {
+    if (!serviceId) return;
+    if (isDemo) {
+      const svc = services.find((s) => s.id === serviceId);
+      const states: Record<string, DayState> = {};
+      for (const d of dates) {
+        const daySlots = demoSlotsForDay({
+          dateStr: d,
+          durationMinutes: svc?.duration_minutes ?? 30,
+          availability: availability ?? [],
+          staffId: staffId || null,
+          timeZone: timezone,
+        });
+        states[d] = daySlots.length > 0 ? "open" : "closed";
+      }
+      setDayStates(states);
+      return;
+    }
+    let live = true;
+    const q = new URLSearchParams({ serviceId });
+    if (staffId) q.set("staffId", staffId);
+    fetch(`/api/businesses/${slug}/day-status?${q.toString()}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (live && d.states) setDayStates(d.states as Record<string, DayState>);
+      })
+      .catch(() => {
+        if (live) setDayStates(null);
+      });
+    return () => {
+      live = false;
+    };
+  }, [slug, serviceId, staffId, isDemo, services, availability, timezone, dates]);
+
+  // If the chosen day just became closed or full (service or person
+  // changed), move to the first open day instead of stranding the
+  // customer on a day with no times.
+  useEffect(() => {
+    if (!dayStates || !date) return;
+    if (dayStates[date] === "open" || dayStates[date] === undefined) return;
+    const firstOpen = dates.find((d) => dayStates[d] === "open");
+    if (firstOpen) setDate(firstOpen);
+  }, [dayStates, date, dates]);
+
   useEffect(() => {
     if (!serviceId || !date) return;
     setSlot("");
@@ -190,14 +292,28 @@ export default function BookingFlow({
       setSlotsLoading(false);
       return;
     }
+    // Real fetch: guard against stale responses — a slow reply for a
+    // previous day must never overwrite the new day's times (it would
+    // offer, and book, the wrong day).
+    let live = true;
+    setSlots([]);
     setSlotsLoading(true);
     const q = new URLSearchParams({ serviceId, date });
     if (staffId) q.set("staffId", staffId);
     fetch(`/api/businesses/${slug}/slots?${q.toString()}`)
       .then((r) => r.json())
-      .then((d) => setSlots(d.slots ?? []))
-      .catch(() => setSlots([]))
-      .finally(() => setSlotsLoading(false));
+      .then((d) => {
+        if (live) setSlots(d.slots ?? []);
+      })
+      .catch(() => {
+        if (live) setSlots([]);
+      })
+      .finally(() => {
+        if (live) setSlotsLoading(false);
+      });
+    return () => {
+      live = false;
+    };
   }, [slug, serviceId, staffId, date, isDemo, services, availability, timezone]);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -324,47 +440,88 @@ export default function BookingFlow({
   }
 
   if (step === 5) {
+    const start = slot ? new Date(slot) : null;
+    const end = start && service ? new Date(start.getTime() + service.duration_minutes * 60000) : null;
+    const whenBig = start
+      ? `${formatDateInZone(start, timezone)} · ${formatTimeInZone(start, timezone)} ${tzAbbrev(start, timezone)}`
+      : "";
+    const calTitle = `${service?.name ?? "Appointment"} at ${businessName}`;
+    const googleUrl =
+      start && end
+        ? "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+          `&text=${encodeURIComponent(calTitle)}` +
+          `&dates=${icsStamp(start)}/${icsStamp(end)}` +
+          (businessAddress ? `&location=${encodeURIComponent(businessAddress)}` : "")
+        : "";
+    const ics =
+      start && end
+        ? "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\n" +
+          `DTSTART:${icsStamp(start)}\r\nDTEND:${icsStamp(end)}\r\n` +
+          `SUMMARY:${calTitle.replace(/[\r\n]/g, " ")}\r\n` +
+          (businessAddress ? `LOCATION:${businessAddress.replace(/[\r\n]/g, " ")}\r\n` : "") +
+          "END:VEVENT\r\nEND:VCALENDAR"
+        : "";
+    const icsHref = `data:text/calendar;charset=utf8,${encodeURIComponent(ics)}`;
+    const outlookUrl =
+      start && end
+        ? "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent" +
+          `&subject=${encodeURIComponent(calTitle)}` +
+          `&startdt=${encodeURIComponent(start.toISOString())}` +
+          `&enddt=${encodeURIComponent(end.toISOString())}` +
+          (businessAddress ? `&location=${encodeURIComponent(businessAddress)}` : "")
+        : "";
+    const price = service ? formatServicePrice(service) : "";
     return (
       <div>
         <div className="card center">
-          <div style={{ fontSize: 40, marginBottom: 6 }}>✓</div>
-          <h2>You&apos;re booked!</h2>
-          <p className="lede">
-            {service?.name} at {businessName}
-            <br />
-            {slot && (
-              <>
-                {formatDateInZone(new Date(slot), timezone)} at {formatTimeInZone(new Date(slot), timezone)}
-              </>
-            )}
-          </p>
-          {result?.confirmationCode && (
-            <p style={{ fontSize: 18, margin: "4px 0 10px" }}>
-              Confirmation #: <strong>{result.confirmationCode}</strong>
-              <br />
-              <span className="small">Keep it handy — quote it if you call the business.</span>
-            </p>
-          )}
+          <div className="c3-check" aria-hidden="true">✓</div>
+          <h2 style={{ marginTop: 10 }}>You&apos;re booked!</h2>
           {result?.demoMode ? (
-            <p className="small">
+            <p className="lede">
               Demo mode: this confirmed on sample data — nothing was saved, and no
-              reminder was sent. Once the live database is connected, bookings save
-              for real and the confirmation + 24 h + 2 h reminders (when the
-              booking is made far enough ahead) go out by text and email.
+              reminder was sent.
             </p>
           ) : (
-            <p className="small">
-              A confirmation is on its way, with reminders 24 hours and 2 hours
-              before (when the booking is made far enough ahead) — each with a
-              link to reschedule or cancel.
+            <p className="lede">
+              We emailed your confirmation. Reminders come 24 hours and 2 hours
+              before, when the booking is made far enough ahead.
             </p>
           )}
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+          <div className="c3-appt-card">
+            <p className="c3-appt-label">Confirmed</p>
+            <p className="c3-appt-when">{whenBig}</p>
+            <p className="c3-appt-meta">
+              {service?.name}
+              {service ? ` · ${service.duration_minutes} min` : ""} · {person?.name ?? "First available"}
+            </p>
+            <p className="c3-appt-meta">
+              {businessAddress ? `${businessAddress} · ` : ""}Confirmation{" "}
+              <strong>{result?.confirmationCode ?? ""}</strong>
+            </p>
+            {price && <p className="c3-appt-meta">{price} · Pay at the office</p>}
+          </div>
+          {start && (
+            <>
+              <p className="small" style={{ margin: "14px 0 8px" }}>Add to your calendar</p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+                <a className="btn" href={googleUrl} target="_blank" rel="noreferrer">Google</a>
+                <a className="btn" href={icsHref} download="appointment.ics">Apple</a>
+                <a className="btn" href={outlookUrl} target="_blank" rel="noreferrer">Outlook</a>
+              </div>
+            </>
+          )}
+          <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 10, alignItems: "center" }}>
+            <Link href={`/${slug}/my`} className="btn btn-primary btn-block" style={{ textAlign: "center" }}>
+              Go to my dashboard
+            </Link>
             {result?.manageToken && (
-              <Link href={`/manage/${result.manageToken}`} className="btn">Manage this appointment</Link>
+              <Link href={`/manage/${result.manageToken}`} className="small">
+                Manage this appointment
+              </Link>
             )}
-            <Link href={`/${slug}/my`} className="btn btn-primary">My dashboard</Link>
-            <Link href={`/${slug}`} className="btn">Back to {businessName}</Link>
+            <Link href={`/${slug}`} className="c3-underlink">
+              Back to {businessName}
+            </Link>
           </div>
         </div>
         {!result?.demoMode && result?.manageToken && result?.intakeFormName && (
@@ -413,12 +570,62 @@ export default function BookingFlow({
     );
   }
 
+  const slotDate = slot ? new Date(slot) : null;
+  const reviewWhen = slotDate
+    ? `${formatDateInZone(slotDate, timezone)} · ${formatTimeInZone(slotDate, timezone)} ${tzAbbrev(slotDate, timezone)}`
+    : "";
+  const price = service ? formatServicePrice(service) : "";
+
+  // Sticky bottom action bar for the step (plan: the flow's main
+  // button stays pinned at the bottom of the screen).
+  const actions = (
+    <div className="c3-actions">
+      {step > 1 && (
+        <button className="btn" onClick={() => setStep(step - 1)}>
+          Back
+        </button>
+      )}
+      {step === 1 && (
+        <button className="btn btn-primary" style={{ flex: 1 }} disabled={!serviceId} onClick={() => setStep(2)}>
+          Continue
+        </button>
+      )}
+      {step === 2 && (
+        <button className="btn btn-primary" style={{ flex: 1 }} disabled={!slot} onClick={() => setStep(3)}>
+          Continue
+        </button>
+      )}
+      {step === 3 && (
+        <button
+          className="btn btn-primary"
+          style={{ flex: 1 }}
+          disabled={!form.name || !form.phone || !form.email}
+          onClick={() => setStep(4)}
+        >
+          Review booking
+        </button>
+      )}
+      {step === 4 && (
+        <button className="btn btn-primary" style={{ flex: 1 }} disabled={busy} onClick={confirm}>
+          {busy ? "Booking…" : isDemo ? "See sample confirmation" : "Confirm booking"}
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div>
-      <p className="eyebrow">{businessName}</p>
-      <h1 style={{ fontSize: 28 }}>Book an appointment</h1>
+      <Link href={`/${slug}`} className="c3-backlink">
+        ‹ {businessName}
+      </Link>
+      <h1 style={{ fontSize: 28, marginTop: 6 }}>Book an appointment</h1>
+      <div className="c3-progress" aria-hidden="true">
+        {[1, 2, 3, 4].map((n) => (
+          <span key={n} className={n <= step ? "c3-seg on" : "c3-seg"} />
+        ))}
+      </div>
       <p className="small" style={{ marginBottom: 16 }}>
-        Step {step} of 4 — {["Choose a service", "Pick a time", "Your details", "Review"][step - 1]}
+        Step {step} of 4 · {STEP_NAMES[step - 1]}
       </p>
       {isDemo && (
         <div className="notice" role="note">
@@ -429,156 +636,228 @@ export default function BookingFlow({
       {error && <div className="error">{error}</div>}
 
       {step === 1 && (
-        <div className="card">
-          <h2>Service</h2>
-          {services.map((s) => (
-            <div key={s.id} className="service-row">
-              <div>
-                <div className="service-name">{s.name}</div>
-                <div className="service-meta">
-                  {[`${s.duration_minutes} min`, formatServicePrice(s), visitTypeLabel(s.visit_type)]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </div>
-              </div>
-              <button
-                className={s.id === serviceId ? "btn btn-primary" : "btn"}
-                style={{ padding: "8px 14px" }}
-                onClick={() => setServiceId(s.id)}
-              >
-                {s.id === serviceId ? "Selected" : "Select"}
-              </button>
+        <>
+          <div className="card">
+            <h2>What do you need?</h2>
+            <div className="c3-service-list">
+              {services.map((s) => {
+                const meta = [
+                  `${s.duration_minutes} min`,
+                  formatServicePrice(s),
+                  visitTypeLabel(s.visit_type),
+                ]
+                  .filter(Boolean)
+                  .join(" · ");
+                const chosen = s.id === serviceId;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className={chosen ? "c3-service-card sel" : "c3-service-card"}
+                    onClick={() => setServiceId(s.id)}
+                    aria-pressed={chosen}
+                  >
+                    <span className="c3-service-main">
+                      <span className="service-name">{s.name}</span>
+                      <span className="service-meta">{meta}</span>
+                    </span>
+                    <span className={chosen ? "c3-radio on" : "c3-radio"} aria-hidden="true" />
+                  </button>
+                );
+              })}
             </div>
-          ))}
-          {staff.length > 1 && (
-            <label className="field" style={{ marginTop: 14 }}>
-              <span>With</span>
-              <select value={staffId} onChange={(e) => setStaffId(e.target.value)}>
-                <option value="">First available</option>
-                {offeringStaff.map((m) => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
-                ))}
-              </select>
-            </label>
-          )}
-          <button className="btn btn-primary btn-block" style={{ marginTop: 14 }} disabled={!serviceId} onClick={() => setStep(2)}>
-            Continue
-          </button>
-        </div>
+            {staff.length > 1 && (
+              <>
+                <h3 style={{ margin: "20px 0 10px" }}>Who would you like to see?</h3>
+                <div className="c3-people">
+                  <button
+                    type="button"
+                    className={staffId === "" ? "c3-person sel" : "c3-person"}
+                    onClick={() => setStaffId("")}
+                    aria-pressed={staffId === ""}
+                  >
+                    <span className="c3-avatar">Any</span>
+                    <span className="c3-person-name">First available</span>
+                    <span className="c3-person-sub">Fastest</span>
+                  </button>
+                  {offeringStaff.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      className={staffId === m.id ? "c3-person sel" : "c3-person"}
+                      onClick={() => setStaffId(m.id)}
+                      aria-pressed={staffId === m.id}
+                    >
+                      <span className="c3-avatar">
+                        {m.name.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+                      </span>
+                      <span className="c3-person-name">{m.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          {actions}
+        </>
       )}
 
       {step === 2 && (
-        <div className="card">
-          <h2>Pick a time</h2>
-          <DatePicker dates={dates} value={date} onChange={setDate} timeZone={timezone} />
-          {slotsLoading ? (
-            <p className="small">Loading times…</p>
-          ) : slots.length === 0 ? (
-            <p className="small">No open times that day — try another day.</p>
-          ) : (
-            <div className="slot-grid">
-              {slots.map((s) => (
-                <button key={s} className={s === slot ? "slot selected" : "slot"} onClick={() => setSlot(s)}>
-                  {formatTimeInZone(new Date(s), timezone)}
-                </button>
-              ))}
+        <>
+          <div className="card">
+            <div className="c3-chosen">
+              <p style={{ margin: 0 }}>
+                <strong>{service?.name}</strong>
+                <span className="small"> · with {person?.name ?? "First available"}</span>
+              </p>
+              <button type="button" className="c3-underlink" onClick={() => setStep(1)}>
+                Change
+              </button>
             </div>
-          )}
-          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-            <button className="btn" onClick={() => setStep(1)}>Back</button>
-            <button className="btn btn-primary" style={{ flex: 1 }} disabled={!slot} onClick={() => setStep(3)}>
-              Continue
-            </button>
+            <DatePicker
+              dates={dates}
+              value={date}
+              onChange={setDate}
+              timeZone={timezone}
+              dayStates={dayStates ?? undefined}
+            />
+            <CalLegend />
+            <p className="small" style={{ margin: "12px 0 8px" }}>
+              Times in {date ? tzAbbrev(new Date(`${date}T12:00:00Z`), timezone) : timezone}
+            </p>
+            {slotsLoading ? (
+              <p className="small">Loading times…</p>
+            ) : slots.length === 0 ? (
+              <p className="small">No open times that day — try another day.</p>
+            ) : (
+              <div className="c3-times">
+                {slots.map((s) => (
+                  <button key={s} className={s === slot ? "slot selected" : "slot"} onClick={() => setSlot(s)}>
+                    {formatTimeInZone(new Date(s), timezone)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+          {actions}
+        </>
       )}
 
       {step === 3 && (
-        <div className="card">
-          <h2>Your details</h2>
-          <label className="field">
-            <span>Full name</span>
-            <input required value={form.name} onChange={set("name")} autoComplete="name" />
-          </label>
-          <label className="field">
-            <span>Phone (for text reminders)</span>
-            <input type="tel" required value={form.phone} onChange={set("phone")} autoComplete="tel" />
-          </label>
-          <label className="field">
-            <span>Email (for email reminders)</span>
-            <input type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
-          </label>
-          {isDemo && (
-            <p className="small" style={{ fontWeight: 400 }}>
-              Demo only — use any name and number you like. Nothing is saved
-              or sent, and no account is created.
-            </p>
-          )}
-          {signedIn && !isDemo && (
-            <p className="small" style={{ fontWeight: 400 }}>
-              From your account with {businessName} — we send your
-              confirmation and reminders to these details.
-            </p>
-          )}
-          {!signedIn && !isDemo && (
-            <p className="small" style={{ fontWeight: 400 }}>
-              You&apos;re not signed in.{" "}
-              <Link href={`/login?next=/${slug}/book`}>Sign in</Link> so this
-              booking lands in your dashboard with {businessName}.
-            </p>
-          )}
-          <label className="field">
-            <span>Notes for the business (optional)</span>
-            <textarea value={form.notes} onChange={set("notes")} style={{ minHeight: 56 }} />
-          </label>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn" onClick={() => setStep(2)}>Back</button>
-            <button
-              className="btn btn-primary"
-              style={{ flex: 1 }}
-              disabled={!form.name || !form.phone || !form.email}
-              onClick={() => setStep(4)}
-            >
-              Review booking
-            </button>
+        <>
+          <div className="card">
+            <h2>Your details</h2>
+            {signedIn && !isDemo && (
+              <p className="small" style={{ marginTop: -4, marginBottom: 14 }}>
+                Filled in from your account. Change anything if needed.
+              </p>
+            )}
+            <label className="field">
+              <span>Full name</span>
+              <input required value={form.name} onChange={set("name")} autoComplete="name" />
+            </label>
+            <label className="field">
+              <span>Mobile number</span>
+              <input type="tel" required value={form.phone} onChange={set("phone")} autoComplete="tel" />
+            </label>
+            <label className="field">
+              <span>Email</span>
+              <input type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
+            </label>
+            {isDemo && (
+              <p className="small" style={{ fontWeight: 400 }}>
+                Demo only — use any name and number you like. Nothing is saved
+                or sent, and no account is created.
+              </p>
+            )}
+            {!signedIn && !isDemo && (
+              <p className="small" style={{ fontWeight: 400 }}>
+                You&apos;re not signed in.{" "}
+                <Link href={`/login?next=/${slug}/book`}>Sign in</Link> so this
+                booking lands in your dashboard with {businessName}.
+              </p>
+            )}
+            <label className="field">
+              <span>Note for the office (optional)</span>
+              <textarea value={form.notes} onChange={set("notes")} style={{ minHeight: 56 }} />
+            </label>
           </div>
-        </div>
+          {actions}
+        </>
       )}
 
       {step === 4 && (
-        <div className="card">
-          <h2>Review</h2>
-          <p className="lede" style={{ marginBottom: 6 }}>
-            {service?.name} at {businessName}
-          </p>
-          <p className="small">
-            {slot && `${formatDateInZone(new Date(slot), timezone)} at ${formatTimeInZone(new Date(slot), timezone)}`}
-            {service &&
-              ` · ${service.duration_minutes} min${formatServicePrice(service) ? ` · ${formatServicePrice(service)}` : ""}`}
-          </p>
-          <p className="small">
-            {form.name} · {formatPhone(form.phone)} · {form.email}
-          </p>
-          {isDemo ? (
-            <p className="small">
-              This is the demo — nothing will be booked or sent. On the next
-              screen you&apos;ll see a sample confirmation and the exact
-              reminder texts your customer would get.
-            </p>
-          ) : (
-            <p className="small">
-              You&apos;ll get a confirmation, then a text and email 24 hours and 2 hours
-              before (when the booking is made far enough ahead) — each with a
-              link to reschedule or cancel.
-            </p>
-          )}
-          <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-            <button className="btn" onClick={() => setStep(3)}>Back</button>
-            <button className="btn btn-primary" style={{ flex: 1 }} disabled={busy} onClick={confirm}>
-              {busy ? "Booking…" : isDemo ? "See sample confirmation" : "Confirm booking"}
-            </button>
+        <>
+          <div className="card">
+            <h2>Review</h2>
+            <div className="c3-review">
+              <div className="c3-review-row">
+                <span>Service</span>
+                <strong>{service?.name}</strong>
+              </div>
+              <div className="c3-review-row">
+                <span>When</span>
+                <strong>{reviewWhen}</strong>
+              </div>
+              <div className="c3-review-row">
+                <span>With</span>
+                <strong>{person?.name ?? "First available"}</strong>
+              </div>
+              <div className="c3-review-row">
+                <span>Where</span>
+                <strong>{businessAddress || visitTypeLabel(service?.visit_type)}</strong>
+              </div>
+              <div className="c3-review-row">
+                <span>Price</span>
+                <strong>{price || "—"}</strong>
+              </div>
+              <div className="c3-review-row">
+                <span>You</span>
+                <strong>
+                  {form.name} · {formatPhone(form.phone)} · {form.email}
+                </strong>
+              </div>
+            </div>
+            {form.notes.trim() ? (
+              <div className="c3-note-box">
+                <div className="c3-note-head">
+                  <span>Your note</span>
+                  <button type="button" className="c3-underlink" onClick={() => setStep(3)}>
+                    Edit note
+                  </button>
+                </div>
+                <p style={{ margin: 0 }}>{form.notes}</p>
+              </div>
+            ) : (
+              <p className="small" style={{ margin: "12px 0 0" }}>
+                No note for the office.{" "}
+                <button type="button" className="c3-underlink" onClick={() => setStep(3)}>
+                  Add a note
+                </button>
+              </p>
+            )}
+            {isDemo ? (
+              <p className="small" style={{ marginTop: 14 }}>
+                This is the demo — nothing will be booked or sent. On the next
+                screen you&apos;ll see a sample confirmation and the exact
+                reminder texts your customer would get.
+              </p>
+            ) : (
+              <>
+                <p className="small" style={{ marginTop: 14 }}>
+                  We&apos;ll email a confirmation now, then reminders 24 hours and 2 hours
+                  before, when the booking is made far enough ahead — each with a
+                  link to reschedule or cancel.
+                </p>
+                {cancelNote && <p className="small">{cancelNote}</p>}
+                <p style={{ margin: "10px 0 0", fontWeight: 600 }}>
+                  Nothing to pay online — you pay at the office.
+                </p>
+              </>
+            )}
           </div>
-        </div>
+          {actions}
+        </>
       )}
 
       {demoMode && step < 5 && (

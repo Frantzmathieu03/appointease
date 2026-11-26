@@ -8,6 +8,7 @@ import { formatPhone } from "@/lib/types";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import ReviewForm from "@/components/ReviewForm";
 import ThreadView from "@/components/ThreadView";
+import AddToCalendar from "@/components/AddToCalendar";
 
 interface ApptRow {
   id: string;
@@ -16,7 +17,20 @@ interface ApptRow {
   manage_token: string;
   confirmation_code: string | null;
   service_id: string;
+  staff_id: string | null;
   services: { name: string } | null;
+}
+
+function icsStamp(d: Date): string {
+  return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+}
+
+function tzAbbrev(d: Date, tz: string): string {
+  return (
+    new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
+      .formatToParts(d)
+      .find((p) => p.type === "timeZoneName")?.value ?? ""
+  );
 }
 
 // The customer's dashboard AT ONE BUSINESS (per-business account
@@ -27,6 +41,13 @@ interface ApptRow {
 // message thread with this business. Nothing from any other business
 // can appear: the queries filter by this business_id throughout, and
 // RLS underneath only ever returns this customer's own rows.
+//
+// Customer Side Plan (Frantz, 2026-11-26): the page leads with the
+// customer's own name ("Hi, <first name>"), their person at the
+// business when they have one, the next appointment on a dark green
+// card, four big buttons (Book new / Message / Call office / Upload
+// files), the real conversation embedded, and their history with
+// statuses and shared summaries.
 export default async function BusinessCustomerDashboard({
   params,
 }: {
@@ -84,13 +105,57 @@ export default async function BusinessCustomerDashboard({
     (meta.full_name as string) ||
     (meta.name as string) ||
     "";
-  const heading =
-    customerName || profile?.email || user.email || "My dashboard";
+  const firstName = customerName ? customerName.split(/\s+/)[0] : "";
+  const heading = firstName
+    ? `Hi, ${firstName}`
+    : customerName || profile?.email || user.email || "My dashboard";
+
+  // Their person at this business (the membership's assignment).
+  // Feature-safe: the column arrives with migration 0010 and the read
+  // simply comes back empty before it.
+  let assignedStaffId: string | null = null;
+  try {
+    const { data: rel } = await supabase
+      .from("business_customers")
+      .select("assigned_staff_id")
+      .eq("business_id", business.id)
+      .eq("customer_id", user.id)
+      .maybeSingle();
+    assignedStaffId =
+      (rel as { assigned_staff_id: string | null } | null)?.assigned_staff_id ?? null;
+  } catch {
+    assignedStaffId = null;
+  }
+  const staffNameById = new Map(page.staff.map((s) => [s.id, s.name]));
+  const assignedName = assignedStaffId ? staffNameById.get(assignedStaffId) : undefined;
+  const assignedLine = assignedName
+    ? business.category === "law-offices"
+      ? `Your attorney: ${assignedName}`
+      : `Your person here: ${assignedName}`
+    : null;
+  const signatureName = assignedName
+    ? assignedName.split(/\s+/)[0]
+    : business.name;
+
+  // Unread business messages, for the Message button's red badge.
+  let unread = 0;
+  try {
+    const { count } = await supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", business.id)
+      .eq("customer_id", user.id)
+      .eq("sender", "business")
+      .is("read_at", null);
+    unread = count ?? 0;
+  } catch {
+    unread = 0;
+  }
 
   const { data } = await supabase
     .from("appointments")
     .select(
-      "id, starts_at, status, manage_token, confirmation_code, service_id, services:service_id ( name )"
+      "id, starts_at, status, manage_token, confirmation_code, service_id, staff_id, services:service_id ( name )"
     )
     .eq("business_id", business.id)
     .eq("customer_id", user.id)
@@ -130,6 +195,12 @@ export default async function BusinessCustomerDashboard({
       // Name display is additive — never break the dashboard.
     }
   }
+  const serviceName = (a: ApptRow) =>
+    a.services?.name ?? serviceNameById.get(a.service_id) ?? "Appointment";
+  const withName = (a: ApptRow) =>
+    (a.staff_id && staffNameById.get(a.staff_id)) || "First available";
+  const durationOf = (a: ApptRow) =>
+    page.services.find((s) => s.id === a.service_id)?.duration_minutes ?? 30;
 
   // Intake forms for this business's appointments (same pattern as
   // My Appointments; degrades to empty if anything is unavailable).
@@ -239,16 +310,55 @@ export default async function BusinessCustomerDashboard({
     a.status === "confirmed" && new Date(a.starts_at).getTime() >= now;
   const upcoming = appts.filter(isUpcoming);
   const past = appts.filter((a) => !isUpcoming(a)).reverse();
+  const next = upcoming[0];
+  const later = upcoming.slice(1);
 
-  const card = (a: ApptRow) => (
+  // The Upload files button exists only when a form exists for this
+  // customer — it points at the soonest appointment whose form is
+  // still open (an upcoming one first).
+  const formTarget =
+    [...upcoming, ...past].find(
+      (a) => intakeByAppt.has(a.id) && !intakeByAppt.get(a.id)!.submitted
+    ) ?? [...upcoming, ...past].find((a) => intakeByAppt.has(a.id));
+
+  const calendarFor = (a: ApptRow) => {
+    const start = new Date(a.starts_at);
+    const end = new Date(start.getTime() + durationOf(a) * 60000);
+    const title = `${serviceName(a)} at ${business.name}`;
+    return {
+      googleUrl:
+        "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+        `&text=${encodeURIComponent(title)}` +
+        `&dates=${icsStamp(start)}/${icsStamp(end)}` +
+        (business.address ? `&location=${encodeURIComponent(business.address)}` : ""),
+      icsHref: `data:text/calendar;charset=utf8,${encodeURIComponent(
+        "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\n" +
+          `DTSTART:${icsStamp(start)}\r\nDTEND:${icsStamp(end)}\r\n` +
+          `SUMMARY:${title.replace(/[\r\n]/g, " ")}\r\n` +
+          (business.address ? `LOCATION:${business.address.replace(/[\r\n]/g, " ")}\r\n` : "") +
+          "END:VEVENT\r\nEND:VCALENDAR"
+      )}`,
+      outlookUrl:
+        "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent" +
+        `&subject=${encodeURIComponent(title)}` +
+        `&startdt=${encodeURIComponent(start.toISOString())}` +
+        `&enddt=${encodeURIComponent(end.toISOString())}` +
+        (business.address ? `&location=${encodeURIComponent(business.address)}` : ""),
+    };
+  };
+
+  const statusWord = (a: ApptRow) =>
+    a.status === "no_show"
+      ? "No-show"
+      : a.status.replace("_", " ").replace(/^\w/, (c) => c.toUpperCase());
+
+  const laterCard = (a: ApptRow) => (
     <div className="card" key={a.id}>
-      <h3 style={{ marginTop: 0 }}>
-        {a.services?.name ?? serviceNameById.get(a.service_id) ?? "Appointment"}
-      </h3>
+      <h3 style={{ marginTop: 0 }}>{serviceName(a)}</h3>
       <p className="small" style={{ margin: "2px 0 10px" }}>
         {formatDateInZone(new Date(a.starts_at), tz)} at {formatTimeInZone(new Date(a.starts_at), tz)}
+        {" · "}with {withName(a)}
         {business.address ? ` · ${business.address}` : ""}
-        {a.status !== "confirmed" ? ` · ${a.status.replace("_", " ")}` : ""}
         {a.confirmation_code ? (
           <>
             <br />
@@ -256,36 +366,9 @@ export default async function BusinessCustomerDashboard({
           </>
         ) : null}
       </p>
-      {sharedByAppt.get(a.id)?.shared_summary && (
-        <div style={{ margin: "0 0 10px" }}>
-          <p className="small" style={{ margin: "2px 0" }}>
-            <strong>Visit summary from {business.name}:</strong>{" "}
-            {sharedByAppt.get(a.id)!.shared_summary}
-          </p>
-          {sharedByAppt.get(a.id)!.steps.length > 0 && (
-            <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
-              {sharedByAppt.get(a.id)!.steps.map((s) => (
-                <li
-                  key={s.id}
-                  className="small"
-                  style={{ textDecoration: s.done_at ? "line-through" : "none" }}
-                >
-                  {s.text}
-                  {s.due_date ? ` · by ${s.due_date}` : ""}
-                  {s.done_at ? " · done" : ""}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {a.status === "confirmed" && new Date(a.starts_at).getTime() >= now && (
-          <>
-            <Link href={`/manage/${a.manage_token}`} className="btn">Reschedule</Link>
-            <Link href={`/manage/${a.manage_token}`} className="btn">Cancel</Link>
-          </>
-        )}
+        <Link href={`/manage/${a.manage_token}`} className="btn">Reschedule</Link>
+        <Link href={`/manage/${a.manage_token}`} className="btn">Cancel</Link>
         {intakeByAppt.has(a.id) &&
           (intakeByAppt.get(a.id)!.submitted ? (
             <span className="btn" aria-disabled="true" style={{ opacity: 0.75 }}>
@@ -297,56 +380,168 @@ export default async function BusinessCustomerDashboard({
             </Link>
           ))}
       </div>
-      {a.status !== "confirmed" || new Date(a.starts_at).getTime() < now
-        ? !reviewed.has(a.id) && a.status !== "cancelled"
-          ? <ReviewForm appointmentId={a.id} />
-          : null
-        : null}
     </div>
   );
 
+  const historyEntry = (a: ApptRow) => {
+    const shared = sharedByAppt.get(a.id);
+    const d = new Date(a.starts_at);
+    return (
+      <div className="card c3-history-entry" key={a.id}>
+        <p className="c3-history-title">
+          {new Intl.DateTimeFormat("en-US", { timeZone: tz, month: "short", day: "numeric" }).format(d)}
+          {" · "}
+          {serviceName(a)}
+        </p>
+        <p className={`c3-history-status st-${a.status}`}>
+          {statusWord(a)}
+          {" · "}
+          {formatTimeInZone(d, tz)} · with {withName(a)}
+        </p>
+        {shared?.shared_summary && (
+          <details className="c3-summary">
+            <summary>View summary</summary>
+            <p className="small" style={{ margin: "8px 0 0" }}>
+              <strong>Visit summary from {business.name}:</strong> {shared.shared_summary}
+            </p>
+            {shared.steps.length > 0 && (
+              <ul style={{ margin: "6px 0 0", paddingLeft: 18, textAlign: "left" }}>
+                {shared.steps.map((s) => (
+                  <li
+                    key={s.id}
+                    className="small"
+                    style={{ textDecoration: s.done_at ? "line-through" : "none" }}
+                  >
+                    {s.text}
+                    {s.due_date ? ` · by ${s.due_date}` : ""}
+                    {s.done_at ? " · done" : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </details>
+        )}
+        {intakeByAppt.has(a.id) && (
+          <div style={{ marginTop: 10 }}>
+            {intakeByAppt.get(a.id)!.submitted ? (
+              <span className="small">✓ Form sent</span>
+            ) : (
+              <Link href={`/manage/${a.manage_token}/form`} className="c3-underlink">
+                Fill in the form
+              </Link>
+            )}
+          </div>
+        )}
+        {a.status !== "cancelled" && !reviewed.has(a.id) ? (
+          <ReviewForm appointmentId={a.id} />
+        ) : null}
+      </div>
+    );
+  };
+
   return (
     <main className="column">
-      <p className="eyebrow">{business.name}</p>
-      <h1 style={{ fontSize: 28, marginBottom: 4 }}>{heading}</h1>
-      <p className="small" style={{ margin: "0 0 16px" }}>
-        Your appointments, messages and history at {business.name} — all
-        in one place.
-        {business.phone ? <> Questions? Call {formatPhone(business.phone)}.</> : null}
-      </p>
-
-      <div style={{ marginBottom: 16 }}>
-        <Link href={`/${slug}/book`} className="btn btn-primary btn-block" style={{ textAlign: "center" }}>
-          Book appointment
-        </Link>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{ fontSize: 28, marginBottom: 4 }}>{heading}</h1>
+          <p className="small" style={{ margin: "0 0 4px" }}>
+            Your appointments, messages and history at {business.name} — all
+            in one place.
+          </p>
+          {assignedLine && (
+            <p style={{ margin: "0 0 4px", fontWeight: 600 }}>{assignedLine}</p>
+          )}
+        </div>
+        <form action="/auth/signout" method="post" style={{ flex: "0 0 auto" }}>
+          <button className="c3-underlink" type="submit" style={{ fontSize: 15, whiteSpace: "nowrap" }}>
+            Log out
+          </button>
+        </form>
       </div>
 
-      <h2 style={{ marginTop: 10 }}>Upcoming</h2>
-      {upcoming.length === 0 && (
-        <div className="card">
-          <p className="lede" style={{ marginBottom: 0 }}>
-            Nothing coming up at {business.name} yet. Book your first
-            visit above.
+      {next ? (
+        <div className="c3-next">
+          <p className="c3-next-label">Next appointment</p>
+          <p className="c3-next-when">
+            {formatDateInZone(new Date(next.starts_at), tz)} ·{" "}
+            {formatTimeInZone(new Date(next.starts_at), tz)} {tzAbbrev(new Date(next.starts_at), tz)}
           </p>
+          <p className="c3-next-meta">
+            {serviceName(next)} · with {withName(next)}
+            {business.address ? ` · ${business.address}` : ""}
+          </p>
+          {next.confirmation_code && (
+            <p className="c3-next-meta">Confirmation {next.confirmation_code}</p>
+          )}
+          <div className="c3-next-actions">
+            <Link href={`/manage/${next.manage_token}`} className="btn c3-btn-white">
+              Reschedule
+            </Link>
+            <Link href={`/manage/${next.manage_token}`} className="btn c3-btn-ghostw">
+              Cancel
+            </Link>
+            <AddToCalendar dark {...calendarFor(next)} />
+          </div>
+        </div>
+      ) : (
+        <div className="c3-next center">
+          <p className="c3-next-when" style={{ fontSize: 21 }}>No upcoming appointments</p>
+          <p className="c3-next-meta">When you book with {business.name}, it shows up here.</p>
+          <div className="c3-next-actions" style={{ justifyContent: "center" }}>
+            <Link href={`/${slug}/book`} className="btn c3-btn-white">
+              Book now
+            </Link>
+          </div>
         </div>
       )}
-      {upcoming.map(card)}
 
-      {past.length > 0 && (
+      <div className="c3-grid">
+        <Link href={`/${slug}/book`} className="c3-big-btn">
+          <span className="c3-big-btn-label">Book new</span>
+          <span className="c3-big-btn-sub">Pick a service and time</span>
+        </Link>
+        <a href="#messages" className="c3-big-btn">
+          <span className="c3-big-btn-label">Message</span>
+          <span className="c3-big-btn-sub">Talk to {business.name}</span>
+          {unread > 0 && <span className="c3-badge-dot">{unread}</span>}
+        </a>
+        {business.phone && (
+          <a href={`tel:${business.phone}`} className="c3-big-btn">
+            <span className="c3-big-btn-label">Call office</span>
+            <span className="c3-big-btn-sub">{formatPhone(business.phone)}</span>
+          </a>
+        )}
+        {formTarget && (
+          <Link href={`/manage/${formTarget.manage_token}/form`} className="c3-big-btn">
+            <span className="c3-big-btn-label">Upload files</span>
+            <span className="c3-big-btn-sub">{intakeByAppt.get(formTarget.id)!.formName}</span>
+          </Link>
+        )}
+      </div>
+
+      {later.length > 0 && (
         <>
-          <h2 style={{ marginTop: 22 }}>Your history here</h2>
-          {past.map(card)}
+          <h2 style={{ marginTop: 22 }}>Also coming up</h2>
+          {later.map(laterCard)}
         </>
       )}
 
-      <h2 style={{ marginTop: 22 }}>Messages</h2>
+      <h2 id="messages" style={{ marginTop: 22 }}>Messages</h2>
       <div className="card">
-        <ThreadView businessId={business.id} customerId={user.id} viewer="customer" />
+        <ThreadView
+          businessId={business.id}
+          customerId={user.id}
+          viewer="customer"
+          signatureName={signatureName}
+        />
       </div>
 
-      <form action="/auth/signout" method="post" style={{ textAlign: "center", marginTop: 18 }}>
-        <button className="btn" type="submit">Sign out</button>
-      </form>
+      {past.length > 0 && (
+        <>
+          <h2 style={{ marginTop: 22 }}>My history</h2>
+          {past.map(historyEntry)}
+        </>
+      )}
     </main>
   );
 }

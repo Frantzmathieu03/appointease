@@ -1715,3 +1715,271 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .d2-svc-chip.sel { background: #e1f2e6; border-color: #1e4d33; color: #1e4d33; }
 .d2-editbox { border-top: 1px solid #eef2ee; margin-top: 12px; padding-top: 12px; width: 100%; }
+
+/* ================================================================
+   Customer Side Plan (Frantz, 2026-11-26) — Phase 3. Classes are
+   prefixed .c3- and used by the customer surfaces: the per-business
+   sign up / log in screen, My dashboard, the booking flow, and the
+   reschedule / cancel screens. Same family as the business page
+   plan: Inter (inherited on /[slug] pages), cards white with a
+   #DCE4DD border and 16px corners, main green #1E4D33, big buttons.
+   ================================================================ */
+
+/* White outlined Google button for customer auth surfaces (the
+   plan's picture: white, bordered, dark text — the owner signup
+   keeps its green treatment). */
+.btn-google-white {
+  background: #fff; border: 1px solid #c9d4ca; color: #16221b;
+  height: 52px; min-height: 52px; font-size: 16px;
+}
+.btn-google-white:hover { background: #f4f8f4; }
+.btn-google-white .g-badge { background: transparent; }
+
+.c3-backlink {
+  display: inline-block; color: #16221b; text-decoration: none;
+  font-weight: 600; font-size: 15px; padding: 6px 0;
+}
+.c3-underlink {
+  background: none; border: none; padding: 0; font: inherit;
+  color: #1e4d33; font-weight: 600; text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Sign up / log in screen. */
+.c3-auth-logo {
+  width: 76px; height: 76px; border-radius: 50%; object-fit: cover;
+  border: 1px solid #dce4dd; background: #fff;
+  display: inline-block;
+}
+.c3-auth-initial {
+  display: inline-grid; place-items: center;
+  background: #1e4d33; color: #fff; font-size: 32px; font-weight: 700;
+}
+.c3-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 0; color: #5b6b61; font-size: 13px;
+}
+.c3-divider::before, .c3-divider::after {
+  content: ""; flex: 1; height: 1px; background: #dce4dd;
+}
+.c3-consent {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin: 2px 0 16px; font-size: 14px; line-height: 1.45;
+  cursor: pointer;
+}
+.c3-consent input {
+  width: 20px; height: 20px; flex: 0 0 auto; margin-top: 1px;
+  accent-color: #1e4d33;
+}
+
+/* Booking flow progress: 4 segment bars. */
+.c3-progress { display: flex; gap: 6px; margin: 4px 0 8px; }
+.c3-seg { flex: 1; height: 5px; border-radius: 999px; background: #dce4dd; }
+.c3-seg.on { background: #1e4d33; }
+
+/* Sticky bottom action bar for flow screens. */
+.c3-actions {
+  position: sticky; bottom: 12px; z-index: 5;
+  display: flex; gap: 8px; margin-top: 14px;
+  background: #fff; border: 1px solid #dce4dd; border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(22, 34, 27, 0.10);
+  padding: 10px;
+}
+.c3-actions .btn { min-height: 48px; }
+
+/* Step 1: selectable service cards + person cards. */
+.c3-service-list { display: flex; flex-direction: column; gap: 10px; }
+.c3-service-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; text-align: left; cursor: pointer; font-family: inherit;
+  background: #fff; border: 1.5px solid #dce4dd; border-radius: 14px;
+  padding: 14px 16px; min-height: 56px; color: #16221b;
+}
+.c3-service-card.sel { border-color: #1e4d33; background: #eef6ef; }
+.c3-service-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.c3-radio {
+  width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto;
+  border: 2px solid #c9d4ca; background: #fff;
+}
+.c3-radio.on {
+  border-color: #1e4d33; background: #1e4d33;
+  box-shadow: inset 0 0 0 4px #fff;
+}
+.c3-people { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.c3-person {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: #fff; border: 1.5px solid #dce4dd; border-radius: 14px;
+  padding: 12px 6px; cursor: pointer; font-family: inherit; color: #16221b;
+  min-height: 88px;
+}
+.c3-person.sel { border-color: #1e4d33; background: #eef6ef; }
+.c3-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #e1f2e6; color: #1e4d33;
+  display: grid; place-items: center;
+  font-size: 13px; font-weight: 700;
+}
+.c3-person-name { font-weight: 700; font-size: 13.5px; text-align: center; line-height: 1.25; }
+.c3-person-sub { font-size: 12px; color: #5b6b61; }
+
+/* Step 2: chosen summary + times grid. */
+.c3-chosen {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 14px;
+}
+.c3-times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.c3-times .slot { width: 100%; min-height: 44px; padding: 9px 4px; }
+
+/* Calendar day states (DatePicker dayStates): open days get a green
+   outline; closed / fully booked days are plain grey numbers; the
+   marked day (the appointment's current day) is dashed. */
+.cal-day.open { border-color: #1e4d33; color: #16221b; background: #fff; }
+.cal-day.closed {
+  opacity: 1; color: #a3b5a6; background: transparent;
+  border-color: transparent; font-weight: 400;
+}
+.cal-day.marked { border: 1.5px dashed #1e4d33; }
+.cal-day.selected { background: #1e4d33; color: #fff; border-color: #1e4d33; }
+.c3-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  font-size: 12.5px; color: #5b6b61; margin-top: 2px;
+}
+.c3-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.c3-legend-day {
+  display: inline-grid; place-items: center;
+  width: 22px; height: 22px; border-radius: 7px;
+  font-size: 12px; color: #a3b5a6;
+}
+.c3-legend-day.open { border: 1.5px solid #1e4d33; color: #16221b; font-weight: 600; }
+
+/* Review rows + note box. */
+.c3-review { display: flex; flex-direction: column; }
+.c3-review-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 16px; padding: 9px 0; border-bottom: 1px solid #edf1ed;
+}
+.c3-review-row:last-child { border-bottom: none; }
+.c3-review-row > span { color: #5b6b61; font-size: 14px; flex: 0 0 auto; }
+.c3-review-row > strong { text-align: right; font-size: 14.5px; }
+.c3-note-box {
+  background: #f3f6f1; border-radius: 12px; padding: 12px 14px;
+  margin-top: 14px; font-size: 14.5px;
+}
+.c3-note-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px; font-size: 12.5px; font-weight: 700;
+  color: #5b6b61; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.c3-note-head .c3-underlink { text-transform: none; letter-spacing: 0; font-size: 13.5px; }
+
+/* Confirmation / appointment cards. */
+.c3-check {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: #e1f2e6; color: #1e6b3a;
+  display: grid; place-items: center;
+  font-size: 36px; font-weight: 700; margin: 4px auto 0;
+}
+.c3-check.grey { background: #edf0ed; color: #5b6b61; }
+.c3-appt-card {
+  background: #f8faf8; border: 1px solid #dce4dd; border-radius: 14px;
+  padding: 16px; margin-top: 14px; text-align: center;
+}
+.c3-appt-label {
+  margin: 0 0 4px; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: #1e6b3a;
+}
+.c3-appt-when { margin: 0; font-size: 21px; font-weight: 700; color: #16221b; }
+.c3-appt-meta { margin: 4px 0 0; font-size: 14px; color: #5b6b61; }
+.strike { text-decoration: line-through; }
+.c3-moved-line { font-size: 16px; margin: 10px 0 0; color: #5b6b61; }
+
+/* My dashboard: dark green next-appointment card + 2×2 buttons. */
+.c3-next {
+  background: #1e4d33; color: #fff; border-radius: 16px;
+  padding: 20px; margin: 14px 0;
+}
+.c3-next-label {
+  margin: 0 0 6px; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: #bcd8c2;
+}
+.c3-next-when { margin: 0; font-size: 23px; font-weight: 700; line-height: 1.25; }
+.c3-next-meta { margin: 5px 0 0; font-size: 14.5px; color: #d7e8da; }
+.c3-next-actions {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
+  align-items: flex-start;
+}
+.c3-btn-white {
+  background: #fff; border-color: #fff; color: #1e4d33;
+}
+.c3-btn-white:hover { background: #eef6ef; }
+.c3-btn-ghostw {
+  background: transparent; border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #fff; font-family: inherit;
+}
+.c3-btn-ghostw:hover { background: rgba(255, 255, 255, 0.12); }
+.c3-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+.c3-big-btn {
+  position: relative; display: flex; flex-direction: column;
+  justify-content: center; gap: 2px; min-height: 76px;
+  background: #fff; border: 1px solid #dce4dd; border-radius: 16px;
+  padding: 14px 16px; text-decoration: none; color: #16221b;
+}
+.c3-big-btn-label { font-weight: 700; font-size: 16px; }
+.c3-big-btn-sub { font-size: 13px; color: #5b6b61; }
+.c3-badge-dot {
+  position: absolute; top: 10px; right: 10px;
+  min-width: 22px; height: 22px; padding: 0 6px;
+  border-radius: 999px; background: #b3261e; color: #fff;
+  display: grid; place-items: center;
+  font-size: 12.5px; font-weight: 800;
+}
+
+/* My history entries: centered, per the plan's picture. */
+.c3-history-entry { text-align: center; }
+.c3-history-title { margin: 0; font-weight: 700; font-size: 16px; }
+.c3-history-status { margin: 3px 0 0; font-size: 13.5px; color: #5b6b61; }
+.c3-history-status.st-completed { color: #1e6b3a; }
+.c3-history-status.st-confirmed { color: #2f5f8f; }
+.c3-history-status.st-cancelled { color: #5b6b61; }
+.c3-history-status.st-no_show { color: #9a6a1f; }
+.c3-summary { margin-top: 8px; }
+.c3-summary summary {
+  color: #1e4d33; font-weight: 600; font-size: 14px;
+  cursor: pointer; text-decoration: underline; list-style: none;
+}
+.c3-summary summary::-webkit-details-marker { display: none; }
+
+/* Message signature inside business bubbles (customer view). */
+.c3-sig { font-size: 12.5px; opacity: 0.75; margin-top: 4px; }
+
+/* Reschedule / cancel screens. */
+.c3-now {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border: 1px solid #dce4dd; border-radius: 999px;
+  padding: 10px 16px; margin-bottom: 14px; font-size: 14.5px;
+}
+.c3-now-label {
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #5b6b61;
+}
+.c3-newtime-strip {
+  background: #e1f2e6; color: #1e4d33; border-radius: 12px;
+  padding: 11px 14px; margin-top: 14px;
+  font-weight: 700; text-align: center; font-size: 15px;
+}
+.c3-policy {
+  background: #fdf3e3; border: 1px solid #f3ddba; border-radius: 12px;
+  padding: 14px 16px; margin-top: 14px; font-size: 14.5px; line-height: 1.5;
+}
+.c3-policy-head { margin: 0 0 4px; font-weight: 700; }
+.c3-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.c3-chip {
+  border: 1px solid #c9d4ca; background: #fff; border-radius: 999px;
+  padding: 9px 14px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; color: #16221b; min-height: 44px;
+}
+.c3-chip.sel { background: #1e4d33; border-color: #1e4d33; color: #fff; }
+.c3-btn-cancel {
+  background: #fff; border: 1.5px solid #b3261e; color: #b3261e;
+}
+.c3-btn-cancel:hover { background: #fdf1f0; }

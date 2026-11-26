@@ -32,6 +32,17 @@ export interface Business {
   subscription_status: string | null;
   subscription_current_period_end: string | null;
   billing_lapsed_at: string | null;
+  // Customer-side booking rules (migration 0016). Optional: rows
+  // fetched before the migration lands won't have them — the helpers
+  // below supply the defaults (no policy words, 12 / 24 hours).
+  /** The business's own cancellation words ("Late-cancellation note"
+      in Settings). Null/absent = the friendly standard note shows. */
+  cancellation_policy?: string | null;
+  /** Inside this many hours of the appointment, customers are asked
+      to call the office to reschedule instead of picking a time. */
+  reschedule_cutoff_hours?: number | null;
+  /** The business's free cancellation window, in hours. */
+  cancel_window_hours?: number | null;
 }
 
 export interface BusinessPhoto {
@@ -224,6 +235,44 @@ export interface BusinessCustomerRel {
   customer_id: string;
   assigned_staff_id: string | null;
   created_at: string;
+  /** When the customer ticked the texting consent box on this
+   *  business's sign-up screen (migration 0016). Optional: rows
+   *  fetched before the migration lands won't have it. */
+  sms_consent_at?: string | null;
+}
+
+// --- Customer-side booking rules (migration 0016) ---------------------------
+
+/** The friendly standard cancellation note, shown when the business
+ *  has not written its own words (revised Customer Side Plan,
+ *  Frantz 2026-11-26). Words only — nothing is ever charged. */
+export const DEFAULT_CANCEL_NOTE =
+  "Thanks for letting us know — please cancel at least 24 hours before when you can, so someone else can take this time. There's nothing to pay online.";
+
+/** The business's cancellation words, or null when it has none set
+ *  (callers then show DEFAULT_CANCEL_NOTE or omit the line). */
+export function businessCancelNote(b: {
+  cancellation_policy?: string | null;
+}): string | null {
+  const words = (b.cancellation_policy ?? "").trim();
+  return words ? words : null;
+}
+
+/** Reschedule cut-off in hours; 12 until the business changes it (or
+ *  before migration 0016 lands). */
+export function rescheduleCutoffHours(b: {
+  reschedule_cutoff_hours?: number | null;
+}): number {
+  const n = b.reschedule_cutoff_hours;
+  return typeof n === "number" && n >= 0 ? n : 12;
+}
+
+/** Free cancellation window in hours; 24 by default. */
+export function cancelWindowHours(b: {
+  cancel_window_hours?: number | null;
+}): number {
+  const n = b.cancel_window_hours;
+  return typeof n === "number" && n >= 0 ? n : 24;
 }
 
 export interface Message {

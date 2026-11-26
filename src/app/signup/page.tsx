@@ -1,54 +1,32 @@
 import SignupForm from "@/components/SignupForm";
+import CustomerAuth from "@/components/CustomerAuth";
 import BusinessContextHeader from "@/components/BusinessContextHeader";
-import { createServerSupabase } from "@/lib/supabase";
-import { isSupabaseConfigured } from "@/lib/supabase-config";
+import { businessAuthContext } from "@/lib/auth-context";
 
-// Same slug-from-next resolution as BusinessContextHeader: when the
-// customer arrived from a business's page (next=/<slug>/book), the
-// signup form names that business in its one short line. Anything
-// unexpected resolves to no name and the form uses its plain line.
-const RESERVED_SEGMENTS = new Set([
-  "login",
-  "signup",
-  "owner",
-  "explore",
-  "about",
-  "terms",
-  "privacy",
-  "contact",
-  "my-appointments",
-  "auth",
-]);
-
-async function businessNameForNext(next?: string): Promise<string | undefined> {
-  if (!next || !isSupabaseConfigured()) return undefined;
-  const segment = next.replace(/^\//, "").split("/")[0];
-  if (!segment || RESERVED_SEGMENTS.has(segment)) return undefined;
-  try {
-    const supabase = await createServerSupabase();
-    const { data } = await supabase
-      .from("businesses")
-      .select("name")
-      .eq("slug", segment)
-      .eq("published", true)
-      .maybeSingle();
-    return data?.name ?? undefined;
-  } catch {
-    return undefined;
-  }
-}
-
+// Customer sign-up. When the customer arrived from a business's own
+// pages (next=/<slug>/…), this is THAT business's sign up screen
+// (Customer Side Plan, Frantz 2026-11-26): its logo, its name, the
+// account-is-only-with-this-office line, and the texting consent
+// box. Without a business in the return path, the platform form
+// renders as before.
 export default async function SignupPage({
   searchParams,
 }: {
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
-  const businessName = await businessNameForNext(next);
+  const business = await businessAuthContext(next);
+  if (business && next) {
+    return (
+      <main className="column">
+        <CustomerAuth business={business} nextPath={next} initialMode="signup" />
+      </main>
+    );
+  }
   return (
     <main className="column">
       <BusinessContextHeader next={next} />
-      <SignupForm nextPath={next ?? "/my-appointments"} businessName={businessName} />
+      <SignupForm nextPath={next ?? "/my-appointments"} businessName={business?.name} />
     </main>
   );
 }
