@@ -69,9 +69,10 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Hero — one hero at every width. Text left, the current hero
-          video right in a rounded frame on desktop; stacked on phones.
-          The three floating notes show on desktop only. */}
+      {/* Hero — one hero at every width. Text centered, the current
+          hero video right in a rounded frame on desktop; stacked
+          centered on phones. The three floating notes show on
+          desktop only. */}
       <section className="hp-hero">
         <div className="mkt-container hp-hero-grid">
           <div className="hp-hero-copy">
