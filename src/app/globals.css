@@ -2053,3 +2053,10 @@ footer.site-footer { padding: 0; text-align: left; }
   .hp-ctas .btn { width: 100%; min-height: 52px; }
   .hp .section-head h2 { font-size: 25px; }
 }
+
+/* Phase 4 fixes: headline size wins over the generic .mkt h1 rule,
+   and every marketing/header button meets the 44px tap target. */
+.hp .hp-headline { font-size: 52px; }
+@media (max-width: 600px) { .hp .hp-headline { font-size: 36px; } }
+.mkt .btn, .site-header .btn { min-height: 44px; }
+.header-links .header-cta { min-height: 44px; }
