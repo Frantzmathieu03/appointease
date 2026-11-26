@@ -80,7 +80,7 @@ export default function OwnerSignupPage() {
       <p className="eyebrow">For businesses</p>
       <h1 style={{ fontSize: 30 }}>Create your booking page</h1>
       <p className="lede">
-        30 days free, no card required. Your page link is reserved the moment
+        14 days free, no card required. Your page link is reserved the moment
         you name your business.
       </p>
 

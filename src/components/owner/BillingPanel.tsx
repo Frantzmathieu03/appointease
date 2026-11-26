@@ -143,7 +143,10 @@ export default function BillingPanel(props: Props) {
                     {isCurrent ? " · your plan" : ""}
                   </strong>
                   <div className="small">
-                    Up to {staffLimitLabel(plan)} team members · {plan.blurb}
+                    {plan.staffLimit === 1
+                      ? "1 team member"
+                      : `Up to ${staffLimitLabel(plan)} team members`}{" "}
+                    · {plan.blurb}
                   </div>
                 </div>
                 <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>

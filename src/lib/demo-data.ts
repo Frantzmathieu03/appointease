@@ -2,6 +2,7 @@
 // Used only while NEXT_PUBLIC_SUPABASE_URL is still a placeholder, so the
 // public page and booking flow can be shown before the real project exists.
 import type { Availability, Business, Service, StaffMember } from "./types";
+import { TRIAL_DAYS } from "./plans";
 
 export const DEMO_BUSINESS: Business = {
   id: "22222222-2222-2222-2222-222222222222",
@@ -17,7 +18,7 @@ export const DEMO_BUSINESS: Business = {
   email: "owner@mainstreetbarber.example",
   timezone: "America/New_York",
   published: true,
-  trial_ends_at: new Date(Date.now() + 30 * 864e5).toISOString(),
+  trial_ends_at: new Date(Date.now() + TRIAL_DAYS * 864e5).toISOString(),
   created_at: new Date().toISOString(),
   plan: "solo",
   stripe_customer_id: null,

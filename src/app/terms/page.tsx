@@ -44,7 +44,7 @@ export default function TermsPage() {
 
       <h2>3. Subscriptions and the free trial</h2>
       <ul>
-        <li>Businesses subscribe to a paid plan based on team size. Every plan begins with a 30-day free trial; no payment card is required to start the trial.</li>
+        <li>Businesses subscribe to a paid plan based on team size. Every plan begins with a 14-day free trial; no payment card is required to start the trial.</li>
         <li>If a business does not subscribe when its trial ends, its public booking page pauses. Account data is not deleted, and the page goes live again when a subscription is active.</li>
         <li>Paid subscriptions renew monthly until cancelled. You can cancel at any time from your billing settings; cancellation takes effect at the end of the current billing period.</li>
         <li>Payments are processed by our payment provider. AppointEase does not store full payment card numbers.</li>

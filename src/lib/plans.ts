@@ -1,15 +1,22 @@
 // Subscription plans — the single source of truth for AppointEase pricing.
 // Owner decision (Frantz, 2026-11-24, FINAL): Solo $29.99/mo ·
-// Team $49.99/mo · Business $149.99/mo. 30-day free trial, no card
+// Team $49.99/mo · Business $149.99/mo. 14-day free trial, no card
 // upfront. Customers who book never pay anything — only businesses
 // subscribe.
-// Team-size bands updated 2026-11-26 (Frantz's Homepage Fix List,
-// MUST FIX #1): Solo up to 4 team members, Team up to 9, Business
-// unlimited (shown as "10+"). Prices did NOT change.
+// Team-size bands (Frantz, 2026-11-26, his own numbers — these
+// supersede the revised PDF's bands): Solo 1 · Team 5 · Business 15
+// people with a calendar, owner included, counted as active staff
+// calendars. Prices unchanged. At the cap, adding a person stops
+// with an upgrade prompt (see seatLimitMessage + the invite route).
+// Trial length: 14 days (Frantz, 2026-11-26 — was 30). New signups
+// only; existing businesses keep the trial_ends_at they already have.
 // Change prices HERE and every surface (settings UI, gating, checkout)
 // follows. Stripe price IDs live in env (see src/lib/stripe.ts).
 
 import type { Business } from "./types";
+
+/** Free trial length for NEW businesses, in days (Frantz, 2026-11-26). */
+export const TRIAL_DAYS = 14;
 
 export type PlanId = "solo" | "team" | "business";
 
@@ -28,10 +35,10 @@ export const PLANS: Plan[] = [
     id: "solo",
     name: "Solo",
     monthlyCents: 2999,
-    staffLimit: 4,
-    blurb: "For a small shop that runs on appointments.",
+    staffLimit: 1,
+    blurb: "For a one-person shop that runs on appointments.",
     features: [
-      "Up to 4 team members",
+      "1 team member",
       "Your own booking page & link",
       "Confirmation, 24-hour & 2-hour reminders — by text and email (when the booking is made far enough ahead)",
       "Two-way messaging with your customers",
@@ -41,10 +48,10 @@ export const PLANS: Plan[] = [
     id: "team",
     name: "Team",
     monthlyCents: 4999,
-    staffLimit: 9,
-    blurb: "For a growing team sharing one booking page.",
+    staffLimit: 5,
+    blurb: "For a small team sharing one booking page.",
     features: [
-      "Up to 9 team members",
+      "Up to 5 team members",
       "Everything in Solo + client assignment and roles",
     ],
   },
@@ -52,18 +59,36 @@ export const PLANS: Plan[] = [
     id: "business",
     name: "Business",
     monthlyCents: 14999,
-    staffLimit: Number.POSITIVE_INFINITY,
-    blurb: "For bigger teams that need room to grow and faster support.",
+    staffLimit: 15,
+    blurb: "For bigger teams that need more calendars and faster support.",
     features: [
-      "10+ team members",
+      "Up to 15 team members",
       "Everything in Team + priority support",
     ],
   },
 ];
 
-/** The team-size label for plan cards: "4", "9", or "10+" (unlimited). */
+/** The team-size label for plan cards: "1", "5", or "15". */
 export function staffLimitLabel(plan: Plan): string {
-  return Number.isFinite(plan.staffLimit) ? String(plan.staffLimit) : "10+";
+  return String(plan.staffLimit);
+}
+
+/** The next plan up, or null on the top plan. */
+export function nextPlan(plan: Plan): Plan | null {
+  const idx = PLANS.findIndex((p) => p.id === plan.id);
+  return idx >= 0 && idx < PLANS.length - 1 ? PLANS[idx + 1] : null;
+}
+
+/**
+ * The at-the-cap sentence (Frantz's wording, 2026-11-26): name the
+ * current plan's cover, then the upgrade — or, on Business, just the
+ * cover. Shown when adding a person would pass the plan's limit.
+ */
+export function seatLimitMessage(plan: Plan): string {
+  const cover = `Your ${plan.name} plan covers ${plan.staffLimit === 1 ? "1 team member" : `up to ${plan.staffLimit} team members`}.`;
+  const next = nextPlan(plan);
+  if (!next) return cover;
+  return `${cover} Upgrade to ${next.name} (${formatPlanPrice(next.monthlyCents)}/mo) to add more people.`;
 }
 
 export function planById(id: string | null | undefined): Plan {

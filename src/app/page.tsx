@@ -45,7 +45,7 @@ export default function HomePage() {
                 <Link href="/owner/signup" className="btn btn-primary btn-lg">Start free</Link>
                 <Link href="/main-street-barbers" className="btn btn-lg">See a live example</Link>
               </div>
-              <p className="hero-micro">30 days free · No card needed</p>
+              <p className="hero-micro">14 days free · No card needed</p>
             </div>
             <div className="hero-pills" aria-hidden="true">
               <div className="hero-pill">
@@ -77,7 +77,7 @@ export default function HomePage() {
               <Link href="/owner/signup" className="btn btn-primary btn-lg">Start free</Link>
               <Link href="/main-street-barbers" className="btn btn-lg">See a live example</Link>
             </div>
-            <p className="hero-micro">30 days free · No card needed</p>
+            <p className="hero-micro">14 days free · No card needed</p>
           </div>
           <div className="hero-media">
             <video autoPlay muted loop playsInline preload="auto" poster="/hero/hero-poster.jpg" aria-label="AppointEase in action — a client booking an appointment and a business owner checking the day's bookings">
@@ -589,7 +589,7 @@ export default function HomePage() {
               and keeps the phone quiet.
             </p>
             <Link href="/owner/signup" className="btn btn-primary btn-lg">Start free</Link>
-            <p className="cta-micro">30 days free · No card needed</p>
+            <p className="cta-micro">14 days free · No card needed</p>
             <p className="cta-micro">Questions? A human answers — by email, whenever you need help.</p>
           </div>
         </section>
@@ -599,7 +599,7 @@ export default function HomePage() {
           <div className="section-head">
             <p className="eyebrow">Pricing</p>
             <h2>Priced by the size of your team</h2>
-            <p className="lede">Every plan starts with a 30-day free trial. No card required.</p>
+            <p className="lede">Every plan starts with a 14-day free trial. No card required.</p>
           </div>
           <div className="pricing-grid">
             {PLANS.map((plan) => (
@@ -644,12 +644,10 @@ export default function HomePage() {
               </thead>
               <tbody>
                 <tr>
-                  <th scope="row">Team members</th>
+                  <th scope="row">Staff calendars</th>
                   {PLANS.map((plan) => (
                     <td key={plan.id}>
-                      {Number.isFinite(plan.staffLimit)
-                        ? `Up to ${staffLimitLabel(plan)}`
-                        : staffLimitLabel(plan)}
+                      {plan.staffLimit === 1 ? "1" : `Up to ${staffLimitLabel(plan)}`}
                     </td>
                   ))}
                 </tr>
@@ -711,7 +709,7 @@ export default function HomePage() {
             </details>
             <details className="faq-item">
               <summary>How does the free trial work?</summary>
-              <p>Every plan starts with 30 days free, no card required. If you don&apos;t subscribe when the trial ends, your page pauses — your data is never deleted.</p>
+              <p>Every plan starts with 14 days free, no card required. If you don&apos;t subscribe when the trial ends, your page pauses — your data is never deleted.</p>
             </details>
             <details className="faq-item">
               <summary>How do reminders work?</summary>
@@ -731,9 +729,9 @@ export default function HomePage() {
         {/* Final CTA */}
         <section className="cta-band">
           <h2>Your next customer is looking for a time.</h2>
-          <p>Give them a page where they can book it — free for 30 days.</p>
+          <p>Give them a page where they can book it — free for 14 days.</p>
           <Link href="/owner/signup" className="btn btn-white btn-lg">Start free</Link>
-          <p className="cta-micro cta-micro-light">30 days free · No card needed</p>
+          <p className="cta-micro cta-micro-light">14 days free · No card needed</p>
         </section>
       </div>
     </main>

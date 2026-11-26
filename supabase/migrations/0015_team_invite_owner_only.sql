@@ -1,5 +1,7 @@
--- AppointEase migration 0015 — team invites: name + owner-only invites
--- (Owner Dashboard Plan, Frantz 2026-11-26).
+-- AppointEase migration 0015 — Phase 2 follow-ups: team invite name +
+-- owner-only invites, the 'marked_paid' timeline type, and the
+-- 14-day trial default (Owner Dashboard Plan + revised PDFs,
+-- Frantz 2026-11-26).
 --
 -- Two changes, both in the team lane from migration 0011:
 --
@@ -39,6 +41,15 @@ alter table public.customer_events
     'assigned', 'note_added', 'profile_changed', 'marked_paid'
   ));
 
+-- 5. TRIAL LENGTH (Frantz, 2026-11-26): the free trial is 14 days,
+--    not 30. Changing the column DEFAULT only affects businesses
+--    created after this runs — existing rows keep the trial_ends_at
+--    they already have. The app also sets trial_ends_at explicitly
+--    at creation (CreateBusinessForm, TRIAL_DAYS in lib/plans.ts), so
+--    new signups get 14 days whether or not this has landed yet.
+alter table public.businesses
+  alter column trial_ends_at set default (now() + interval '14 days');
+
 alter table public.team_invites
   add column if not exists name text;
 
@@ -49,3 +60,43 @@ create policy team_invites_insert on public.team_invites
 drop policy if exists business_members_insert on public.business_members;
 create policy business_members_insert on public.business_members
   for insert with check (public.business_role(business_id) = 'owner');
+
+-- 6. SEAT LIMIT (Frantz, 2026-11-26): plans count people with a
+--    calendar — Solo 1 · Team 5 · Business 15, owner included (the
+--    active staff rows). The app stops an over-cap add first with
+--    the friendly upgrade prompt (invite route + StaffManager); this
+--    trigger is the database backstop so no insert path can pass the
+--    cap. The caps mirror src/lib/plans.ts — change both together.
+--    Existing rows are untouched: a business already over its cap
+--    keeps its calendars; only NEW adds stop.
+create or replace function public.enforce_staff_seat_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  lim int;
+  used int;
+begin
+  select case plan when 'team' then 5 when 'business' then 15 else 1 end
+    into lim
+    from public.businesses
+    where id = NEW.business_id;
+  if lim is null then
+    return NEW;
+  end if;
+  select count(*) into used
+    from public.staff
+    where business_id = NEW.business_id and active;
+  if used >= lim then
+    raise exception 'seat limit reached for this plan';
+  end if;
+  return NEW;
+end;
+$$;
+
+drop trigger if exists staff_seat_limit on public.staff;
+create trigger staff_seat_limit
+  before insert on public.staff
+  for each row execute function public.enforce_staff_seat_limit();

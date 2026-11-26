@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
+import { nextPlan, seatLimitMessage, type Plan } from "@/lib/plans";
 import type { BusinessMember, MemberRole, Service, StaffMember, TeamInvite } from "@/lib/types";
 
 /**
@@ -37,7 +38,8 @@ export default function TeamManager({
   ownerName,
   ownerEmail,
   siteUrl,
-  showGrowNote,
+  plan,
+  seatsUsed,
 }: {
   businessId: string;
   currentUserId: string;
@@ -52,12 +54,15 @@ export default function TeamManager({
   ownerName: string;
   ownerEmail: string | null;
   siteUrl: string;
-  /** At/over the plan's seat count: inviting still works; the plan
-   * simply grows (Frantz's revised Build Plan, 2026-11-26). */
-  showGrowNote?: boolean;
+  /** The business's plan + seats in use (active staff calendars).
+   * At the cap, a Staff invite stops with the upgrade prompt —
+   * here, and again on the server in /api/team/invite. */
+  plan: Plan;
+  seatsUsed: number;
 }) {
   const router = useRouter();
   const isOwner = role === "owner";
+  const atCap = seatsUsed >= plan.staffLimit;
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [inviteRole, setInviteRole] = useState<"manager" | "staff">("staff");
@@ -68,6 +73,7 @@ export default function TeamManager({
   const [lastLink, setLastLink] = useState("");
   const [copied, setCopied] = useState("");
   const [resending, setResending] = useState("");
+  const [limitHit, setLimitHit] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editRole, setEditRole] = useState<"manager" | "staff">("staff");
   const [editServices, setEditServices] = useState<Set<string>>(new Set());
@@ -108,7 +114,10 @@ export default function TeamManager({
         }),
       });
       const data = await res.json();
-      if (!res.ok) {
+      if (res.status === 409) {
+        // Seat limit: the add is stopped; show the upgrade prompt.
+        setLimitHit(true);
+      } else if (!res.ok) {
         setError(data.error ?? "Could not send the invite — please try again.");
       } else {
         setLastLink(data.link as string);
@@ -379,12 +388,6 @@ export default function TeamManager({
       {isOwner && (
         <div className="card" style={{ marginBottom: 0 }}>
           <h2 style={{ marginTop: 0 }}>Invite a team member</h2>
-          {showGrowNote && (
-            <p className="small" style={{ marginTop: 0 }}>
-              Your plan grows with your team — we&apos;ll let you know when
-              it&apos;s time to upgrade.
-            </p>
-          )}
           {error && <div className="error">{error}</div>}
           {success && (
             <div className="success">
@@ -467,9 +470,20 @@ export default function TeamManager({
                 </span>
               </div>
             )}
-            <button className="btn btn-primary btn-block" type="submit" disabled={busy || !contact.trim()}>
-              {busy ? "Sending…" : "Send invite"}
-            </button>
+            {(atCap && inviteRole === "staff") || limitHit ? (
+              <div className="notice">
+                <p style={{ margin: "0 0 10px" }}>{seatLimitMessage(plan)}</p>
+                {nextPlan(plan) && (
+                  <Link href="/owner/dashboard/billing" className="btn btn-primary">
+                    Go to Billing
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <button className="btn btn-primary btn-block" type="submit" disabled={busy || !contact.trim()}>
+                {busy ? "Sending…" : "Send invite"}
+              </button>
+            )}
           </form>
         </div>
       )}

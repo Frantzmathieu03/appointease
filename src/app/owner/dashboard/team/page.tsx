@@ -74,7 +74,10 @@ export default async function DashboardTeamPage() {
   }
 
   const plan = planById(business.plan);
-  const seatsUsed = 1 + members.length;
+  // Seats = people with a calendar, owner included: the active staff
+  // rows (the same count the Billing page shows). At the plan's cap,
+  // adding another calendar stops with the upgrade prompt.
+  const seatsUsed = staff.length;
   const ownerName =
     role === "owner"
       ? (((user.user_metadata?.full_name as string | undefined) ??
@@ -89,15 +92,7 @@ export default async function DashboardTeamPage() {
     <div>
       <h1 style={{ fontSize: 26, marginBottom: 2 }}>Team</h1>
       <p className="small" style={{ margin: "0 0 18px" }}>
-        {Number.isFinite(plan.staffLimit) ? (
-          <>
-            {seatsUsed} of {plan.staffLimit} seats used on the {plan.name} plan
-          </>
-        ) : (
-          <>
-            {seatsUsed} team member{seatsUsed === 1 ? "" : "s"} on the {plan.name} plan
-          </>
-        )}
+        {seatsUsed} of {plan.staffLimit} seats used on the {plan.name} plan
         {role === "owner" && (
           <>
             {" · "}
@@ -121,7 +116,8 @@ export default async function DashboardTeamPage() {
         ownerName={ownerName}
         ownerEmail={ownerEmail}
         siteUrl={siteUrl()}
-        showGrowNote={Number.isFinite(plan.staffLimit) && seatsUsed >= plan.staffLimit}
+        plan={plan}
+        seatsUsed={seatsUsed}
       />
       <div className="card" style={{ marginTop: 16 }}>
         <h2>Bookable staff calendars</h2>

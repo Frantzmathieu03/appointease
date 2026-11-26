@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireBusiness } from "@/lib/owner";
 import BillingPanel from "@/components/owner/BillingPanel";
-import { formatPlanPrice, getBillingState, planById, staffLimitLabel } from "@/lib/plans";
+import { formatPlanPrice, getBillingState, planById } from "@/lib/plans";
 import { isAnnualBillingConfigured, isBillingConfigured } from "@/lib/stripe";
 
 // Billing: the owner's own AppointEase subscription — the ONLY money
@@ -83,9 +83,8 @@ export default async function DashboardBillingPage() {
         <div className="card" style={{ margin: 0 }}>
           <p className="eyebrow">Team seats</p>
           <p className="lede" style={{ margin: "4px 0" }}>
-            {Number.isFinite(plan.staffLimit)
-              ? `${staffCount ?? 0} of ${plan.staffLimit} staff calendars used`
-              : `${staffCount ?? 0} staff calendars used · ${staffLimitLabel(plan)} on this plan, no cap`}
+            {staffCount ?? 0} of {plan.staffLimit} staff calendar
+            {plan.staffLimit === 1 ? "" : "s"} used
           </p>
           <p className="small" style={{ margin: 0 }}>
             {memberCount !== null

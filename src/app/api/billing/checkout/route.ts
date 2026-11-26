@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
   }
 
   const base = siteUrl();
-  // The app-level 30-day free trial runs first and needs no card; if the
+  // The app-level 14-day free trial runs first and needs no card; if the
   // owner subscribes mid-trial, Stripe waits until the trial ends to
   // charge — the owner is never double-charged for trial days.
   const trialEndSecs = Math.floor(new Date(business.trial_ends_at).getTime() / 1000);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireBusiness, siteUrl } from "@/lib/owner";
+import { planById, seatLimitMessage } from "@/lib/plans";
 import { sendEmail } from "@/lib/notify";
 
 // POST /api/team/invite — team invites (Owner Dashboard Plan,
@@ -113,12 +114,33 @@ export async function POST(req: NextRequest) {
     if (match) {
       staffId = match.id as string;
     } else {
+      // SEAT LIMIT (Frantz, 2026-11-26): a staff invite creates a new
+      // calendar, and calendars are what the plan counts (owner
+      // included). At the cap the add stops here — server-side, not
+      // just in the UI — with the upgrade prompt. Linking an existing
+      // calendar (the match above) adds no seat and stays allowed;
+      // manager invites carry no calendar and are not seat-capped.
+      const plan = planById(business.plan);
+      if ((existing ?? []).length >= plan.staffLimit) {
+        return NextResponse.json(
+          { error: seatLimitMessage(plan), seatLimit: true },
+          { status: 409 }
+        );
+      }
       const { data: created, error: staffErr } = await supabase
         .from("staff")
         .insert({ business_id: business.id, name })
         .select("id")
         .single();
       if (staffErr || !created) {
+        // The migration 0015 trigger says the same thing at the
+        // database level — surface it as the seat-limit prompt.
+        if (staffErr && /seat limit/i.test(staffErr.message)) {
+          return NextResponse.json(
+            { error: seatLimitMessage(planById(business.plan)), seatLimit: true },
+            { status: 409 }
+          );
+        }
         return NextResponse.json(
           { error: "Could not create their calendar — please try again." },
           { status: 500 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
+import { TRIAL_DAYS } from "@/lib/plans";
 import { slugify } from "@/lib/types";
 import { BUSINESS_TYPES } from "@/lib/owner-shared";
 import { CATEGORIES, DEFAULT_CATEGORY } from "@/lib/categories";
@@ -49,6 +50,10 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         address: address.trim() || null,
         description: description.trim() || null,
         email: user.email ?? null,
+        // 14-day free trial for new businesses (Frantz, 2026-11-26).
+        // Set explicitly so the length does not depend on the DB
+        // column default; migration 0015 moves the default to match.
+        trial_ends_at: new Date(Date.now() + TRIAL_DAYS * 864e5).toISOString(),
       });
       if (!error) {
         created = true;
