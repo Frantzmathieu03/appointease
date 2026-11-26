@@ -405,10 +405,14 @@ export interface PushSubscriptionRow {
 export function formatPhone(phone: string | null | undefined): string {
   if (!phone) return "";
   const digits = phone.replace(/\D/g, "");
-  const ten =
-    digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
-  if (ten.length !== 10) return phone;
-  return `${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`;
+  // 11 digits: keep every digit — leading digit separated, then the
+  // usual 3-3-4 grouping ("7 786-985-8449"). Display only; the stored
+  // value never changes.
+  if (digits.length === 11) {
+    return `${digits.slice(0, 1)} ${digits.slice(1, 4)}-${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length !== 10) return phone;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
 export function formatPrice(priceCents: number | null): string {

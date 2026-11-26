@@ -132,7 +132,7 @@ h3 { font-size: 16px; margin: 0 0 6px; }
   font-weight: 800; font-size: 17px; flex: 0 0 auto;
 }
 .biz-header-name {
-  font-weight: 700; font-size: 17px;
+  font-weight: 700; font-size: 17px; min-width: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .biz-header-actions { display: flex; align-items: center; gap: 14px; flex: 0 0 auto; }
@@ -931,8 +931,17 @@ footer.site-footer { padding: 0; text-align: left; }
    2-column category grid. */
 @media (max-width: 760px) {
   .site-header-wrap .site-header { flex-wrap: wrap; }
-  .header-links { gap: 16px; flex-wrap: wrap; width: 100%; justify-content: center; }
-  .header-links .header-cta { min-height: 44px; padding: 9px 14px; font-size: 14px; }
+  /* One tidy row of three pills under the logo (Frantz, 2026-11-26):
+     Pricing and Business sign-in wear the soft pill, Start free stays
+     the filled primary — all exactly 44px, centered as a group. */
+  .header-links { gap: 8px; flex-wrap: nowrap; width: 100%; justify-content: center; }
+  .header-links .header-link-text {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 44px; padding: 0 14px; border-radius: 999px;
+    background: #eef3ee; border: 1px solid #dce4dd;
+    font-weight: 600; white-space: nowrap;
+  }
+  .header-links .header-cta { height: 44px; min-height: 44px; padding: 0 16px; font-size: 14px; }
   .site-header { gap: 10px; }
   .filters-toggle { display: inline-flex; margin-top: 14px; }
   .explore-filters { display: none; }
@@ -2075,4 +2084,17 @@ footer.site-footer { padding: 0; text-align: left; }
 .signup-page .card h2 { margin-bottom: 16px; }
 @media (max-width: 600px) {
   .signup-page .card { padding: 22px 18px; }
+}
+
+/* Booking flow polish (Frantz, 2026-11-26): the business surfaces
+   (book / message / my, header + Powered line included) use the same
+   20px side margins as the business page, so nothing touches the
+   screen edges; the flow title and step line are centered. */
+.bizpage .column { padding-left: 20px; padding-right: 20px; }
+.c3-flow > h1 { text-align: center; }
+.c3-step-line { text-align: center; }
+@media (max-width: 480px) {
+  .biz-header { gap: 8px; }
+  .biz-header-actions { gap: 8px; }
+  .biz-header-btn { padding: 9px 12px; }
 }

@@ -71,7 +71,7 @@ export default async function BookPage({
       return (
         <main className="column">
           <p className="eyebrow">{page.business.name}</p>
-          <h1 style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
+          <h1 className="center" style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
           <AccountGate slug={slug} businessName={page.business.name} />
           <p className="small center" style={{ marginTop: 14 }}>
             <Link href={`/${slug}`}>← Back to {page.business.name}</Link>
@@ -98,7 +98,7 @@ export default async function BookPage({
       return (
         <main className="column">
           <p className="eyebrow">{business.name}</p>
-          <h1 style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
+          <h1 className="center" style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
           <JoinStep
             slug={slug}
             businessName={business.name}

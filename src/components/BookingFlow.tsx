@@ -614,7 +614,7 @@ export default function BookingFlow({
   );
 
   return (
-    <div>
+    <div className="c3-flow">
       <Link href={`/${slug}`} className="c3-backlink">
         ‹ {businessName}
       </Link>
@@ -624,7 +624,7 @@ export default function BookingFlow({
           <span key={n} className={n <= step ? "c3-seg on" : "c3-seg"} />
         ))}
       </div>
-      <p className="small" style={{ marginBottom: 16 }}>
+      <p className="small c3-step-line" style={{ marginBottom: 16 }}>
         Step {step} of 4 · {STEP_NAMES[step - 1]}
       </p>
       {isDemo && (
