@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getBusinessPageDataWithPreview, hoursSummary, openStatus } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
-import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import {
   ensureBusinessMembership,
   ensureCustomerProfile,
@@ -58,7 +58,39 @@ export default async function BusinessPage({
   const { slug } = await params;
   const { join } = await searchParams;
   const page = await getBusinessPageDataWithPreview(slug);
-  if (!page) notFound();
+  if (!page) {
+    // Join on return for an UNPUBLISHED business (Frantz, 2026-11-25):
+    // the preview above serves insiders only, so a brand-new customer
+    // returning from sign-up with the join marker is not a member yet
+    // and the fetch misses — the page must not 404 before the join can
+    // run. Look the business up by slug without the published filter
+    // (service-role, minimal fields; RLS hides the row from a new
+    // customer), and when it exists and the signed-in user is not the
+    // owner, join them and redirect to the clean page — which now
+    // renders for them as a member. A business that truly does not
+    // exist still 404s, signed-out returns still 404, and the owner
+    // never joins their own business.
+    if (join && !isDemoShop(slug) && isSupabaseConfigured()) {
+      const supabase = await createServerSupabase();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const admin = createAdminSupabase();
+        const { data: biz } = await admin
+          .from("businesses")
+          .select("id, owner_id")
+          .eq("slug", slug)
+          .maybeSingle();
+        if (biz && biz.owner_id !== user.id) {
+          await ensureCustomerProfile(supabase, user);
+          await ensureBusinessMembership(supabase, biz.id, user.id);
+          redirect(`/${slug}`);
+        }
+      }
+    }
+    notFound();
+  }
   const { business, services } = page;
   const tz = business.timezone;
   // A published business with no services yet is not bookable: the page

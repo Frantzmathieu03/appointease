@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBusinessPageData } from "@/lib/data";
+import { getBusinessPageDataWithPreview } from "@/lib/data";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { scheduleReminders } from "@/lib/reminders";
 import { getBillingState } from "@/lib/plans";
@@ -28,7 +28,14 @@ export async function POST(req: NextRequest) {
   if (!body) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   const { slug, serviceId, staffId, startsAt, name, phone, email, notes } = body;
 
-  const page = await getBusinessPageData(slug);
+  // Insider rule (Frantz, 2026-11-25): published businesses take
+  // bookings from anyone, as before; an UNPUBLISHED business can be
+  // booked only by insiders — the owner, active team members, and
+  // joined customers — so a new business can be tested end to end
+  // before it goes public. Everyone else gets the same 404 as a
+  // missing business. The billing gate and all other checks below
+  // still apply to insiders.
+  const page = await getBusinessPageDataWithPreview(slug);
   if (!page) return NextResponse.json({ error: "Business not found" }, { status: 404 });
   const service = page.services.find((s) => s.id === serviceId);
   if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });

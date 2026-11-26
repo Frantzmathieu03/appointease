@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBusinessPageData } from "@/lib/data";
+import { getBusinessPageDataWithPreview } from "@/lib/data";
 import { createAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { availableSlots, type BookedRange } from "@/lib/slots";
 
@@ -17,7 +17,11 @@ export async function GET(
     return NextResponse.json({ error: "serviceId and date are required" }, { status: 400 });
   }
 
-  const page = await getBusinessPageData(slug);
+  // Insider rule (Frantz, 2026-11-25): published businesses serve
+  // everyone; an UNPUBLISHED business serves slots only to insiders —
+  // the owner, active team members, and joined customers. Signed-out
+  // callers and non-members get the same 404 as a missing business.
+  const page = await getBusinessPageDataWithPreview(slug);
   if (!page) return NextResponse.json({ error: "Business not found" }, { status: 404 });
 
   const service = page.services.find((s) => s.id === serviceId);

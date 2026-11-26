@@ -1,6 +1,8 @@
 // Data access for public business pages — Supabase when configured,
 // demo data (mirroring supabase/seed.sql) while the project is a placeholder.
-import { createServerSupabase, isSupabaseConfigured } from "./supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "./supabase";
+import { isBusinessMember } from "./profile";
 import { DEMO_AVAILABILITY, DEMO_BUSINESS, DEMO_SERVICES, DEMO_STAFF } from "./demo-data";
 import type {
   Availability,
@@ -57,14 +59,26 @@ export async function getBusinessPageData(slug: string): Promise<BusinessPageDat
 }
 
 /**
- * Owner/staff preview of a business page (Frantz 2026-11-25): the
- * public lookup above only serves PUBLISHED businesses, so the
- * dashboard's "View booking page" landed the owner of an unpublished
- * business on a 404. The signed-in owner — and active team members —
- * can always preview their own page; everyone else (signed-out
- * visitors, other users) still gets null here and the route 404s,
- * exactly as before. The booking APIs keep using the published-only
- * lookup, so an unpublished business can never actually be booked.
+ * Insider view of a business page (Frantz 2026-11-25): "published"
+ * means visible to the PUBLIC. The public lookup above only serves
+ * published businesses — but the owner, active team members, and
+ * customers who have JOINED the business (a business_customers row)
+ * are insiders, not the public: they can view the business's pages
+ * and complete the customer journey (book, message, their dashboard)
+ * while it is still unpublished. That is how an owner tests a new
+ * business end to end before publishing it. Everyone else (signed-out
+ * visitors, signed-in non-members) still gets null here and the
+ * routes 404, exactly as before. The booking APIs resolve through
+ * this same helper, so the insider rule holds there too; every other
+ * API check (billing gate, staff restrictions, slot validity) is
+ * unchanged.
+ *
+ * RLS note: row-level security hides an unpublished business and its
+ * services/hours from joined customers, so the by-slug lookup runs on
+ * the service-role client and insider status is checked explicitly
+ * below before anything is served. A joined customer's page data is
+ * also assembled on the service-role client for the same reason; the
+ * owner and team keep reading through their own session, as before.
  */
 export async function getBusinessPageDataWithPreview(
   slug: string
@@ -79,27 +93,33 @@ export async function getBusinessPageDataWithPreview(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: business } = await supabase
+  const admin = createAdminSupabase();
+  const { data: business } = await admin
     .from("businesses")
     .select("*")
     .eq("slug", slug)
     .single();
   if (!business) return null;
-  if (business.owner_id !== user.id) {
-    const { data: member } = await supabase
-      .from("business_members")
-      .select("id")
-      .eq("business_id", business.id)
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .maybeSingle();
-    if (!member) return null;
+  if (business.owner_id === user.id) {
+    return assembleBusinessPageData(supabase, business as Business);
   }
-  return assembleBusinessPageData(supabase, business as Business);
+  const { data: teamMember } = await supabase
+    .from("business_members")
+    .select("id")
+    .eq("business_id", business.id)
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+  if (teamMember) {
+    return assembleBusinessPageData(supabase, business as Business);
+  }
+  const joined = await isBusinessMember(supabase, business.id, user.id);
+  if (!joined) return null;
+  return assembleBusinessPageData(admin, business as Business);
 }
 
 async function assembleBusinessPageData(
-  supabase: Awaited<ReturnType<typeof createServerSupabase>>,
+  supabase: SupabaseClient,
   business: Business
 ): Promise<BusinessPageData> {
   const [{ data: services }, { data: staff }, { data: availability }, { data: photos }] =
