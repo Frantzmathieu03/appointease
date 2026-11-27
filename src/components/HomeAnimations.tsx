@@ -59,9 +59,41 @@ export default function HomeAnimations() {
     );
     journeyEls.forEach((el) => journeyIO.observe(el));
 
+    // Count-up stats ([data-count]): the markup already carries the
+    // final value, so no-JS and reduced-motion visitors see the real
+    // number; everyone else gets a gentle count when it scrolls in.
+    const counters = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-count]")
+    );
+    let countIO: IntersectionObserver | null = null;
+    if (counters.length > 0) {
+      countIO = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            const el = entry.target as HTMLElement;
+            countIO?.unobserve(el);
+            const target = Number(el.dataset.count ?? "0");
+            if (!Number.isFinite(target) || target <= 0) continue;
+            const start = performance.now();
+            const tick = (now: number) => {
+              const t = Math.min(1, (now - start) / 1100);
+              const eased = 1 - Math.pow(1 - t, 3);
+              el.textContent = String(Math.round(target * eased));
+              if (t < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+          }
+        },
+        { threshold: 0.4 }
+      );
+      counters.forEach((el) => countIO?.observe(el));
+    }
+
     return () => {
       revealIO.disconnect();
       journeyIO.disconnect();
+      countIO?.disconnect();
     };
   }, []);
 

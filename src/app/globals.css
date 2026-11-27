@@ -1998,10 +1998,20 @@ footer.site-footer { padding: 0; text-align: left; }
    ========================================================================== */
 .hp { --hp-green: #1e4d33; --hp-bg: #f3f6f1; --hp-line: #dce4dd; --hp-ink: #16221b; --hp-muted: #5b6b61; }
 .hp-hero { background: var(--hp-bg); padding: 44px 0 52px; }
-.hp-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; }
+/* Hero layout: on desktop the copy reads as one centered block in
+   the left column (top = badge + headline, bottom = sub + buttons)
+   with the video in the right column. On phones the same areas stack
+   badge + headline, then the VIDEO, then the rest — so the film sits
+   right with the hero, never buried below the fold (Frantz,
+   2026-11-26: the video looked removed on his phone). */
+.hp-hero-grid {
+  display: grid; grid-template-columns: 1fr 1fr; column-gap: 44px; row-gap: 0;
+  grid-template-areas: "top media" "bottom media";
+}
 /* Hero copy is center aligned at every width (Frantz, 2026-11-26:
    "Make sure things are centered" — mobile friendly, app-like). */
-.hp-hero-copy { text-align: center; }
+.hp-hero-top { grid-area: top; align-self: end; text-align: center; }
+.hp-hero-bottom { grid-area: bottom; align-self: start; text-align: center; }
 .hp-badge {
   display: inline-block; background: #e1f2e6; color: #1e6b3a;
   font-size: 13.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; margin: 0 0 20px;
@@ -2012,7 +2022,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .hp .btn-primary { background: var(--hp-green); border-color: var(--hp-green); }
 .hp .btn-primary:hover { background: #173d28; }
 .hp-money-line { margin: 18px 0 0; font-size: 14.5px; font-weight: 600; color: var(--hp-green); }
-.hp-hero-media { position: relative; }
+.hp-hero-media { position: relative; grid-area: media; align-self: center; }
 .hp-hero-video {
   width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
   border-radius: 24px; box-shadow: 0 18px 48px rgba(22, 34, 27, 0.22); background: #0e2417;
@@ -2097,4 +2107,114 @@ footer.site-footer { padding: 0; text-align: left; }
   .biz-header { gap: 8px; }
   .biz-header-actions { gap: 8px; }
   .biz-header-btn { padding: 9px 12px; }
+}
+
+/* ==========================================================================
+   Homepage length + motion (Frantz, 2026-11-26 evening): the hero
+   video rides high on phones, a true-facts stat band, category cards
+   with people at work, the looping "day with AppointEase" phone
+   sequence, a people film, and the behind-the-counter strip. All
+   animation is CSS; prefers-reduced-motion gets the static version.
+   ========================================================================== */
+@media (max-width: 1023px) {
+  .hp-hero-grid { grid-template-areas: "top" "media" "bottom"; row-gap: 24px; }
+  .hp-hero-top, .hp-hero-bottom { align-self: auto; }
+}
+
+.hp-stats-section { padding-top: 34px; }
+.hp-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 20px;
+  padding: 26px 18px;
+}
+.hp-stat { text-align: center; padding: 4px 10px; }
+.hp-stat-num {
+  display: block; font-size: 42px; font-weight: 800; line-height: 1.05;
+  color: var(--hp-green); letter-spacing: -0.02em;
+}
+.hp-stat-label { display: block; margin-top: 6px; font-size: 13.5px; line-height: 1.45; color: var(--hp-muted); }
+@media (max-width: 700px) {
+  .hp-stats { grid-template-columns: 1fr 1fr; gap: 18px 8px; }
+  .hp-stat-num { font-size: 34px; }
+}
+
+.hp-cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.hp-cat-card {
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 16px;
+  overflow: hidden; text-align: center; padding-bottom: 16px;
+}
+.hp-cat-img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; margin-bottom: 14px; }
+.hp-cat-card h3 { font-size: 16.5px; font-weight: 700; color: var(--hp-ink); margin: 0 10px 6px; }
+.hp-cat-card p { margin: 0 14px; color: var(--hp-muted); font-size: 13.5px; line-height: 1.5; }
+@media (max-width: 900px) { .hp-cats { grid-template-columns: 1fr 1fr; } }
+
+.hp-day {
+  display: grid; grid-template-columns: 320px 1fr; gap: 40px;
+  align-items: center; max-width: 880px; margin: 0 auto;
+}
+.hp-phone {
+  width: 300px; margin: 0 auto; background: #fdfefd;
+  border: 10px solid #16221b; border-radius: 44px;
+  padding: 18px 16px 20px; box-shadow: 0 24px 54px rgba(22, 34, 27, 0.2);
+}
+.hp-phone-notch { width: 92px; height: 6px; border-radius: 3px; background: #d7ded7; margin: 0 auto 14px; }
+.hp-phone-head { text-align: center; font-weight: 700; font-size: 14.5px; color: var(--hp-ink); margin: 0 0 14px; }
+.hp-phone-foot { text-align: center; font-size: 12.5px; color: var(--hp-muted); margin: 14px 0 0; }
+.hp-day-stage { position: relative; height: 172px; }
+.hp-day-card {
+  position: absolute; top: 0; left: 0; width: 100%;
+  display: flex; gap: 9px; align-items: flex-start;
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(22, 34, 27, 0.12);
+  padding: 14px; font-size: 14px; line-height: 1.45; color: var(--hp-ink);
+  opacity: 0; animation: hpDayCard 12s ease-in-out infinite;
+}
+.hp-day-card strong { font-weight: 800; }
+.hp-day-card-2 { animation-delay: 4s; }
+.hp-day-card-3 { animation-delay: 8s; }
+@keyframes hpDayCard {
+  0% { opacity: 0; transform: translateY(14px); }
+  5% { opacity: 1; transform: none; }
+  30% { opacity: 1; transform: none; }
+  36% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.hp-day-caps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.hp-day-cap {
+  border: 1px solid var(--hp-line); border-radius: 14px; background: #fff;
+  padding: 14px 16px; text-align: center;
+  animation: hpDayCap 12s ease-in-out infinite;
+}
+.hp-day-cap strong { display: block; font-size: 15.5px; color: var(--hp-ink); margin-bottom: 3px; }
+.hp-day-cap span { font-size: 14px; color: var(--hp-muted); line-height: 1.45; }
+.hp-day-cap-2 { animation-delay: 4s; }
+.hp-day-cap-3 { animation-delay: 8s; }
+@keyframes hpDayCap {
+  0% { border-color: var(--hp-green); box-shadow: 0 8px 22px rgba(30, 77, 51, 0.14); }
+  30% { border-color: var(--hp-green); box-shadow: 0 8px 22px rgba(30, 77, 51, 0.14); }
+  38% { border-color: var(--hp-line); box-shadow: none; }
+  96% { border-color: var(--hp-line); box-shadow: none; }
+  100% { border-color: var(--hp-green); box-shadow: 0 8px 22px rgba(30, 77, 51, 0.14); }
+}
+@media (max-width: 760px) { .hp-day { grid-template-columns: 1fr; gap: 26px; } }
+
+.hp-film-video {
+  width: 100%; max-width: 880px; margin: 0 auto; display: block;
+  aspect-ratio: 16 / 9; object-fit: cover; border-radius: 24px;
+  box-shadow: 0 18px 48px rgba(22, 34, 27, 0.22); background: #0e2417;
+}
+
+.hp-people { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.hp-person {
+  margin: 0; background: #fff; border: 1px solid var(--hp-line);
+  border-radius: 16px; overflow: hidden; text-align: center;
+}
+.hp-person img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+.hp-person figcaption { padding: 11px 10px 13px; font-size: 14px; font-weight: 600; color: var(--hp-ink); }
+@media (max-width: 760px) { .hp-people { grid-template-columns: 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-day-card { animation: none; position: static; opacity: 1; margin-bottom: 10px; }
+  .hp-day-stage { height: auto; }
+  .hp-day-cap { animation: none; }
 }
