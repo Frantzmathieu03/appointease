@@ -12,6 +12,7 @@ import BusinessMediaManager from "@/components/owner/BusinessMediaManager";
 import LocationsManager from "@/components/owner/LocationsManager";
 import PushOptIn from "@/components/PushOptIn";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
+import SecuritySettings from "@/components/SecuritySettings";
 import { FaceIdSetting, NotificationPrefs } from "@/components/owner/AppSettings";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import { getBillingState, planById } from "@/lib/plans";
@@ -159,6 +160,8 @@ export default async function DashboardSettingsPage() {
         <h2>Face ID sign in</h2>
         <FaceIdSetting />
       </div>
+
+      <SecuritySettings resetTo="/owner/dashboard" />
 
       {role === "owner" && (
       <div className="card">

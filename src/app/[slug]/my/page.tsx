@@ -9,6 +9,7 @@ import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import ReviewForm from "@/components/ReviewForm";
 import ThreadView from "@/components/ThreadView";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
+import SecuritySettings from "@/components/SecuritySettings";
 import AddToCalendar from "@/components/AddToCalendar";
 
 interface ApptRow {
@@ -544,6 +545,10 @@ export default async function BusinessCustomerDashboard({
           {past.map(historyEntry)}
         </>
       )}
+
+      <div style={{ marginTop: 22 }}>
+        <SecuritySettings resetTo={`/${slug}/my`} />
+      </div>
 
       <h2 style={{ marginTop: 22 }}>Account</h2>
       <div className="card">
