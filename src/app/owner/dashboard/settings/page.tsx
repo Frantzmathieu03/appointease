@@ -167,10 +167,9 @@ export default async function DashboardSettingsPage() {
       <div className="card">
         <h2>Delete my account</h2>
         <DeleteAccountButton
-          intro="Deleting your account deletes your business, its booking page, and everything in it: services, hours, appointments, customers, and messages. Your subscription is cancelled first, so nothing charges again. This cannot be undone."
-          confirmPrompt="Are you sure? Your business and its page will be gone for good."
+          intro="Deleting your account deletes your business, its booking page, and everything in it: services, hours, appointments, customers, and messages. Your subscription is cancelled first, so nothing charges again."
+          confirmPrompt="Are you sure? This schedules the deletion for 48 hours from now. You can undo it at any time before then."
           confirmLabel="Yes, delete everything"
-          afterPath="/"
         />
       </div>
       )}

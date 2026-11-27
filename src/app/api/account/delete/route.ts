@@ -4,37 +4,36 @@ import {
   createServerSupabase,
   isSupabaseConfigured,
 } from "@/lib/supabase";
-import { getStripe } from "@/lib/stripe";
-import { cancelReminders } from "@/lib/reminders";
-import { sendNativePush } from "@/lib/native-push";
-import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
+import {
+  createDeletionRequest,
+  getPendingDeletionRequest,
+} from "@/lib/account-deletion";
 
-// POST /api/account/delete: in app account deletion (Apple App
-// Store guideline 5.1.1(v): an app that lets people create an
-// account must let them delete it inside the app, with no support
-// email in the loop). The session is the only credential: the route
-// deletes the SIGNED IN user's own account and nothing else, and
-// the body must carry { confirm: true } so a stray request can
-// never do it by accident. The two confirm steps live in the UI
-// (DeleteAccountButton); this route is the final one.
+// Account deletion with a 48 hour grace period (Frantz, 2026-11-27;
+// migration 0022; App Store guideline 5.1.1(v) still applies: the
+// ask happens inside the app, with no support email in the loop).
 //
-// Order of work, chosen so nothing is left charging or waiting:
-//   1. Any business this user owns: its Stripe subscription is
-//      cancelled first, while the business still exists. If Stripe
-//      refuses, the deletion stops and says so, rather than leaving
-//      a live subscription behind on a deleted account.
-//   2. The user's own future appointments, at every business they
-//      are a customer of, are cancelled the same way the manage
-//      link cancels: the slot frees, the pending reminders stop,
-//      and the business gets the same cancellation push it would
-//      get from a normal cancel, so nobody is stood up.
-//   3. The user's messages and form submissions are deleted.
-//   4. The auth user is deleted. The schema carries the rest:
-//      the customers row, owned businesses and everything under
-//      them, team memberships, device tokens, notification prefs,
-//      and push subscriptions all hang off the auth user or the
-//      business with ON DELETE CASCADE (audited in
-//      APP_STORE_PREP.md and proven by the verification harness).
+// POST schedules the deletion instead of running it: the session is
+// the only credential, the route only ever acts on the signed in
+// user's own account, and the body must carry { confirm: true } so
+// a stray request can never schedule anything by accident. The two
+// confirm steps live in the UI (DeleteAccountButton).
+//
+// The account keeps working normally during the 48 hours. The
+// person can undo the ask through POST /api/account/delete/cancel,
+// and GET on this same route tells the Settings and My pages
+// whether an ask is pending and when it falls due. When the time
+// comes, the cron processor (/api/cron/deletions) runs the deletion
+// itself through the exact steps in lib/account-deletion.ts:
+// subscriptions cancelled first (stopping if Stripe refuses),
+// future appointments cancelled, messages and form submissions
+// deleted, then the auth user deleted with the schema cascades
+// carrying the rest.
+//
+// Until migration 0022 lands, the request table does not exist:
+// POST answers that deletion is being set up and schedules nothing,
+// and GET simply reports no pending request, so the pages render
+// exactly as before.
 export async function POST(req: NextRequest) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
@@ -57,129 +56,42 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
 
   const admin = createAdminSupabase();
-
-  // 1. Owned businesses: cancel any live Stripe subscription first.
-  const { data: owned } = await admin
-    .from("businesses")
-    .select("id, stripe_subscription_id, subscription_status")
-    .eq("owner_id", user.id);
-  const stripe = getStripe();
-  for (const biz of owned ?? []) {
-    const subId = biz.stripe_subscription_id as string | null;
-    const status = biz.subscription_status as string | null;
-    const live =
-      !!subId &&
-      (status === null ||
-        ["active", "trialing", "past_due", "unpaid", "incomplete"].includes(status));
-    if (!live) continue;
-    if (!stripe) {
-      // Billing is not configured in this environment, so there is
-      // no live Stripe side to cancel against. Production carries
-      // the key; never trap the person in an undeletable account
-      // over an environment gap.
-      console.error(
-        `account delete: business ${biz.id} carries subscription ${subId} but Stripe is not configured here; proceeding`
-      );
-      continue;
-    }
-    try {
-      await stripe.subscriptions.cancel(subId as string);
-    } catch (err) {
-      console.error("account delete: subscription cancel failed:", err);
-      return NextResponse.json(
-        {
-          error:
-            "We could not cancel your subscription, so nothing was deleted. Please try again in a moment.",
-        },
-        { status: 502 }
-      );
-    }
-  }
-
-  // 2. The user's future appointments as a customer: cancel each
-  //    one properly (slot frees, reminders stop, business hears).
-  const { data: future } = await admin
-    .from("appointments")
-    .select("id, business_id, service_id, starts_at")
-    .eq("customer_id", user.id)
-    .eq("status", "confirmed")
-    .gt("starts_at", new Date().toISOString());
-  for (const appt of future ?? []) {
-    // cancelled_by arrives with migration 0010; the fallback keeps
-    // the cancel working on the pre-0010 column set, the same
-    // pattern the manage route uses.
-    let { error } = await admin
-      .from("appointments")
-      .update({
-        status: "cancelled",
-        cancellation_reason: "Account deleted",
-        cancelled_by: "customer",
-      })
-      .eq("id", appt.id);
-    if (error) {
-      ({ error } = await admin
-        .from("appointments")
-        .update({ status: "cancelled", cancellation_reason: "Account deleted" })
-        .eq("id", appt.id));
-    }
-    if (error) {
-      console.error("account delete: appointment cancel failed:", error);
-      return NextResponse.json(
-        { error: "We could not cancel everything, so nothing was deleted. Please try again in a moment." },
-        { status: 500 }
-      );
-    }
-    await cancelReminders(admin, appt.id);
-    // The same cancellation push a normal cancel sends (native app
-    // phase 1): env gated, a silent no-op until push credentials
-    // exist, and never allowed to fail the deletion.
-    try {
-      const [{ data: biz }, { data: cust }, { data: svc }] = await Promise.all([
-        admin.from("businesses").select("timezone").eq("id", appt.business_id).single(),
-        admin.from("customers").select("full_name").eq("id", user.id).single(),
-        admin.from("services").select("name").eq("id", appt.service_id).single(),
-      ]);
-      const tz = (biz?.timezone as string | undefined) ?? "America/New_York";
-      const when = `${formatDateInZone(new Date(appt.starts_at), tz)} · ${formatTimeInZone(new Date(appt.starts_at), tz)}`;
-      await sendNativePush(admin, {
-        businessId: appt.business_id,
-        kind: "cancelled",
-        title: "Appointment cancelled",
-        body: `${cust?.full_name || "A customer"} cancelled ${svc?.name ?? "their appointment"} · ${when}`,
-        data: {
-          type: "cancelled",
-          appointmentId: appt.id,
-          customerId: user.id,
-          url: "/owner/dashboard/calendar",
-        },
-        customerId: user.id,
-      });
-    } catch (err) {
-      console.error("account delete: cancellation push failed:", err);
-    }
-  }
-
-  // 3. The user's messages and form submissions go with the account.
-  await admin.from("messages").delete().eq("customer_id", user.id);
-  await admin.from("form_submissions").delete().eq("customer_id", user.id);
-
-  // 4. Delete the auth user. Cascades carry the rest (see header).
-  const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
-  if (deleteError) {
-    console.error("account delete: deleteUser failed:", deleteError);
+  const { request, tableReady } = await createDeletionRequest(admin, user);
+  if (!tableReady) {
     return NextResponse.json(
-      { error: "Deleting the account failed. Please try again in a moment." },
+      { error: "Account deletion is being set up right now. Please try again later." },
+      { status: 503 }
+    );
+  }
+  if (!request) {
+    return NextResponse.json(
+      { error: "Scheduling the deletion failed. Please try again in a moment." },
       { status: 500 }
     );
   }
+  return NextResponse.json({
+    ok: true,
+    scheduled: true,
+    requestedAt: request.requested_at,
+    dueAt: request.due_at,
+  });
+}
 
-  // Clear the now dead session cookies on the way out (best effort:
-  // the account is gone either way, and the UI signs out locally too).
-  try {
-    await supabase.auth.signOut();
-  } catch {
-    // Nothing left to sign out of.
+export async function GET() {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ pending: false, dueAt: null, demoMode: true });
   }
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
 
-  return NextResponse.json({ ok: true });
+  const admin = createAdminSupabase();
+  const { request } = await getPendingDeletionRequest(admin, user.id);
+  return NextResponse.json({
+    pending: !!request,
+    requestedAt: request?.requested_at ?? null,
+    dueAt: request?.due_at ?? null,
+  });
 }
