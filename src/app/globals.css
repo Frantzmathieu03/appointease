@@ -2328,34 +2328,49 @@ footer.site-footer { padding: 0; text-align: left; }
   .hp .section-head h2 { font-size: 36px; }
 }
 .hp-reviews { background: var(--hp-bg); padding-bottom: 52px; }
-.hp-review-feature {
-  display: grid; grid-template-columns: 1.15fr 1fr; gap: 0;
+/* Reviews in the reference format Frantz picked: video cards with
+   a big bold quote line over the footage and a small name and
+   business label under it, mixed with text cards (round photo,
+   name, business, stars, plain quote). One flowing track: a
+   wrapping row on desktop, a snap carousel on phones. The section
+   renders only when real entries exist (see src/lib/reviews.ts). */
+.hp-reviews-track {
+  display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+  max-width: 1180px; margin: 0 auto; padding: 0 20px;
+}
+.hp-rv-video {
+  position: relative; flex: 1 1 340px; max-width: 400px; margin: 0;
+  border-radius: 24px; overflow: hidden; background: #0e2417;
+  aspect-ratio: 4 / 5; text-align: left;
+}
+.hp-rv-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hp-rv-overlay {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 44px 22px 20px; display: flex; flex-direction: column; gap: 7px;
+  background: linear-gradient(transparent, rgba(10, 24, 15, 0.82));
+}
+.hp-rv-quote { color: #fff; font-size: 23px; font-weight: 800; line-height: 1.28; }
+.hp-rv-who { color: #cfe3d3; font-size: 13.5px; font-weight: 600; }
+.hp-rv-text {
+  flex: 1 1 300px; max-width: 400px; margin: 0; text-align: left;
   background: #fff; border: 1px solid var(--hp-line); border-radius: 24px;
-  overflow: hidden; margin: 0 auto 16px; max-width: 1020px; text-align: left;
+  padding: 24px 22px; display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 8px 24px rgba(22, 34, 27, 0.06);
 }
-.hp-review-main { padding: 34px 32px; display: flex; flex-direction: column; gap: 16px; }
-.hp-review-main blockquote {
-  margin: 0; font-size: 24px; line-height: 1.4; font-weight: 600; color: var(--hp-ink);
-}
-.hp-review-photo { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 260px; }
+.hp-rv-head { display: flex; align-items: center; gap: 13px; }
+.hp-rv-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex: none; }
+.hp-rv-name { font-weight: 800; color: var(--hp-ink); font-size: 16.5px; }
+.hp-rv-biz { color: var(--hp-muted); font-size: 14px; }
+.hp-rv-text .hp-stars { font-size: 15px; }
+.hp-rv-text blockquote { margin: 0; font-size: 16.5px; line-height: 1.55; color: var(--hp-ink); }
 .hp-stars { color: #e8a33d; font-size: 17px; letter-spacing: 2px; }
-.hp-review-card .hp-stars { font-size: 15px; }
-.hp-review-feature figcaption, .hp-review-card figcaption { display: flex; gap: 8px; flex-wrap: wrap; }
-.hp-review-chip {
-  background: #eef3ee; border: 1px solid #dce4dd; border-radius: 999px;
-  padding: 4px 12px; font-size: 13px; font-weight: 600; color: var(--hp-ink);
-}
-.hp-review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1020px; margin: 0 auto; }
-.hp-review-card {
-  background: #fff; border: 1px solid var(--hp-line); border-radius: 20px;
-  padding: 24px 22px; margin: 0; text-align: left;
-  display: flex; flex-direction: column; gap: 12px;
-}
-.hp-review-card blockquote { margin: 0; font-size: 16.5px; line-height: 1.5; color: var(--hp-ink); }
-@media (max-width: 900px) {
-  .hp-review-feature { grid-template-columns: 1fr; }
-  .hp-review-photo { min-height: 200px; max-height: 260px; }
-  .hp-review-grid { grid-template-columns: 1fr; }
+@media (max-width: 760px) {
+  .hp-reviews-track {
+    flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
+    scroll-snap-type: x mandatory; padding: 4px 20px 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hp-rv-video, .hp-rv-text { flex: 0 0 84%; max-width: 84%; scroll-snap-align: center; }
 }
 
 /* Pre-made templates gallery (Forms page, 2026-11-26): tidy cards

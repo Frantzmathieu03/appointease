@@ -336,34 +336,44 @@ export default function HomePage() {
             <div className="section-head">
               <h2>Real words from real businesses</h2>
             </div>
-            <figure className="hp-review-feature">
-              <div className="hp-review-main">
-                <span className="hp-stars" aria-label={`${REVIEWS[0].stars} out of 5 stars`}>
-                  {"★".repeat(REVIEWS[0].stars)}{"☆".repeat(5 - REVIEWS[0].stars)}
-                </span>
-                <blockquote>{REVIEWS[0].quote}</blockquote>
-                <figcaption>
-                  <span className="hp-review-chip">{REVIEWS[0].name}</span>
-                  <span className="hp-review-chip">{REVIEWS[0].business}</span>
-                </figcaption>
-              </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="hp-review-photo" src={REVIEWS[0].photo} alt="" loading="lazy" />
-            </figure>
-            <div className="hp-review-grid">
-              {REVIEWS.slice(1).map((t) => (
-                <figure key={t.name} className="hp-review-card">
-                  <span className="hp-stars" aria-label={`${t.stars} out of 5 stars`}>
-                    {"★".repeat(t.stars)}{"☆".repeat(5 - t.stars)}
-                  </span>
-                  <blockquote>{t.quote}</blockquote>
-                  <figcaption>
-                    <span className="hp-review-chip">{t.name}</span>
-                    <span className="hp-review-chip">{t.business}</span>
+          </div>
+          <div className="hp-reviews-track">
+            {REVIEWS.map((r, i) =>
+              r.kind === "video" ? (
+                <figure key={i} className="hp-rv-video">
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    poster={r.poster}
+                    aria-label={`${r.name}, ${r.business}`}
+                  >
+                    <source src={r.video} type="video/mp4" />
+                  </video>
+                  <figcaption className="hp-rv-overlay">
+                    <span className="hp-rv-quote">{r.quote}</span>
+                    <span className="hp-rv-who">{r.name} · {r.business}</span>
                   </figcaption>
                 </figure>
-              ))}
-            </div>
+              ) : (
+                <figure key={i} className="hp-rv-text">
+                  <div className="hp-rv-head">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="hp-rv-photo" src={r.photo} alt="" loading="lazy" />
+                    <div>
+                      <div className="hp-rv-name">{r.name}</div>
+                      <div className="hp-rv-biz">{r.business}</div>
+                    </div>
+                  </div>
+                  <span className="hp-stars" aria-label={`${r.stars} out of 5 stars`}>
+                    {"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}
+                  </span>
+                  <blockquote>{r.quote}</blockquote>
+                </figure>
+              )
+            )}
           </div>
         </section>
       )}
