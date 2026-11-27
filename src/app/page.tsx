@@ -2,6 +2,7 @@ import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { PLANS, formatPlanPrice, annualCents } from "@/lib/plans";
 import { CATEGORIES } from "@/lib/categories";
+import { REVIEWS } from "@/lib/reviews";
 import HomeAnimations from "@/components/HomeAnimations";
 
 // Category cards for "Made for your kind of business" — labels and
@@ -18,20 +19,9 @@ const CAT_CARDS = CATEGORIES.filter((c) => c.image !== null).map((c) => ({
 // Landing page — Homepage New Design (Frantz, 2026-11-26): one hero
 // with the current looping video, three steps, six feature cards,
 // pricing by team size, and a closing call to action. Real product
-// claims only: no testimonials, quotes, ratings or invented counts —
-// the "What business owners say" section renders only once at least
-// two real quotes exist (see TESTIMONIALS below).
-
-interface Testimonial {
-  quote: string;
-  name: string;
-  business: string;
-}
-
-// Real quotes from real businesses go here, with permission. The
-// section stays hidden until at least two exist — never placeholders,
-// never invented quotes (Frantz's Homepage New Design PDF, §4).
-const TESTIMONIALS: Testimonial[] = [];
+// claims only: no testimonials, quotes, ratings or invented counts.
+// The reviews section renders only once at least two real reviews
+// exist in src/lib/reviews.ts (real businesses, with permission).
 
 const FEATURES: { icon: string; title: string; body: string; dark?: boolean }[] = [
   {
@@ -134,6 +124,33 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Find a business (restored at Frantz's word, 2026-11-26):
+          someone without a direct link can find a business by name
+          and by ZIP code or city. A plain form onto /explore, which
+          opens with both filters already filled in. */}
+      <section className="hp-section hp-find-section" data-reveal>
+        <div className="mkt-container">
+          <div className="hp-head">
+            <h2>Find a business</h2>
+            <p className="hp-lede">
+              Looking for your barber, your salon, your lawyer? Search by
+              name, or by ZIP code or city.
+            </p>
+          </div>
+          <form className="hp-find" action="/explore" method="get">
+            <label className="hp-find-field">
+              <span>Business name</span>
+              <input type="text" name="q" placeholder="e.g. Main Street Barbers" autoComplete="off" />
+            </label>
+            <label className="hp-find-field">
+              <span>ZIP code or city</span>
+              <input type="text" name="place" placeholder="e.g. 02062 or Norwood" autoComplete="off" />
+            </label>
+            <button type="submit" className="btn btn-primary btn-lg hp-find-btn">Search</button>
+          </form>
+        </div>
+      </section>
+
       {/* The short version — true product facts only, counting up
           as the band scrolls into view. */}
       <section className="hp-section hp-stats-section" data-reveal>
@@ -216,6 +233,7 @@ export default function HomePage() {
             <h2>A day with AppointEase</h2>
             <p className="lede">One booking, start to finish — while you work.</p>
           </div>
+          <div className="hp-panel">
           <div className="hp-day">
             <div className="hp-phone" aria-hidden="true">
               <div className="hp-phone-notch" />
@@ -251,6 +269,7 @@ export default function HomePage() {
               </li>
             </ol>
           </div>
+          </div>
         </div>
       </section>
 
@@ -280,34 +299,68 @@ export default function HomePage() {
             <h2>Booked online. Welcomed in person.</h2>
             <p className="lede">The booking takes care of itself. You take care of the client.</p>
           </div>
-          <video
-            className="hp-film-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster="/videos/people-shop-poster.jpg"
-            aria-label="Inside a barbershop — the barber welcomes a client who booked online while another client checks his phone"
-          >
-            <source src="/videos/people-shop.mp4" type="video/mp4" />
-          </video>
+          <div className="hp-panel hp-film-panel">
+            <video
+              className="hp-film-video"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="/videos/people-shop-poster.jpg"
+              aria-label="Inside a barbershop — the barber welcomes a client who booked online while another client checks his phone"
+            >
+              <source src="/videos/people-shop.mp4" type="video/mp4" />
+            </video>
+          </div>
         </div>
       </section>
 
-      {/* What business owners say — hidden until at least two real
-          quotes exist (see TESTIMONIALS above). */}
-      {TESTIMONIALS.length >= 2 && (
-        <section className="hp-section" data-reveal>
+      {/* The statement band: one bold line, lots of air (the line is
+          the site's own pre-redesign statement, restored 2026-11-26). */}
+      <section className="hp-section hp-statement" data-reveal>
+        <div className="mkt-container">
+          <h2>Built for people whose work runs on appointments.</h2>
+          <Link href="/owner/signup" className="btn btn-primary btn-lg">Start free</Link>
+        </div>
+      </section>
+
+      {/* Reviews — real words from real businesses, data-driven from
+          src/lib/reviews.ts. The section renders ONLY when at least
+          two real reviews exist there. It stays hidden until the
+          first pilot shops give real words with permission: never
+          placeholders, never invented quotes, names, or ratings. */}
+      {REVIEWS.length >= 2 && (
+        <section className="hp-section hp-reviews" data-reveal>
           <div className="mkt-container">
             <div className="section-head">
-              <h2>What business owners say</h2>
+              <h2>Real words from real businesses</h2>
             </div>
-            <div className="hp-cards">
-              {TESTIMONIALS.map((t) => (
-                <figure key={t.name} className="hp-card hp-quote">
+            <figure className="hp-review-feature">
+              <div className="hp-review-main">
+                <span className="hp-stars" aria-label={`${REVIEWS[0].stars} out of 5 stars`}>
+                  {"★".repeat(REVIEWS[0].stars)}{"☆".repeat(5 - REVIEWS[0].stars)}
+                </span>
+                <blockquote>{REVIEWS[0].quote}</blockquote>
+                <figcaption>
+                  <span className="hp-review-chip">{REVIEWS[0].name}</span>
+                  <span className="hp-review-chip">{REVIEWS[0].business}</span>
+                </figcaption>
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="hp-review-photo" src={REVIEWS[0].photo} alt="" loading="lazy" />
+            </figure>
+            <div className="hp-review-grid">
+              {REVIEWS.slice(1).map((t) => (
+                <figure key={t.name} className="hp-review-card">
+                  <span className="hp-stars" aria-label={`${t.stars} out of 5 stars`}>
+                    {"★".repeat(t.stars)}{"☆".repeat(5 - t.stars)}
+                  </span>
                   <blockquote>{t.quote}</blockquote>
-                  <figcaption>{t.name} · {t.business}</figcaption>
+                  <figcaption>
+                    <span className="hp-review-chip">{t.name}</span>
+                    <span className="hp-review-chip">{t.business}</span>
+                  </figcaption>
                 </figure>
               ))}
             </div>

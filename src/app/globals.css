@@ -930,6 +930,10 @@ footer.site-footer { padding: 0; text-align: left; }
    This block also carries the mobile explore filters and the
    2-column category grid. */
 @media (max-width: 760px) {
+  /* Find a business lives in the homepage section on phones; the
+     header pill row stays exactly the shipped three (Frantz,
+     2026-11-26). */
+  .header-links .header-link-text.header-link-find { display: none; }
   .site-header-wrap .site-header { flex-wrap: wrap; }
   /* One tidy row of three pills under the logo (Frantz, 2026-11-26):
      Pricing and Business sign-in wear the soft pill, Start free stays
@@ -2247,3 +2251,84 @@ footer.site-footer { padding: 0; text-align: left; }
 .gate-lede { margin: 0 0 18px; }
 .gate-or { margin: 14px 0 12px; }
 .gate-email-row { display: flex; gap: 8px; }
+
+/* Find a business band (restored 2026-11-26): centered heading and
+   a simple two field search onto /explore. Stacks on phones. */
+.hp-find-section { padding-top: 8px; }
+.hp-find {
+  display: flex; gap: 12px; align-items: flex-end; justify-content: center;
+  max-width: 760px; margin: 22px auto 0; flex-wrap: wrap;
+}
+.hp-find-field {
+  display: flex; flex-direction: column; gap: 6px; text-align: left;
+  flex: 1 1 220px; font-size: 13.5px; font-weight: 600; color: #40534a;
+}
+.hp-find-field input {
+  height: 52px; border-radius: 12px; border: 1px solid #cfdacf;
+  padding: 0 14px; font-size: 16px; background: #fff; width: 100%;
+}
+.hp-find-btn { height: 52px; }
+@media (max-width: 760px) {
+  .hp-find { flex-direction: column; align-items: stretch; }
+  .hp-find-btn { width: 100%; }
+}
+
+/* Calendly-feel richness pass (Frantz, 2026-11-26): big soft green
+   panels holding the product visuals, a bold statement band, more
+   air between sections, and the reviews section (hidden until real
+   reviews exist in lib/reviews.ts). AppointEase green throughout;
+   all headings stay centered per Frantz's standing rule. */
+.hp-panel {
+  background: linear-gradient(155deg, #e7f1e8 0%, #f7faf5 52%, #e0eee1 100%);
+  border: 1px solid #dce8dc;
+  border-radius: 28px;
+  padding: 42px 36px;
+  max-width: 1020px;
+  margin: 0 auto;
+}
+.hp-film-panel { padding: 18px; }
+.hp-film-panel .hp-film-video { border-radius: 18px; box-shadow: 0 12px 34px rgba(22, 34, 27, 0.2); }
+@media (max-width: 760px) {
+  .hp-panel { padding: 26px 14px; border-radius: 22px; }
+  .hp-film-panel { padding: 10px; }
+}
+.hp-statement { text-align: center; }
+.hp-statement h2 {
+  font-size: 42px; line-height: 1.16; letter-spacing: -0.015em;
+  color: var(--hp-ink); max-width: 720px; margin: 0 auto 26px;
+}
+@media (max-width: 760px) { .hp-statement h2 { font-size: 31px; } }
+@media (min-width: 900px) {
+  .hp-section { padding-top: 84px; }
+  .hp .section-head h2 { font-size: 36px; }
+}
+.hp-reviews { background: var(--hp-bg); padding-bottom: 52px; }
+.hp-review-feature {
+  display: grid; grid-template-columns: 1.15fr 1fr; gap: 0;
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 24px;
+  overflow: hidden; margin: 0 auto 16px; max-width: 1020px; text-align: left;
+}
+.hp-review-main { padding: 34px 32px; display: flex; flex-direction: column; gap: 16px; }
+.hp-review-main blockquote {
+  margin: 0; font-size: 24px; line-height: 1.4; font-weight: 600; color: var(--hp-ink);
+}
+.hp-review-photo { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 260px; }
+.hp-stars { color: #e8a33d; font-size: 17px; letter-spacing: 2px; }
+.hp-review-card .hp-stars { font-size: 15px; }
+.hp-review-feature figcaption, .hp-review-card figcaption { display: flex; gap: 8px; flex-wrap: wrap; }
+.hp-review-chip {
+  background: #eef3ee; border: 1px solid #dce4dd; border-radius: 999px;
+  padding: 4px 12px; font-size: 13px; font-weight: 600; color: var(--hp-ink);
+}
+.hp-review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1020px; margin: 0 auto; }
+.hp-review-card {
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 20px;
+  padding: 24px 22px; margin: 0; text-align: left;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.hp-review-card blockquote { margin: 0; font-size: 16.5px; line-height: 1.5; color: var(--hp-ink); }
+@media (max-width: 900px) {
+  .hp-review-feature { grid-template-columns: 1fr; }
+  .hp-review-photo { min-height: 200px; max-height: 260px; }
+  .hp-review-grid { grid-template-columns: 1fr; }
+}

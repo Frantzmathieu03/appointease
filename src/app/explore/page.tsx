@@ -12,11 +12,16 @@ export const metadata: Metadata = {
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string; place?: string }>;
 }) {
-  const { category } = await searchParams;
+  const { category, q, place } = await searchParams;
   const initialCategory =
     category && CATEGORIES.some((c) => c.slug === category) ? category : "all";
+  // The homepage's Find a business band lands here carrying the
+  // visitor's words (Frantz, 2026-11-26): the name search and the
+  // city/ZIP start pre-filled so the results are already filtered.
+  const initialQuery = (q ?? "").slice(0, 80);
+  const initialPlace = (place ?? "").slice(0, 80);
   const { businesses, demoMode } = await getPublishedBusinesses();
 
   return (
@@ -36,7 +41,12 @@ export default async function ExplorePage({
             sample business only.
           </div>
         )}
-        <ExploreDirectory businesses={businesses} initialCategory={initialCategory} />
+        <ExploreDirectory
+          businesses={businesses}
+          initialCategory={initialCategory}
+          initialQuery={initialQuery}
+          initialPlace={initialPlace}
+        />
       </div>
     </main>
   );

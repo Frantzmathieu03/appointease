@@ -60,6 +60,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
               <span className="logo-word">Appoint<span className="logo-word-accent">Ease</span></span>
             </Link>
             <nav className="header-links">
+              <Link href="/explore" className="header-link-text header-link-find">Find a business</Link>
               <Link href="/#pricing" className="header-link-text">Pricing</Link>
               <Link href="/owner" className="header-link-text">Business sign-in</Link>
               <Link href="/owner/signup" className="btn btn-primary header-cta">

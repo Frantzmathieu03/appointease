@@ -13,13 +13,17 @@ import type { DirectoryBusiness } from "@/lib/data";
 export default function ExploreDirectory({
   businesses,
   initialCategory,
+  initialQuery = "",
+  initialPlace = "",
 }: {
   businesses: DirectoryBusiness[];
   initialCategory: string;
+  initialQuery?: string;
+  initialPlace?: string;
 }) {
   const [category, setCategory] = useState(initialCategory);
-  const [place, setPlace] = useState("");
-  const [query, setQuery] = useState("");
+  const [place, setPlace] = useState(initialPlace);
+  const [query, setQuery] = useState(initialQuery);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   function pickCategory(slug: string) {
