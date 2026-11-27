@@ -16,7 +16,8 @@
  * people, invented names, invented quotes, invented star ratings,
  * or invented results. Honest claims only, always.
  *
- * Entry shapes:
+ * Entry shapes (the business name is OPTIONAL on both, per
+ * Frantz's call on 2026-11-27: a first name alone is enough):
  * Video: { kind: "video", video: "/videos/reviews/name.mp4",
  *          poster: "/videos/reviews/name.jpg" (optional),
  *          quote: "The short bold line over the video.",
@@ -32,13 +33,13 @@ export type ReviewEntry =
       poster?: string;
       quote: string;
       name: string;
-      business: string;
+      business?: string;
     }
   | {
       kind: "text";
       photo: string;
       name: string;
-      business: string;
+      business?: string;
       stars: 1 | 2 | 3 | 4 | 5;
       quote: string;
     };

@@ -85,13 +85,13 @@ function reviewCard(r: ReviewEntry, key: string) {
         playsInline
         preload="metadata"
         poster={r.poster}
-        aria-label={`${r.name}, ${r.business}`}
+        aria-label={r.business ? `${r.name}, ${r.business}` : r.name}
       >
         <source src={r.video} type="video/mp4" />
       </video>
       <figcaption className="hp-rv-overlay">
         <span className="hp-rv-quote">{r.quote}</span>
-        <span className="hp-rv-who">{r.name} · {r.business}</span>
+        <span className="hp-rv-who">{r.name}{r.business ? ` · ${r.business}` : ""}</span>
       </figcaption>
     </figure>
   ) : (
@@ -101,7 +101,7 @@ function reviewCard(r: ReviewEntry, key: string) {
         <img className="hp-rv-photo" src={r.photo} alt="" loading="lazy" />
         <div>
           <div className="hp-rv-name">{r.name}</div>
-          <div className="hp-rv-biz">{r.business}</div>
+          {r.business && <div className="hp-rv-biz">{r.business}</div>}
         </div>
       </div>
       <span className="hp-stars" aria-label={`${r.stars} out of 5 stars`}>
@@ -380,7 +380,7 @@ export default function HomePage() {
         <section className="hp-section hp-reviews" data-reveal>
           <div className="mkt-container">
             <div className="section-head">
-              <h2>Real words from real businesses</h2>
+              <h2>This is what real users are saying</h2>
             </div>
           </div>
           <div className="hp-reviews-wall">
