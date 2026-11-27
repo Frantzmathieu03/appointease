@@ -29,12 +29,13 @@ interface AppointmentRow {
   manage_token: string;
   confirmation_code: string | null;
   businesses: {
+    id: string;
     name: string;
     address: string | null;
     timezone: string;
     slug: string;
   } | null;
-  customers: { full_name: string; email: string | null; phone: string | null } | null;
+  customers: { id: string; full_name: string; email: string | null; phone: string | null } | null;
   services: { name: string } | null;
 }
 
@@ -135,6 +136,34 @@ function reminderCopy(kind: string, a: AppointmentRow): { subject: string; body:
 }
 
 /**
+ * Whether the appointment's customer opted in to texts at the
+ * appointment's business (business_customers.sms_consent_at,
+ * migration 0016, stamped by the sign-up form or the booking flow's
+ * consent box). Any read problem answers false: when in doubt, do
+ * not text.
+ */
+async function hasSmsConsent(
+  admin: SupabaseClient,
+  appt: AppointmentRow
+): Promise<boolean> {
+  const businessId = appt.businesses?.id;
+  const customerId = appt.customers?.id;
+  if (!businessId || !customerId) return false;
+  try {
+    const { data, error } = await admin
+      .from("business_customers")
+      .select("sms_consent_at")
+      .eq("business_id", businessId)
+      .eq("customer_id", customerId)
+      .maybeSingle();
+    if (error) return false;
+    return Boolean(data?.sms_consent_at);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Send every due pending reminder. Returns a summary; each row is marked
  * sent / skipped / failed honestly based on the provider result.
  */
@@ -145,8 +174,8 @@ export async function processDueReminders(admin: SupabaseClient) {
       `id, kind, channel,
        appointments:appointment_id (
          id, starts_at, status, manage_token, confirmation_code,
-         businesses:business_id ( name, address, timezone, slug ),
-         customers:customer_id ( full_name, email, phone ),
+         businesses:business_id ( id, name, address, timezone, slug ),
+         customers:customer_id ( id, full_name, email, phone ),
          services:service_id ( name )
        )`
     )
@@ -184,6 +213,13 @@ export async function processDueReminders(admin: SupabaseClient) {
         const to = appt.customers?.phone;
         if (!to) {
           detail = "Customer has no phone on file.";
+        } else if (!(await hasSmsConsent(admin, appt))) {
+          // Consent gate (reader audit fix, 2026-11-27): texts go
+          // only to customers who opted in at THIS business, on the
+          // sign-up form or the booking flow's consent box. Before
+          // this check the send path texted any phone on file, which
+          // made the consent box a promise the engine did not keep.
+          detail = "Customer has not opted in to texts.";
         } else {
           // SMS gets the short form of the same copy.
           const r = await dispatchSms({ to, body: `${subject}. ${body.split("\n\n")[2] ?? ""} Manage: ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://appointease.io"}/manage/${appt.manage_token}` });

@@ -30,7 +30,7 @@ export const CATEGORIES: Category[] = [
   { slug: "law-offices", label: "Law Offices", image: "/images/law-office.jpg", blurb: "Consultations scheduled without the phone tag.", icon: "scale" },
   { slug: "dental-offices", label: "Dental Offices", image: "/images/cat-dental.jpg", blurb: "Cleanings and checkups patients actually keep.", icon: "tooth" },
   { slug: "doctors-clinics", label: "Doctors & Clinics", image: "/images/cat-clinics.jpg", blurb: "Appointments with reminders patients can act on.", icon: "stethoscope" },
-  { slug: "pet-groomers", label: "Pet Groomers", image: "/images/cat-pet.jpg", blurb: "Baths, cuts and nail trims for four legged clients.", icon: "paw" },
+  { slug: "pet-groomers", label: "Pet Groomers", image: "/images/cat-pet.jpg", blurb: "Baths, cuts and nail trims for four-legged clients.", icon: "paw" },
   { slug: "auto-repair", label: "Auto Repair", image: "/images/cat-auto.jpg", blurb: "Service appointments that keep the bays on schedule.", icon: "wrench" },
   { slug: "other", label: "Other", image: null, blurb: "Every other appointment based business.", icon: "star" },
 ];

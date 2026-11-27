@@ -52,6 +52,14 @@ export default async function BookPage({
   // session:
   let accountPrefill: { name: string; email: string; phone: string } | null =
     null;
+  // Whether this member already opted in to texts at this business
+  // (business_customers.sms_consent_at, migration 0016). The booking
+  // flow shows its consent box only when this is false, so a customer
+  // who opted in at sign-up is never asked twice, and one who did
+  // not is finally asked while booking (reader audit fix, 2026-11-27:
+  // before this, consent lived only on the sign-up form and existing
+  // customers never saw the box again).
+  let smsConsentOnFile = false;
   //   - signed out: the short account step (Google, or email
   //     sign-up/sign-in), which returns here carrying the join marker;
   //   - signed in, not a member of this business: the join step.
@@ -150,6 +158,16 @@ export default async function BookPage({
       email: profile?.email ?? user.email ?? "",
       phone: profile?.phone ?? "",
     };
+    // The member's text consent at THIS business. A read error (for
+    // example before migration 0016) leaves it false, so the flow
+    // simply shows the box: the safe direction.
+    const { data: membership } = await supabase
+      .from("business_customers")
+      .select("sms_consent_at")
+      .eq("business_id", business.id)
+      .eq("customer_id", user.id)
+      .maybeSingle();
+    smsConsentOnFile = Boolean(membership?.sms_consent_at);
   }
 
   return (
@@ -168,6 +186,7 @@ export default async function BookPage({
         preselectedServiceId={service}
         cancellationPolicy={page.business.cancellation_policy ?? null}
         prefill={accountPrefill}
+        smsConsentOnFile={smsConsentOnFile}
       />
     </main>
   );

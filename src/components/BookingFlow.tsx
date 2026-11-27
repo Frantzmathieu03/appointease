@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import {
   businessCancelNote,
+  DEFAULT_CANCEL_NOTE,
   formatPhone,
   formatServicePrice,
   visitTypeLabel,
@@ -123,6 +124,7 @@ export default function BookingFlow({
   preselectedServiceId,
   cancellationPolicy,
   prefill,
+  smsConsentOnFile,
 }: {
   slug: string;
   businessName: string;
@@ -146,6 +148,10 @@ export default function BookingFlow({
       the book page: step 3 starts filled from their account. The
       client-side profile read below stays as a refresh. */
   prefill?: { name: string; email: string; phone: string } | null;
+  /** True when this customer already opted in to texts at this
+      business (resolved on the server by the book page): the consent
+      box on step 3 is then hidden, because they already said yes. */
+  smsConsentOnFile?: boolean;
 }) {
   const isDemo = !!demoShop;
   const [step, setStep] = useState(1);
@@ -170,6 +176,12 @@ export default function BookingFlow({
   });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Text consent inside the booking flow itself (reader audit fix,
+  // 2026-11-27): the same box, with the same words, as the sign-up
+  // screen, so a customer who joined earlier can opt in while
+  // booking. Ticking it stamps the consent on this business's
+  // membership when the booking lands (see /api/book).
+  const [smsConsent, setSmsConsent] = useState(false);
   const [result, setResult] = useState<{
     demoMode: boolean;
     demoShop?: boolean;
@@ -181,7 +193,14 @@ export default function BookingFlow({
 
   const service = services.find((s) => s.id === serviceId);
   const person = staff.find((m) => m.id === staffId);
-  const cancelNote = businessCancelNote({ cancellation_policy: cancellationPolicy });
+  // The Review always carries a cancellation line (reader audit fix,
+  // 2026-11-27): the business's own words when it set them, and the
+  // same default note the manage page shows when it did not, so the
+  // policy never silently vanishes for businesses that never typed
+  // one.
+  const cancelNote =
+    businessCancelNote({ cancellation_policy: cancellationPolicy }) ??
+    DEFAULT_CANCEL_NOTE;
 
   // Team members who offer the selected service. Unrestricted (no rows
   // for the service) = the whole team.
@@ -346,6 +365,7 @@ export default function BookingFlow({
           phone: form.phone,
           email: form.email,
           notes: form.notes || undefined,
+          smsConsent: smsConsent || undefined,
         }),
       });
       const data = await res.json();
@@ -424,10 +444,9 @@ export default function BookingFlow({
         <div className="card">
           <h2>Here&apos;s the text your customer would get</h2>
           <p className="small" style={{ marginTop: 0 }}>
-            Every real booking sends these three messages by email. Text
-            reminders join them once texting is on, for customers who
-            opted in. Shown here with your sample details; in the demo
-            they are never actually sent.
+            Every real booking sends these three messages by email, and
+            by text for customers who opted in. Shown here with your
+            sample details; in the demo they are never actually sent.
           </p>
           {previews.map((p) => (
             <div key={p.label} style={{ marginTop: 16 }}>
@@ -484,7 +503,8 @@ export default function BookingFlow({
             </p>
           ) : (
             <p className="lede">
-              We emailed your confirmation. Reminders come 24 hours and 2 hours
+              We sent your confirmation by email, and by text if you
+              opted in. Reminders come 24 hours and 2 hours
               before, when the booking is made far enough ahead.
             </p>
           )}
@@ -741,11 +761,21 @@ export default function BookingFlow({
               <input type="tel" required value={form.phone} onChange={set("phone")} autoComplete="tel" />
             </label>
             <p className="small" style={{ fontWeight: 400, marginTop: -6 }}>
-              Reminders go by email today. When texting turns on, this number
-              gets appointment texts only if you opted in: a confirmation and
-              up to 2 reminders per booking. Msg and data rates may apply.
-              Reply STOP to opt out, HELP for help.
+              Reminders go by email, and by text to this number if you
+              opted in: a confirmation and up to 2 reminders per booking.
+              Msg and data rates may apply. Reply STOP to opt out, HELP
+              for help.
             </p>
+            {!isDemo && !smsConsentOnFile && (
+              <label className="c3-consent">
+                <input
+                  type="checkbox"
+                  checked={smsConsent}
+                  onChange={(e) => setSmsConsent(e.target.checked)}
+                />
+                <span>Text me reminders and replies. Reply STOP anytime.</span>
+              </label>
+            )}
             <label className="field">
               <span>Email</span>
               <input type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
@@ -839,9 +869,10 @@ export default function BookingFlow({
             ) : (
               <>
                 <p className="small c3-info-box">
-                  We&apos;ll email a confirmation now, then reminders 24 hours and 2 hours
-                  before, when the booking is made far enough ahead, each with a
-                  link to reschedule or cancel.
+                  We&apos;ll send a confirmation now, by email and by text
+                  if you opted in, then reminders 24 hours and 2 hours
+                  before, when the booking is made far enough ahead, each
+                  with a link to reschedule or cancel.
                 </p>
                 {cancelNote && <p className="small c3-info-box">{cancelNote}</p>}
                 <p className="c3-info-box" style={{ fontWeight: 600 }}>

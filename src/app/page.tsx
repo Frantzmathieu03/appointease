@@ -55,7 +55,7 @@ const FEATURES: { icon: string; title: string; body: string; dark?: boolean }[] 
   {
     icon: "📝",
     title: "Forms",
-    body: "Questions and file uploads before the visit, with ready made templates for law offices and salons.",
+    body: "Questions and file uploads before the visit, with ready-made templates for law offices and salons.",
   },
   {
     icon: "💬",
@@ -157,7 +157,7 @@ export default function HomePage() {
               salons and every appointment based business.
             </p>
             <div className="hp-ctas">
-              <Link href="/owner/signup" className="btn btn-primary btn-lg">Create my booking page</Link>
+              <Link href="/owner/signup" className="btn btn-primary btn-lg">Start free</Link>
               <Link href="/main-street-barbers" className="btn btn-lg">See a live example</Link>
             </div>
             <p className="hp-money-line">Your clients pay you directly. AppointEase never touches their money.</p>
@@ -514,11 +514,11 @@ export default function HomePage() {
       {/* FAQ (restored at Frantz's word, 2026-11-27): the original
           five questions from before the Phase 4 rebuild, back in
           their original place right after pricing. The reminders
-          answer says email only, because texting is not live yet. */}
+          answer covers email and text: texting went live on
+          2026-11-27 for customers who opted in. */}
       <section className="hp-section" data-reveal>
         <div className="mkt-container">
           <div className="section-head">
-            <p className="eyebrow">Questions</p>
             <h2>Good to know</h2>
           </div>
           <div className="faq-list">
@@ -544,7 +544,7 @@ export default function HomePage() {
             </details>
             <details className="faq-item">
               <summary>How do reminders work?</summary>
-              <p>By email today. Each appointment gets a confirmation, then a reminder 24 hours before and another 2 hours before, when the booking is made far enough ahead. Text reminders are not live yet.</p>
+              <p>By email, and by text for customers who opted in. Each appointment gets a confirmation, then a reminder 24 hours before and another 2 hours before, when the booking is made far enough ahead.</p>
             </details>
             <details className="faq-item">
               <summary>Can clients reschedule or cancel themselves?</summary>
@@ -629,7 +629,7 @@ export default function HomePage() {
         <section className="cta-band hp-cta" data-reveal>
           <h2>Your booking page can be live today</h2>
           <p>Questions? Email support@appointease.io. A real person answers.</p>
-          <Link href="/owner/signup" className="btn btn-white btn-lg">Create my booking page</Link>
+          <Link href="/owner/signup" className="btn btn-white btn-lg">Start free</Link>
         </section>
       </div>
 

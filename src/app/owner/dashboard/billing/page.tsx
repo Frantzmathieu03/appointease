@@ -95,11 +95,11 @@ export default async function DashboardBillingPage() {
         <div className="card" style={{ margin: 0 }}>
           <p className="eyebrow">Text reminders</p>
           <p className="lede" style={{ margin: "4px 0" }}>
-            {textsSent === null ? "Not connected yet" : `${textsSent} sent this month`}
+            {textsSent === null ? "Count unavailable" : `${textsSent} sent this month`}
           </p>
           <p className="small" style={{ margin: 0 }}>
             {textsSent === null
-              ? "Text reminders turn on when texting is connected. Email reminders already work."
+              ? "We could not read the count of texts sent this month. Text reminders are on for clients who opted in."
               : "Counted from reminders actually sent: confirmations, 24 hour and 2 hour reminders."}
           </p>
         </div>

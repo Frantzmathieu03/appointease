@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { TRIAL_DAYS } from "@/lib/plans";
 import { slugify } from "@/lib/types";
-import { BUSINESS_TYPES } from "@/lib/owner-shared";
 import { CATEGORIES, DEFAULT_CATEGORY } from "@/lib/categories";
 import { standardServiceNames, DEFAULT_SERVICE_MINUTES } from "@/lib/default-service";
 
@@ -17,6 +16,24 @@ const RESERVED_SLUGS = new Set([
   "manage", "set-password", "robots.txt", "sitemap.xml", "favicon.ico",
 ]);
 
+// The businesses.type column still gets a plain value at creation,
+// derived from the kind the owner picks (the dashboard's Business
+// Details form can change it later). Creation itself asks for the
+// business name and kind only (Frantz's simplicity rule, restated
+// in the 2026-11-27 reader audit fix): phone, address and the
+// description are added in the setup checklist's next step, not here.
+const TYPE_BY_CATEGORY: Record<string, string> = {
+  "barbershops": "Barbershop",
+  "hair-salons": "Hair Salon",
+  "nail-salons-spas": "Spa / Massage",
+  "law-offices": "Law Office",
+  "dental-offices": "Dental",
+  "doctors-clinics": "Doctor / Medical",
+  "pet-groomers": "Other",
+  "auto-repair": "Auto Repair",
+  "other": "Other",
+};
+
 /**
  * Creates the owner's business row with its slug reserved
  * (appointease.io/<slug>). Slug collisions get a numeric suffix.
@@ -25,11 +42,7 @@ const RESERVED_SLUGS = new Set([
 export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { afterCreate?: string }) {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [type, setType] = useState(BUSINESS_TYPES[0]);
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -59,10 +72,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         owner_id: user.id,
         slug,
         name: name.trim(),
-        type,
-        phone: phone.trim() || null,
-        address: address.trim() || null,
-        description: description.trim() || null,
+        type: TYPE_BY_CATEGORY[category] ?? "Other",
         email: user.email ?? null,
         // 14-day free trial for new businesses (Frantz, 2026-11-26).
         // Set explicitly so the length does not depend on the DB
@@ -131,15 +141,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         </p>
       )}
       <label className="field">
-        <span>Business type</span>
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          {BUSINESS_TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-      </label>
-      <label className="field">
-        <span>Category (customers find you by this)</span>
+        <span>Kind of business (customers find you by this)</span>
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
           {CATEGORIES.map((c) => (
             <option key={c.slug} value={c.slug}>{c.label}</option>
@@ -147,25 +149,8 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         </select>
       </label>
       <p className="small" style={{ margin: "0 0 10px" }}>
-        The rest is optional. You can add this later.
+        That is all we need to start. Phone, address and hours come next, and you can change them anytime.
       </p>
-      <label className="field">
-        <span>Office phone (optional, customers will tap to call)</span>
-        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" />
-      </label>
-      <label className="field">
-        <span>Business address (optional, customers tap it for directions)</span>
-        <input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" placeholder="25 Main St, Boston, MA" />
-      </label>
-      <label className="field">
-        <span>What does your business do? (optional)</span>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          style={{ minHeight: 56 }}
-          placeholder="Tell customers what you do. For example: Haircuts and beard trims for the whole family. Walk ins welcome."
-        />
-      </label>
       <button className="btn btn-primary btn-block" type="submit" disabled={busy || !name.trim()}>
         {busy ? "Reserving your link…" : "Create my business"}
       </button>

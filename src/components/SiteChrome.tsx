@@ -18,9 +18,12 @@ import { usePathname } from "next/navigation";
  *     carries the business's own top row and menu card instead of
  *     the platform header. The /owner sign-in page keeps the header.
  * A first path segment that is not a known platform route is treated
- * as a business slug. The platform header (Pricing · Business
- * Log in · Get started for free) stays on the platform's own pages: homepage,
- * /explore, pricing and the owner sign-in pages.
+ * as a business slug. The platform header (Pricing · Log in ·
+ * Start free) stays on the platform's own pages: homepage,
+ * /explore, pricing and the owner sign-in pages. "Find a business"
+ * is NOT a header link (reader audit fix, 2026-11-27): it lives
+ * only as the homepage's own section near the bottom, per Frantz's
+ * ruling that the feature stays.
  */
 const PLATFORM_SEGMENTS = new Set([
   "login",
@@ -88,7 +91,6 @@ export default function SiteChrome({
               <span className="logo-word">Appoint<span className="logo-word-accent">Ease</span></span>
             </Link>
             <nav className="header-links">
-              <Link href="/explore" className="header-link-text header-link-find">Find a business</Link>
               <Link href="/#pricing" className="header-link-text">Pricing</Link>
               {insider ? (
                 <Link href="/owner/dashboard" className="btn btn-primary header-cta">
@@ -98,7 +100,7 @@ export default function SiteChrome({
                 <>
                   <Link href="/owner" className="header-link-text">Log in</Link>
                   <Link href="/owner/signup" className="btn btn-primary header-cta">
-                    Get started for free
+                    Start free
                   </Link>
                 </>
               )}

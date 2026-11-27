@@ -84,8 +84,8 @@ export default async function DashboardSettingsPage() {
           then a reminder email 24 hours before and another 2 hours before
           (when the booking is made far enough ahead). Every reminder
           carries the customer&apos;s secure link to reschedule or cancel.
-          Text reminders are not on yet. When they are, clients who opted
-          in will get these by text too.
+          Text reminders are on too: clients who opted
+          in get these by text as well.
         </p>
       </div>
 

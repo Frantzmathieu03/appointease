@@ -106,7 +106,8 @@ export default function OwnerSignupPage() {
       <h1 className="center" style={{ fontSize: 30 }}>Create your booking page</h1>
       <p className="lede center">
         14 days free, no card needed. After that, plans start at
-        $29.99/month. Cancel anytime. Your page link is reserved the moment
+        $29.99/month. Cancel anytime. First your account, then your
+        business name and kind: your page link is reserved the moment
         you name your business.
       </p>
 

@@ -133,8 +133,8 @@ export default function SignupForm({
           <input type="tel" required value={form.phone} onChange={set("phone")} autoComplete="tel" />
         </label>
         <p className="small" style={{ marginTop: -6 }}>
-          Reminders go by email today. When texting turns on, appointment
-          texts go to this number only if you opt in.
+          Reminders go by email, and appointment texts go to this
+          number only if you opt in.
         </p>
         <label className="field">
           <span>Password</span>

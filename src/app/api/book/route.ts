@@ -8,6 +8,7 @@ import { isDemoShop } from "@/lib/demo";
 import { logCustomerEvent } from "@/lib/events";
 import { sendNativePush } from "@/lib/native-push";
 import { ensureStandardServices, isStandardServiceId } from "@/lib/default-service";
+import { recordSmsConsent } from "@/lib/profile";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
 // POST /api/book
@@ -29,7 +30,7 @@ import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-  const { slug, serviceId, staffId, startsAt, name, phone, email, notes } = body;
+  const { slug, serviceId, staffId, startsAt, name, phone, email, notes, smsConsent } = body;
 
   // Insider rule (Frantz, 2026-11-25): published businesses take
   // bookings from anyone, as before; an UNPUBLISHED business can be
@@ -175,6 +176,12 @@ export async function POST(req: NextRequest) {
       { business_id: page.business.id, customer_id: customerId },
       { onConflict: "business_id,customer_id", ignoreDuplicates: true }
     );
+  // Text consent ticked inside the booking flow (reader audit fix,
+  // 2026-11-27): stamp it on this business's membership, first stamp
+  // only, exactly like the sign-up box does. Never fails a booking.
+  if (smsConsent) {
+    await recordSmsConsent(admin, page.business.id, customerId);
+  }
   // Booking with a specific person makes that person the customer's
   // person at this business: only when nobody is assigned yet (the
   // owner can reassign anytime; a later booking never silently moves

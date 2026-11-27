@@ -44,7 +44,6 @@ export const PLANS: Plan[] = [
       "Messaging",
       "Client history",
       "Forms + file uploads",
-      "Team logins",
     ],
   },
   {
@@ -56,6 +55,7 @@ export const PLANS: Plan[] = [
     features: [
       "2 to 5 people",
       "Everything in Solo",
+      "Team logins",
       "Assign clients to each person",
       "Roles",
       "2 locations",
