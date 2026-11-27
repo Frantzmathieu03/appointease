@@ -1,10 +1,10 @@
-// Data access for public business pages — Supabase when configured,
+// Data access for public business pages: Supabase when configured,
 // demo data (mirroring supabase/seed.sql) while the project is a placeholder.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "./supabase";
 import { isBusinessMember } from "./profile";
 import { DEMO_AVAILABILITY, DEMO_BUSINESS, DEMO_SERVICES, DEMO_STAFF } from "./demo-data";
-import { syntheticStandardServices } from "./default-service";
+import { orderServicesForDisplay, syntheticStandardServices } from "./default-service";
 import type {
   Availability,
   Business,
@@ -16,7 +16,7 @@ import type {
 } from "./types";
 
 /** Demo businesses: published so their pages work, but never listed in
- *  the public directory — they are examples, not real businesses. */
+ *  the public directory: they are examples, not real businesses. */
 export const DIRECTORY_EXCLUDED_SLUGS: string[] = [DEMO_BUSINESS.slug, "harbor-family-law"];
 
 export interface BusinessPageData {
@@ -62,7 +62,7 @@ export async function getBusinessPageData(slug: string): Promise<BusinessPageDat
 /**
  * Insider view of a business page (Frantz 2026-11-25): "published"
  * means visible to the PUBLIC. The public lookup above only serves
- * published businesses — but the owner, active team members, and
+ * published businesses: but the owner, active team members, and
  * customers who have JOINED the business (a business_customers row)
  * are insiders, not the public: they can view the business's pages
  * and complete the customer journey (book, message, their dashboard)
@@ -125,7 +125,7 @@ async function assembleBusinessPageData(
 ): Promise<BusinessPageData> {
   const [{ data: services }, { data: staff }, { data: availability }, { data: photos }] =
     await Promise.all([
-      supabase.from("services").select("*").eq("business_id", business.id).eq("active", true),
+      supabase.from("services").select("*").eq("business_id", business.id).eq("active", true).order("created_at", { ascending: true }),
       supabase.from("staff").select("*").eq("business_id", business.id).eq("active", true),
       supabase.from("availability").select("*").eq("business_id", business.id),
       supabase
@@ -149,7 +149,7 @@ async function assembleBusinessPageData(
   }
 
   // Branches (migration 0013). Defensive: before the migration lands
-  // the table doesn't exist — the page simply has no locations.
+  // the table doesn't exist: the page simply has no locations.
   let locations: Location[] = [];
   const locRes = await supabase
     .from("locations")
@@ -168,7 +168,7 @@ async function assembleBusinessPageData(
     business: business as Business,
     services:
       serviceRows.length > 0
-        ? serviceRows
+        ? orderServicesForDisplay(serviceRows, business.category)
         : syntheticStandardServices(business.id, business.category),
     staff: (staff ?? []) as StaffMember[],
     availability: (availability ?? []) as Availability[],
@@ -204,7 +204,7 @@ async function assembleBusinessPageData(
 export interface OpenStatus {
   /** "open" when now falls inside one of today's rows, else "closed". */
   state: "open" | "closed";
-  /** Today's hours, e.g. "9 AM – 5 PM" — null when closed today. */
+  /** Today's hours, e.g. "9 AM – 5 PM": null when closed today. */
   todayLabel: string | null;
   /** Truthful note, e.g. "Open now · closes 5 PM" / "Closed · opens Sat 9 AM". */
   note: string;
@@ -322,7 +322,7 @@ export function openStatus(availability: Availability[], timeZone: string): Open
 /**
  * Grouped hours lines for the business page's "Hours & location"
  * card (Frantz's plan, 2026-11-26): consecutive days with identical
- * hours share one line, Monday first — e.g. "Mon – Fri · 9 AM – 5 PM"
+ * hours share one line, Monday first: e.g. "Mon – Fri · 9 AM – 5 PM"
  * and "Sat – Sun · Closed". Days with no availability rows count as
  * closed. Business-wide rows (staff_id null) define a day's hours;
  * when a day has only per-staff rows, the widest span counts. Empty
@@ -387,9 +387,9 @@ const US_STATES: Record<string, string> = {
  * Best-effort "City, ST" parsed from a free-form address, for the
  * business page's quiet line under the name ("Family law · Boston,
  * MA"). Handles "…, Boston, MA", "…, Boston, MA 02109" and a trailing
- * full state name ("… Boston Massachusetts" — the word right before
+ * full state name ("… Boston Massachusetts": the word right before
  * the state name is taken as the city). Returns null when no city can
- * be found — the page then shows the type/category alone.
+ * be found: the page then shows the type/category alone.
  */
 export function parseCityState(address: string | null | undefined): string | null {
   if (!address) return null;
@@ -469,7 +469,7 @@ export async function getPublishedBusinesses(): Promise<{
   type Row = Record<string, unknown>;
   let rows: Row[] = [];
   // The demo businesses stay published so their demo pages keep working,
-  // but they are not real businesses — never list them in the directory.
+  // but they are not real businesses: never list them in the directory.
   const withCategory = await supabase
     .from("businesses")
     .select(`${baseCols}, category`)

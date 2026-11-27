@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireBusiness } from "@/lib/owner";
+import { getBusinessSenderNames } from "@/lib/profile";
+import { createAdminSupabase } from "@/lib/supabase";
 import ThreadView from "@/components/ThreadView";
 import AssignControl from "@/components/owner/AssignControl";
 import InboxShell from "@/components/owner/InboxShell";
@@ -107,11 +109,12 @@ export default async function DashboardThreadPage({
               viewer="business"
               customerName={customer.full_name ?? undefined}
               teamName={business.name}
+              senderNames={await getBusinessSenderNames(createAdminSupabase(), business)}
             />
           </div>
           <p className="small">
             Replies alert the customer by email (and text/push where enabled) the
-            moment you send — and their replies alert you the same way.
+            moment you send, and their replies alert you the same way.
           </p>
         </div>
       </InboxShell>

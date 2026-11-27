@@ -7,13 +7,13 @@ import type { Service } from "@/lib/types";
  * the owner should never have to add the basics. The system itself
  * provides two services for every business, free, no owner action
  * needed:
- *   1. the category standard — "Consultation" (30 min) for law
+ *   1. the category standard: "Consultation" (30 min) for law
  *      offices, "Appointment" (30 min) for every other category;
  *   2. "Follow-up appointment" (30 min) for every category.
  * Both are ordinary service rows (price_type "none", active): they
  * are created at business creation, the live data was backfilled with
  * them (skipping any name a business already had), and the owner may
- * rename, deactivate, or add their own in the dashboard — theirs list
+ * rename, deactivate, or add their own in the dashboard: theirs list
  * first in the booking flow, the standard pair after. The helpers
  * below are the belt and suspenders for a business that somehow has
  * zero services anyway: page data presents the pair, and the booking
@@ -37,6 +37,33 @@ export function isStandardServiceId(id: string): boolean {
   return id === DEFAULT_SERVICE_ID || id === FOLLOWUP_SERVICE_ID;
 }
 
+/**
+ * Display order (Frantz fix round, 2026-11-26): the business's OWN
+ * services list first, in the order given; the standard pair comes
+ * after them (category standard, then Follow-up). Pair members are
+ * recognized by name, the same way ensureStandardServices detects
+ * them. Used everywhere a customer picks a service: the public page
+ * and booking Step 1 both read page data assembled in lib/data.ts.
+ */
+export function orderServicesForDisplay(
+  services: Service[],
+  category: string | null | undefined
+): Service[] {
+  const pairNames = standardServiceNames(category).map((n) => n.toLowerCase());
+  const own: Service[] = [];
+  const pair: Service[] = [];
+  for (const s of services) {
+    if (pairNames.includes(s.name.trim().toLowerCase())) pair.push(s);
+    else own.push(s);
+  }
+  pair.sort(
+    (a, b) =>
+      pairNames.indexOf(a.name.trim().toLowerCase()) -
+      pairNames.indexOf(b.name.trim().toLowerCase())
+  );
+  return [...own, ...pair];
+}
+
 export function syntheticStandardServices(
   businessId: string,
   category: string | null | undefined
@@ -56,7 +83,7 @@ export function syntheticStandardServices(
 
 /**
  * Server side: make sure the business's standard pair exists as real
- * rows (any name already present — even deactivated by the owner —
+ * rows (any name already present: even deactivated by the owner :
  * is left alone), then return the business's active services. Runs
  * on the admin client (RLS-safe). Returns null only on a database
  * error during creation.
@@ -94,5 +121,8 @@ export async function ensureStandardServices(
     }
     rows.push(...(created as Service[]));
   }
-  return rows.filter((s) => s.active);
+  return orderServicesForDisplay(
+    rows.filter((s) => s.active),
+    business.category
+  );
 }

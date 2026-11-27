@@ -2,21 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { notifyNewMessage } from "@/lib/dispatch";
 import { sendNativePush } from "@/lib/native-push";
-import { ensureCustomerProfile } from "@/lib/profile";
+import { ensureCustomerProfile, isBusinessTeamMember } from "@/lib/profile";
 import { logCustomerEvent } from "@/lib/events";
 
 // POST /api/messages  { businessId, customerId?, body }
 // Sends one chat message in a (business, customer) thread.
-// - A signed-in customer messages as themselves (customerId is ignored —
+// - A signed-in customer messages as themselves (customerId is ignored :
 //   it is always their own id).
-// - A business owner replies from the dashboard (customerId names the
-//   thread; ownership is verified against the business row).
+// - A business owner or team member replies from the dashboard
+//   (customerId names the thread; ownership / team membership is
+//   verified against the business). The sender's user id is recorded
+//   on the row (migration 0020) so replies sign with their real name.
 // After the insert, the notification dispatcher alerts the other side
 // (email / SMS / push, once per unread burst) and logs every attempt.
 export async function POST(req: NextRequest) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
-      { error: "Demo mode — messaging turns on when the live database is connected." },
+      { error: "Demo mode: messaging turns on when the live database is connected." },
       { status: 400 }
     );
   }
@@ -44,13 +46,18 @@ export async function POST(req: NextRequest) {
     .single();
   if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 });
 
+  // The business side is the owner OR any active team member of this
+  // business (manager / staff): their replies are business replies,
+  // signed with their own name (sender_user_id, migration 0020).
   const isOwner = business.owner_id === user.id;
-  const customerId: string = isOwner ? body?.customerId ?? "" : user.id;
+  const isTeam =
+    isOwner || (await isBusinessTeamMember(admin, businessId, user.id));
+  const customerId: string = isTeam ? body?.customerId ?? "" : user.id;
   if (!customerId) {
     return NextResponse.json({ error: "customerId is required" }, { status: 400 });
   }
 
-  if (!isOwner) {
+  if (!isTeam) {
     // A customer can only message as themselves, and only about a real
     // relationship: create the tenant link if this is their first contact.
     await ensureCustomerProfile(session, user);
@@ -70,28 +77,37 @@ export async function POST(req: NextRequest) {
       { onConflict: "business_id,customer_id", ignoreDuplicates: true }
     );
 
-  const sender = isOwner ? "business" : "customer";
-  const { data: message, error } = await admin
+  const sender = isTeam ? "business" : "customer";
+  // Record WHO sent it (migration 0020) so the thread can sign a
+  // business reply with the actual sender's name. Feature-detected:
+  // before 0020 lands the column does not exist and the insert simply
+  // goes out without it, exactly as before.
+  const baseRow = { business_id: businessId, customer_id: customerId, sender, body: text };
+  let insertRes = await admin
     .from("messages")
-    .insert({ business_id: businessId, customer_id: customerId, sender, body: text })
+    .insert({ ...baseRow, sender_user_id: user.id })
     .select("*")
     .single();
+  if (insertRes.error && (insertRes.error.message ?? "").includes("sender_user_id")) {
+    insertRes = await admin.from("messages").insert(baseRow).select("*").single();
+  }
+  const { data: message, error } = insertRes;
   if (error || !message) {
     return NextResponse.json({ error: "Message failed to send." }, { status: 500 });
   }
 
-  // Timeline: count-level only — message bodies are never copied into
+  // Timeline: count-level only: message bodies are never copied into
   // the event log (migration 0010).
   await logCustomerEvent(admin, {
     businessId,
     customerId,
     type: "message",
-    actorType: isOwner ? "team_member" : "customer",
+    actorType: isTeam ? "team_member" : "customer",
     actorId: user.id,
     details: { count: 1, sender },
   });
 
-  // Alert the other side — failures here never fail the message itself;
+  // Alert the other side: failures here never fail the message itself;
   // every attempt is recorded in notifications_log by the dispatcher.
   try {
     await notifyNewMessage(admin, {
@@ -105,7 +121,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Native app push (app build phase 1): customer messages also reach
-  // the owner/team phones. Business replies are not pushed — customers
+  // the owner/team phones. Business replies are not pushed: customers
   // use their booking link, not the app. Env-gated; the helper applies
   // the toggles, the staff rule, and law-office title-only previews.
   if (sender === "customer") {

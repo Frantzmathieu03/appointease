@@ -7,7 +7,7 @@ import type { Message } from "@/lib/types";
 /**
  * Two-way in-app chat between one customer and one business.
  * - Loads the thread, subscribes to Supabase Realtime inserts, and polls
- *   every 15 seconds as a fallback — a message sent on one side appears
+ *   every 15 seconds as a fallback: a message sent on one side appears
  *   on the other without a manual refresh.
  * - Opening/reading the thread marks the other side's messages read,
  *   which clears the unread badges.
@@ -21,22 +21,29 @@ export default function ThreadView({
   customerName,
   teamName,
   signatureName,
+  senderNames,
 }: {
   businessId: string;
   customerId: string;
   viewer: "customer" | "business";
   /** For the captions under bubbles (owner inbox): the customer's name. */
   customerName?: string;
-  /** For the captions under bubbles: the business's name. Individual
-   *  team authors aren't stored on messages, so business replies are
-   *  captioned with the business name. */
+  /** For the captions under bubbles: the business's name. Used for a
+   *  business reply whose author is not recorded (rows sent before
+   *  migration 0020, or a sender no longer on the team). */
   teamName?: string;
   /** Customer view only (Customer Side Plan, Frantz 2026-11-26):
-   *  business bubbles carry a "— <name>" signature line inside the
-   *  bubble — the customer's own person's first name when they have
-   *  one, else the business's name (message authors aren't stored,
-   *  so this names the customer's contact, not a per-message author). */
+   *  business bubbles carry a signature line inside the bubble with
+   *  the sender's first name. The recorded sender's first name wins (migration 0020);
+   *  this prop is the fallback for replies with no author recorded:
+   *  the customer's own person's first name when they have one, else
+   *  the business's name. */
   signatureName?: string;
+  /** user id → display name for everyone who can speak for this
+   *  business (owner + team), resolved server side. A business
+   *  message with a recorded sender_user_id signs with that person's
+   *  first name. */
+  senderNames?: Record<string, string>;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -148,27 +155,31 @@ export default function ThreadView({
     <div>
       <div className="thread" style={{ marginBottom: 12 }}>
         {messages.length === 0 && (
-          <p className="small">No messages yet — say hello below.</p>
+          <p className="small">No messages yet. Say hello below.</p>
         )}
         {messages.map((m) => {
           const day = dayLabel(m.created_at);
           const showDay = day !== lastDay;
           lastDay = day;
           const mine = m.sender === viewer;
+          const senderFirst = firstNameOf(
+            m.sender_user_id ? senderNames?.[m.sender_user_id] : undefined
+          );
           const caption =
             viewer === "business"
               ? m.sender === "customer"
                 ? `${firstNameOf(customerName) || "Customer"} · ${timeLabel(m.created_at)} · in app`
-                : `${teamName ?? "Your team"} · ${timeLabel(m.created_at)}${m.read_at ? " · Read" : ""}`
+                : `${senderFirst || teamName || "Your team"} · ${timeLabel(m.created_at)}${m.read_at ? " · Read" : ""}`
               : `${timeLabel(m.created_at)}`;
+          const sig = senderFirst || signatureName;
           return (
             <div key={m.id} style={{ display: "contents" }}>
               {showDay && <div className="d2-daylabel">{day}</div>}
               <div className={mine ? "msg-wrap mine" : "msg-wrap"}>
                 <div className={mine ? "bubble mine" : "bubble"}>
                   <div>{m.body}</div>
-                  {viewer === "customer" && m.sender === "business" && signatureName && (
-                    <div className="c3-sig">— {signatureName}</div>
+                  {viewer === "customer" && m.sender === "business" && sig && (
+                    <div className="c3-sig">{sig}</div>
                   )}
                 </div>
                 <div className="msg-cap">{caption}</div>

@@ -6,7 +6,7 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
  * MODEL (Frantz, 2026-11-25) is per business: a customer joins each
  * business separately (see ensureBusinessMembership), and their
  * appointments, messages and history live inside that business's
- * world — nothing mixes across businesses. Insert-only here: booking
+ * world: nothing mixes across businesses. Insert-only here: booking
  * flows refresh name/phone/email with the details given there.
  */
 export async function ensureCustomerProfile(supabase: SupabaseClient, user: User) {
@@ -25,7 +25,7 @@ export async function ensureCustomerProfile(supabase: SupabaseClient, user: User
 /**
  * Is this user a customer member of THIS business? Being signed in
  * to AppointEase alone does NOT make someone a client of a business
- * (Frantz, 2026-11-25) — only the business_customers row does. The
+ * (Frantz, 2026-11-25): only the business_customers row does. The
  * business header, the booking gate and the message gate all key off
  * this check, never off the bare session. RLS lets a customer read
  * their own membership rows. Never throws.
@@ -50,7 +50,7 @@ export async function isBusinessMember(
 
 /**
  * Is this user on the business's own team (an active business_members
- * row — manager or staff)? The owner is checked separately against
+ * row: manager or staff)? The owner is checked separately against
  * businesses.owner_id. Owners and team members never hit the customer
  * join wall on their own business (Frantz, 2026-11-26): the gates
  * auto-join them as customers instead, and the business headers show
@@ -77,12 +77,12 @@ export async function isBusinessTeamMember(
 
 /**
  * Join this customer to ONE business (per-business account model,
- * Frantz 2026-11-25): the business_customers row is the membership —
+ * Frantz 2026-11-25): the business_customers row is the membership :
  * the account's home at that business. Signing up from a business's
  * page, opening its customer dashboard, messaging it, or booking with
  * it creates the membership for THAT business only. RLS lets a
  * customer insert their own membership row (customer_id = auth.uid()).
- * Never throws — membership must not break the page it rides on.
+ * Never throws: membership must not break the page it rides on.
  */
 export async function ensureBusinessMembership(
   supabase: SupabaseClient,
@@ -96,7 +96,7 @@ export async function ensureBusinessMembership(
       { onConflict: "business_id,customer_id", ignoreDuplicates: true }
     );
   } catch {
-    // Membership is created at booking time as well (via /api/book) —
+    // Membership is created at booking time as well (via /api/book) :
     // a failed join here must never take the page down.
   }
   if (opts?.smsConsent) {
@@ -111,7 +111,7 @@ export async function ensureBusinessMembership(
  * unchecked; when it is ticked, the join that follows carries the
  * consent marker and the moment is stamped on the membership row
  * (business_customers.sms_consent_at, migration 0016). Only the
- * first stamp is kept — re-joining never moves it. Feature-detected:
+ * first stamp is kept: re-joining never moves it. Feature-detected:
  * before the migration lands the update errors and is quietly
  * ignored, like every other membership write. Never throws.
  */
@@ -128,11 +128,63 @@ export async function recordSmsConsent(
       .eq("customer_id", userId)
       .is("sms_consent_at", null);
     if (error) {
-      // Column missing (pre-0016) or policy refusal — consent is
+      // Column missing (pre-0016) or policy refusal: consent is
       // additive; the join itself already succeeded.
       return;
     }
   } catch {
     // Never break the page over a consent stamp.
   }
+}
+
+/**
+ * Display names for everyone who can speak for a business, keyed by
+ * auth user id: the owner plus active team members (migration 0020
+ * message signatures). A person's name comes from their staff row
+ * when they have one (that is the name customers know), else from
+ * their customer profile's full name. Runs on the admin client; any
+ * failure returns what was gathered so far (threads then fall back
+ * to the old signature).
+ */
+export async function getBusinessSenderNames(
+  admin: SupabaseClient,
+  business: { id: string; owner_id: string }
+): Promise<Record<string, string>> {
+  const names: Record<string, string> = {};
+  try {
+    const { data: members } = await admin
+      .from("business_members")
+      .select("user_id, staff_id")
+      .eq("business_id", business.id)
+      .eq("status", "active");
+    const memberRows = (members ?? []) as { user_id: string; staff_id: string | null }[];
+    const staffIds = memberRows.map((m) => m.staff_id).filter(Boolean) as string[];
+    if (staffIds.length > 0) {
+      const { data: staffRows } = await admin
+        .from("staff")
+        .select("id, name")
+        .in("id", staffIds);
+      const staffName = new Map(
+        ((staffRows ?? []) as { id: string; name: string }[]).map((s) => [s.id, s.name])
+      );
+      for (const m of memberRows) {
+        const n = m.staff_id ? staffName.get(m.staff_id) : undefined;
+        if (n && n.trim()) names[m.user_id] = n.trim();
+      }
+    }
+    const userIds = [business.owner_id, ...memberRows.map((m) => m.user_id)];
+    const missing = [...new Set(userIds)].filter((id) => !names[id]);
+    if (missing.length > 0) {
+      const { data: profiles } = await admin
+        .from("customers")
+        .select("id, full_name")
+        .in("id", missing);
+      for (const p of (profiles ?? []) as { id: string; full_name: string }[]) {
+        if (p.full_name && p.full_name.trim()) names[p.id] = p.full_name.trim();
+      }
+    }
+  } catch {
+    // Signatures are a nicety; never break a thread over them.
+  }
+  return names;
 }

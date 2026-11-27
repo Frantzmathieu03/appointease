@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getBusinessPageDataWithPreview } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { ensureBusinessMembership, ensureCustomerProfile } from "@/lib/profile";
+import { ensureBusinessMembership, ensureCustomerProfile, getBusinessSenderNames } from "@/lib/profile";
 import { formatPhone } from "@/lib/types";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import ReviewForm from "@/components/ReviewForm";
@@ -35,7 +35,7 @@ function tzAbbrev(d: Date, tz: string): string {
 
 // The customer's dashboard AT ONE BUSINESS (per-business account
 // model, Frantz 2026-11-25): each business is its own separate world.
-// Everything here is scoped to this business and this customer —
+// Everything here is scoped to this business and this customer :
 // their upcoming and past appointments here, the visit summaries this
 // business shared with them, their next steps, and their two-way
 // message thread with this business. Nothing from any other business
@@ -67,7 +67,7 @@ export default async function BusinessCustomerDashboard({
           <p className="lede">
             This is where your appointments, messages and history with{" "}
             {business.name} will live. Customer accounts turn on with the
-            live business — this demo shop keeps everything as a sample.
+            live business: this demo shop keeps everything as a sample.
           </p>
           <Link href={`/${slug}`} className="btn btn-primary">
             Back to {business.name}
@@ -90,8 +90,8 @@ export default async function BusinessCustomerDashboard({
   await ensureBusinessMembership(supabase, business.id, user.id);
 
   // The dashboard leads with the CUSTOMER, not the business (Frantz,
-  // 2026-11-26): their own name is the heading — from their customer
-  // profile first, then the sign-in account's name — with the
+  // 2026-11-26): their own name is the heading: from their customer
+  // profile first, then the sign-in account's name: with the
   // business as the smaller line under it. No name on file falls
   // back to their email, then to a plain "My dashboard".
   const { data: profile } = await supabase
@@ -164,7 +164,7 @@ export default async function BusinessCustomerDashboard({
 
   // Service names for the appointment cards. The join above runs on
   // the customer's own session, and RLS hides an unpublished
-  // business's service rows even from its joined customers — so at an
+  // business's service rows even from its joined customers: so at an
   // unpublished business the joined name comes back null and the card
   // would fall back to the word "Appointment". This page only renders
   // for a verified insider of the business (the page-data lookup
@@ -192,7 +192,7 @@ export default async function BusinessCustomerDashboard({
         serviceNameById.set(s.id as string, s.name as string);
       }
     } catch {
-      // Name display is additive — never break the dashboard.
+      // Name display is additive: never break the dashboard.
     }
   }
   const serviceName = (a: ApptRow) =>
@@ -253,7 +253,7 @@ export default async function BusinessCustomerDashboard({
         }
       }
     } catch {
-      // Intake display is additive — never break the dashboard.
+      // Intake display is additive: never break the dashboard.
     }
   }
 
@@ -269,7 +269,7 @@ export default async function BusinessCustomerDashboard({
 
   // Shared visit summaries + the customer's own next steps, for THIS
   // business's appointments only. RLS only returns this customer's
-  // shared notes — internal notes never reach this side.
+  // shared notes: internal notes never reach this side.
   interface SharedNote {
     shared_summary: string | null;
     steps: { id: string; text: string; due_date: string | null; done_at: string | null }[];
@@ -314,7 +314,7 @@ export default async function BusinessCustomerDashboard({
   const later = upcoming.slice(1);
 
   // The Upload files button exists only when a form exists for this
-  // customer — it points at the soonest appointment whose form is
+  // customer: it points at the soonest appointment whose form is
   // still open (an upcoming one first).
   const formTarget =
     [...upcoming, ...past].find(
@@ -445,7 +445,7 @@ export default async function BusinessCustomerDashboard({
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={{ fontSize: 28, marginBottom: 4 }}>{heading}</h1>
           <p className="small" style={{ margin: "0 0 4px" }}>
-            Your appointments, messages and history at {business.name} — all
+            Your appointments, messages and history at {business.name}, all
             in one place.
           </p>
           {assignedLine && (
@@ -533,6 +533,7 @@ export default async function BusinessCustomerDashboard({
           customerId={user.id}
           viewer="customer"
           signatureName={signatureName}
+          senderNames={await getBusinessSenderNames(createAdminSupabase(), business)}
         />
       </div>
 

@@ -6,6 +6,7 @@ import { createAdminSupabase, createServerSupabase } from "@/lib/supabase";
 import {
   ensureBusinessMembership,
   ensureCustomerProfile,
+  getBusinessSenderNames,
   isBusinessMember,
   isBusinessTeamMember,
 } from "@/lib/profile";
@@ -31,14 +32,14 @@ export default async function MessagePage({
       <main className="column">
         <div className="notice">
           {isDemoShop(slug)
-            ? "Demo shop — messaging is turned off in the demo."
-            : "Demo business — messaging turns on when the live database is connected."}
+            ? "Demo shop: messaging is turned off in the demo."
+            : "Demo business: messaging turns on when the live database is connected."}
         </div>
         <div className="card">
           <h2>Message {business.name}</h2>
           <p className="lede" style={{ marginBottom: 0 }}>
             Customers will chat with the business right here, and the business
-            gets an email, text and push alert the moment a message lands —
+            gets an email, text and push alert the moment a message lands, so
             no message sits unseen.
           </p>
         </div>
@@ -60,8 +61,8 @@ export default async function MessagePage({
         <div className="card center">
           <h2>Message {business.name}</h2>
           <p className="lede">
-            Sign in (or create your free account) to message the business —
-            your conversation stays saved here, and we alert you the moment
+            Sign in (or create your free account) to message the business.
+            Your conversation stays saved here, and we alert you the moment
             they reply.
           </p>
           <Link
@@ -80,7 +81,7 @@ export default async function MessagePage({
 
   // Per-business accounts (Frantz, 2026-11-25): messaging a business
   // is for ITS customers. A signed-in non-member (the owner included)
-  // gets the same join step as booking first — completing sign-in
+  // gets the same join step as booking first: completing sign-in
   // through this business's link (the join marker) or tapping join
   // creates the membership for this business, then the thread opens.
   // Members go straight in.
@@ -135,7 +136,12 @@ export default async function MessagePage({
       <p className="eyebrow">{business.name}</p>
       <h1 style={{ fontSize: 27 }}>Messages</h1>
       <div className="card">
-        <ThreadView businessId={business.id} customerId={user.id} viewer="customer" />
+        <ThreadView
+          businessId={business.id}
+          customerId={user.id}
+          viewer="customer"
+          senderNames={await getBusinessSenderNames(createAdminSupabase(), business)}
+        />
       </div>
       <p className="small center">
         <Link href={`/${slug}`}>← Back to {business.name}</Link> ·{" "}

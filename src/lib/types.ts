@@ -25,7 +25,7 @@ export interface Business {
   published: boolean;
   trial_ends_at: string;
   created_at: string;
-  // Billing (migration 0004) — the business's AppointEase subscription.
+  // Billing (migration 0004): the business's AppointEase subscription.
   plan: string; // PlanId from src/lib/plans.ts
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
@@ -33,7 +33,7 @@ export interface Business {
   subscription_current_period_end: string | null;
   billing_lapsed_at: string | null;
   // Customer-side booking rules (migration 0016). Optional: rows
-  // fetched before the migration lands won't have them — the helpers
+  // fetched before the migration lands won't have them: the helpers
   // below supply the defaults (no policy words, 12 / 24 hours).
   /** The business's own cancellation words ("Late-cancellation note"
       in Settings). Null/absent = the friendly standard note shows. */
@@ -63,7 +63,7 @@ export interface Service {
   /** How the price is shown to customers (migration 0014):
       "none" = no price text, "exact" = "$250", "from" = "from $350",
       "free" = "Free". Optional: rows fetched before the migration
-      lands won't have it — formatServicePrice derives the same answer
+      lands won't have it: formatServicePrice derives the same answer
       from price_cents in that case. */
   price_type?: PriceType;
   active: boolean;
@@ -245,9 +245,9 @@ export interface BusinessCustomerRel {
 
 /** The friendly standard cancellation note, shown when the business
  *  has not written its own words (revised Customer Side Plan,
- *  Frantz 2026-11-26). Words only — nothing is ever charged. */
+ *  Frantz 2026-11-26). Words only: nothing is ever charged. */
 export const DEFAULT_CANCEL_NOTE =
-  "Thanks for letting us know — please cancel at least 24 hours before when you can, so someone else can take this time. There's nothing to pay online.";
+  "Thanks for letting us know. Please cancel at least 24 hours before when you can, so someone else can take this time. There's nothing to pay online.";
 
 /** The business's cancellation words, or null when it has none set
  *  (callers then show DEFAULT_CANCEL_NOTE or omit the line). */
@@ -280,13 +280,17 @@ export interface Message {
   business_id: string;
   customer_id: string;
   sender: "customer" | "business";
+  /** Who actually sent it (migration 0020). Optional: rows sent
+   *  before the column existed, and selects made before it lands,
+   *  simply have no author recorded. */
+  sender_user_id?: string | null;
   body: string;
   read_at: string | null;
   created_at: string;
 }
 
 // Team logins (migration 0011). The business owner is an implicit member
-// with role "owner" — no row required. Rows exist for invited logins.
+// with role "owner": no row required. Rows exist for invited logins.
 export type MemberRole = "owner" | "manager" | "staff";
 
 export interface BusinessMember {
@@ -318,7 +322,7 @@ export interface TeamInvite {
 
 // --- Intake forms (migration 0012) -----------------------------------------
 // No fee/deposit question types exist: forms never collect money data
-// for AppointEase — the app never receives or holds client money.
+// for AppointEase: the app never receives or holds client money.
 export type FormQuestionType =
   | "short_text"
   | "long_text"
@@ -402,12 +406,12 @@ export interface PushSubscriptionRow {
  * Display-only US phone format (Frantz, 2026-11-25): 2958532555 shows
  * as 295-853-2555. An 11-digit number with a leading 1 (US country
  * code) formats on its last 10 digits. Anything else renders exactly
- * as stored. Storage and validation are untouched — format at render.
+ * as stored. Storage and validation are untouched: format at render.
  */
 export function formatPhone(phone: string | null | undefined): string {
   if (!phone) return "";
   const digits = phone.replace(/\D/g, "");
-  // 11 digits: keep every digit — leading digit separated, then the
+  // 11 digits: keep every digit: leading digit separated, then the
   // usual 3-3-4 grouping ("7 786-985-8449"). Display only; the stored
   // value never changes.
   if (digits.length === 11) {
@@ -433,7 +437,7 @@ function money(cents: number): string {
 /**
  * The customer-facing price words for a service, per the business
  * page plan (Frantz, 2026-11-26): an exact price ("$250"), a starting
- * price ("from $350"), "Free", or NOTHING when no price is set —
+ * price ("from $350"), "Free", or NOTHING when no price is set :
  * there is deliberately no "price confirmed with the business"
  * fallback anymore. When price_type is absent (rows from before
  * migration 0014, demo data), the same answer is derived from
