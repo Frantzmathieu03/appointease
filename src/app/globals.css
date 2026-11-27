@@ -2332,3 +2332,26 @@ footer.site-footer { padding: 0; text-align: left; }
   .hp-review-photo { min-height: 200px; max-height: 260px; }
   .hp-review-grid { grid-template-columns: 1fr; }
 }
+
+/* Pre-made templates gallery (Forms page, 2026-11-26): tidy cards
+   inside the dashboard's own card, one per industry, each with a
+   customer form row and a note template row. */
+.tpl-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+@media (max-width: 900px) { .tpl-gallery { grid-template-columns: 1fr; } }
+.tpl-card {
+  border: 1px solid #e3eae3; border-radius: 14px; padding: 16px;
+  background: #fbfcfb; display: flex; flex-direction: column; gap: 10px;
+}
+.tpl-card-head { display: flex; align-items: center; gap: 8px; }
+.tpl-card-name { font-size: 16px; font-weight: 700; }
+.tpl-card-yours {
+  background: #e7f1e8; color: #1e4d33; border-radius: 999px;
+  font-size: 12px; font-weight: 700; padding: 3px 10px;
+}
+.tpl-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border-top: 1px solid #edf1ed; padding-top: 10px;
+}
+.tpl-row-title { font-size: 14.5px; font-weight: 600; }
+.tpl-row-line { font-size: 13px; color: #5b6b61; line-height: 1.45; margin-top: 2px; }
+.tpl-added { font-size: 13.5px; font-weight: 600; color: #1e4d33; white-space: nowrap; }
