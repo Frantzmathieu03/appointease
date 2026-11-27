@@ -90,7 +90,12 @@ export default function SignupForm({
           We sent a confirmation link to {form.email}. Click it, then sign in and
           you&apos;ll land right back where you were.
         </p>
-        <Link href="/login" className="btn btn-primary">Go to sign in</Link>
+        <Link
+          href={nextPath !== "/my-appointments" ? `/login?next=${encodeURIComponent(nextPath)}` : "/login"}
+          className="btn btn-primary"
+        >
+          Go to log in
+        </Link>
       </div>
     );
   }
@@ -134,7 +139,7 @@ export default function SignupForm({
       <p className="small center" style={{ marginTop: 14 }}>
         Already have an account?{" "}
         <Link href={nextPath !== "/my-appointments" ? `/login?next=${encodeURIComponent(nextPath)}` : "/login"}>
-          Sign in
+          Log in
         </Link>
       </p>
     </div>

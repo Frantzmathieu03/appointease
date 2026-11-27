@@ -368,7 +368,7 @@ export default async function MyAppointmentsPage({
         </div>
 
         <form action="/auth/signout" method="post" style={{ textAlign: "center" }}>
-          <button className="btn" type="submit">Sign out</button>
+          <button className="btn" type="submit">Log out</button>
         </form>
       </main>
     );
@@ -407,7 +407,7 @@ export default async function MyAppointmentsPage({
       )}
 
       <form action="/auth/signout" method="post" style={{ textAlign: "center" }}>
-        <button className="btn" type="submit">Sign out</button>
+        <button className="btn" type="submit">Log out</button>
       </form>
     </main>
   );

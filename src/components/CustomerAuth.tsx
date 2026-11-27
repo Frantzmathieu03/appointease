@@ -158,8 +158,11 @@ export default function CustomerAuth({
           We sent a confirmation link to {form.email}. Click it, then sign in and
           you&apos;ll land right back at {business.name}.
         </p>
-        <button className="btn btn-primary" onClick={() => setCheckEmail(false)}>
-          Go to sign in
+        <button
+          className="btn btn-primary"
+          onClick={() => { setCheckEmail(false); setMode("login"); setError(""); }}
+        >
+          Go to log in
         </button>
       </div>
     );

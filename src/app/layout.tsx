@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import SiteChrome from "@/components/SiteChrome";
 import NativeBridge from "@/components/NativeBridge";
+import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getMembership, getOwnerBusiness } from "@/lib/owner";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.appointease.io"),
@@ -31,11 +33,32 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Platform header state (audit fix, 2026-11-27): a signed in owner
+  // or active team member sees "My dashboard" in the header instead
+  // of the guest words "Log in / Get started for free". Resolved on
+  // the server so the right words render first, with no flicker. A
+  // customer only session keeps the guest labels.
+  let insider = false;
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createServerSupabase();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        insider =
+          Boolean(await getOwnerBusiness(supabase, user.id)) ||
+          Boolean(await getMembership(supabase, user.id));
+      }
+    } catch {
+      insider = false;
+    }
+  }
   return (
     <html lang="en">
       <body>
-        <SiteChrome>{children}</SiteChrome>
+        <SiteChrome insider={insider}>{children}</SiteChrome>
         {/* Native app bridge: completely inert in a normal browser. */}
         <NativeBridge />
       </body>

@@ -78,7 +78,7 @@ export default function OwnerSignupPage() {
             you&apos;ll go straight to naming your business, with no extra
             sign in needed.
           </p>
-          <Link href="/owner" className="btn btn-primary">Go to business sign-in</Link>
+          <Link href="/owner" className="btn btn-primary">Go to log in</Link>
         </div>
       </main>
     );
@@ -121,7 +121,7 @@ export default function OwnerSignupPage() {
             </button>
           </form>
           <p className="small center" style={{ marginTop: 14 }}>
-            Already have an account? <Link href="/owner">Sign in</Link>
+            Already have an account? <Link href="/owner">Log in</Link>
           </p>
         </div>
       )}

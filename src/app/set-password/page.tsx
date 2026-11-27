@@ -46,7 +46,7 @@ export default function SetPasswordPage() {
     : isCustomerLane
       ? `/${dest!.split("/")[1]}`
       : "/login";
-  const backLabel = isCustomerLane ? "Back to the business page" : "Go to sign in";
+  const backLabel = isCustomerLane ? "Back to the business page" : "Go to log in";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -103,7 +103,7 @@ export default function SetPasswordPage() {
               You can now sign in with your email and this password.
             </p>
             <Link href={dest} className="btn btn-primary">
-              {isOwnerLane ? "Open my dashboard" : "Go to my page"}
+              {isOwnerLane ? "Open my dashboard" : dest === "/my-appointments" ? "My appointments" : "Go to my page"}
             </Link>
           </div>
         </main>
@@ -120,7 +120,7 @@ export default function SetPasswordPage() {
           </p>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/my-appointments" className="btn btn-primary">My appointments</Link>
-            <Link href="/login" className="btn">Sign in</Link>
+            <Link href="/login" className="btn">Log in</Link>
           </div>
         </div>
       </main>

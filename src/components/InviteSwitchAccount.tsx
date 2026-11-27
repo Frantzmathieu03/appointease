@@ -52,7 +52,7 @@ export default function InviteSwitchAccount({
       onClick={switchAccount}
       disabled={busy}
     >
-      {busy ? "Signing out…" : `Sign in as ${invitedEmail}`}
+      {busy ? "Signing out…" : `Log in as ${invitedEmail}`}
     </button>
   );
 }

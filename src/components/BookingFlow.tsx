@@ -752,7 +752,7 @@ export default function BookingFlow({
             {!signedIn && !isDemo && (
               <p className="small" style={{ fontWeight: 400 }}>
                 You&apos;re not signed in.{" "}
-                <Link href={`/login?next=/${slug}/book`}>Sign in</Link> so this
+                <Link href={`/login?next=/${slug}/book`}>Log in</Link> so this
                 booking lands in your dashboard with {businessName}.
               </p>
             )}

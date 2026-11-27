@@ -135,7 +135,7 @@ export default async function BusinessPage({
   const demoShop = isDemoShop(slug);
 
   // Join on return (per-business account model, Frantz 2026-11-25):
-  // the header's Sign up / Sign in buttons on this business's own
+  // the header's Sign up / Log in buttons on this business's own
   // pages carry the join marker (?join=1) in their return path, so a
   // visitor who just completed sign-up or sign-in through them lands
   // back here WITH the marker: that deliberate completion is what
@@ -251,7 +251,7 @@ export default async function BusinessPage({
             cancel it from <Link href="/my-appointments">My appointments</Link>.
           </p>
           <p className="small" style={{ marginBottom: 0 }}>
-            Business owner? <Link href="/owner">Sign in</Link> to reactivate
+            Business owner? <Link href="/owner">Log in</Link> to reactivate
             your booking page.
           </p>
         </section>

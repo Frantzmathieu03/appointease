@@ -9,7 +9,7 @@ import DashNav, { type DashNavItem } from "@/components/DashNav";
 // on the left; View booking page, a bell with a red dot when there
 // are unread messages, and the signed-in person's initials on the
 // right), a 220px white side menu (items 40px tall, the open section
-// on #E4EEE7 + bold, Sign out small at the bottom), and the content
+// on #E4EEE7 + bold, Log out small at the bottom), and the content
 // on #F3F6F1, max 1180px, in Inter. Phones keep the bottom tab bar.
 // Role rules (migration 0011): staff logins see only their own
 // sections; managers see everything except Billing and Team
@@ -103,6 +103,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <span className="d2-avatar" title={user.email ?? undefined} aria-label="Your account">
               {initials}
             </span>
+            {/* Phone sign out: the sidebar (with its sign out) is
+                hidden at 900px and under, so the top bar carries its
+                own control there. CSS shows this only on phones. */}
+            <form action="/auth/signout" method="post" className="d2-signout-top">
+              <button type="submit">Log out</button>
+            </form>
           </span>
         </div>
       </header>
@@ -112,7 +118,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <DashNav items={navItems} businessId={business.id} memberStaffId={memberStaffId} />
           <div className="d2-signout">
             <form action="/auth/signout" method="post">
-              <button type="submit">Sign out</button>
+              <button type="submit">Log out</button>
             </form>
           </div>
         </aside>

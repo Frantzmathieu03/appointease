@@ -113,7 +113,7 @@ export default async function InvitePage({
               className="btn btn-primary"
               href={`/login?next=${encodeURIComponent(next)}&email=${encodeURIComponent(inv.email)}`}
             >
-              Sign in
+              Log in
             </Link>
             <Link
               className="btn"

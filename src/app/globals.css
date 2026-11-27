@@ -1523,12 +1523,20 @@ footer.site-footer { padding: 0; text-align: left; }
   font-size: 13.5px; color: #5b6b61; padding: 6px 12px; font-weight: 500;
 }
 .d2-signout button:hover { color: #16221b; }
+/* Top bar sign out: phones only (the sidebar is hidden there). */
+.d2-signout-top { display: none; margin: 0; }
+.d2-signout-top button {
+  background: none; border: none; cursor: pointer; font: inherit;
+  font-size: 13.5px; color: #5b6b61; padding: 6px 2px; font-weight: 600; white-space: nowrap;
+}
+.d2-signout-top button:hover { color: #16221b; }
 .d2-main { flex: 1 1 auto; min-width: 0; }
 .d2-main-in { max-width: 1180px; margin: 0 auto; padding: 24px 28px 56px; }
 @media (max-width: 900px) {
   .d2-side { display: none; }
   .d2-main-in { padding: 18px 16px 84px; }
   .d2-view-link { display: none; }
+  .d2-signout-top { display: block; }
 }
 
 /*: Shared elements inside the dashboard: */

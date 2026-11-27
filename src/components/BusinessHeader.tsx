@@ -11,7 +11,7 @@ import { isDemoShop } from "@/lib/demo";
 // joined customer (Frantz, 2026-11-26: the header must never show
 // the owner as logged out on their own pages). Signed-in visitors
 // who have not joined this business, and logged-out visitors, see
-// the "Sign up" and "Sign in" buttons (real buttons, not shy text
+// the "Sign up" and "Log in" buttons (real buttons, not shy text
 // links; both carry next=/<slug>?join=1 so the customer lands back
 // on this business AND joins it: see the join handling on the
 // business page). Demo shops keep their sample behavior (any
@@ -34,7 +34,7 @@ export default async function BusinessHeader({
   // "My dashboard" has two targets (Frantz, 2026-11-26): the owner
   // and active team members of THIS business get their OWNER
   // dashboard; a joined customer gets their customer dashboard for
-  // this business. Everyone else sees Sign up / Sign in. (The main
+  // this business. Everyone else sees Sign up / Log in. (The main
   // business page applies the same rule in its own top row.)
   let dashboardHref: string | null = null;
   if (isSupabaseConfigured()) {
@@ -92,7 +92,7 @@ export default async function BusinessHeader({
               Sign up
             </Link>
             <Link href={`/login?next=${encodeURIComponent(nextPath)}`} className="btn biz-header-btn">
-              Sign in
+              Log in
             </Link>
           </>
         )}

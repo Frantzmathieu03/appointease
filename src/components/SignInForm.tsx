@@ -14,12 +14,18 @@ export default function SignInForm({
   signupHref = "/signup",
   signupText = "New to AppointEase? Create an account",
   initialEmail = "",
+  resetTo = "/owner/dashboard",
 }: {
   nextPath?: string;
   title?: string;
   subtitle?: string;
   signupHref?: string;
   signupText?: string;
+  /** Where the password reset flow lands after the new password is
+   *  set. Owners keep the dashboard; the platform (customer) form
+   *  passes its own neutral home so a customer with no business is
+   *  never pushed into business creation. */
+  resetTo?: string;
   /** Prefilled email (for example from an invite link that names the account to use). */
   initialEmail?: string;
 }) {
@@ -93,10 +99,11 @@ export default function SignInForm({
     }
     const supabase = createBrowserSupabase();
     // Same message whether or not the account exists: never reveal which.
-    // The set-password page carries the owner lane home: after the
-    // password is set, its button opens the dashboard.
+    // The set-password page carries this form's lane home (resetTo):
+    // owners land on their dashboard, platform customers on their
+    // appointments, never in the other lane.
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/set-password?to=/owner/dashboard")}`,
+      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/set-password?to=${resetTo}`)}`,
     });
     setNotice("If that email has an account, we sent a password reset link.");
   }
@@ -122,7 +129,7 @@ export default function SignInForm({
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
         </label>
         <button className="btn btn-block" type="submit" disabled={busy}>
-          {busy ? "Signing in…" : "Sign in"}
+          {busy ? "Logging in…" : "Log in"}
         </button>
       </form>
       <p className="small center" style={{ marginTop: 12 }}>

@@ -57,7 +57,16 @@ const SOCIAL_LINKS: { label: string; href: string; path: string }[] = [
   },
 ];
 
-export default function SiteChrome({ children }: { children: React.ReactNode }) {
+export default function SiteChrome({
+  children,
+  insider = false,
+}: {
+  children: React.ReactNode;
+  /** True when the session user owns a business or is an active
+   *  team member (resolved server side in the root layout): the
+   *  header then offers "My dashboard" instead of the guest pair. */
+  insider?: boolean;
+}) {
   const pathname = usePathname();
   const firstSegment = pathname?.split("/")[1] ?? "";
   if (
@@ -81,10 +90,18 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
             <nav className="header-links">
               <Link href="/explore" className="header-link-text header-link-find">Find a business</Link>
               <Link href="/#pricing" className="header-link-text">Pricing</Link>
-              <Link href="/owner" className="header-link-text">Log in</Link>
-              <Link href="/owner/signup" className="btn btn-primary header-cta">
-                Get started for free
-              </Link>
+              {insider ? (
+                <Link href="/owner/dashboard" className="btn btn-primary header-cta">
+                  My dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link href="/owner" className="header-link-text">Log in</Link>
+                  <Link href="/owner/signup" className="btn btn-primary header-cta">
+                    Get started for free
+                  </Link>
+                </>
+              )}
             </nav>
           </header>
         </div>

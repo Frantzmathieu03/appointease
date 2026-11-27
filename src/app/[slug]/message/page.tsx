@@ -12,6 +12,7 @@ import {
 } from "@/lib/profile";
 import ThreadView from "@/components/ThreadView";
 import JoinStep from "@/components/JoinStep";
+import AccountGate from "@/components/AccountGate";
 
 export default async function MessagePage({
   params,
@@ -56,25 +57,22 @@ export default async function MessagePage({
   } = await supabase.auth.getUser();
 
   if (!user) {
+    // The same account card as the booking gate (Frantz, 2026-11-27
+    // audit fix): Google first, Create account and Log in, returning
+    // here with the join marker. No thinner card for messaging.
     return (
       <main className="column">
-        <div className="card center">
-          <h2>Message {business.name}</h2>
-          <p className="lede">
-            Sign in (or create your free account) to message the business.
-            Your conversation stays saved here, and we alert you the moment
-            they reply.
-          </p>
-          <Link
-            href={`/login?next=${encodeURIComponent(`/${slug}/message?join=1`)}`}
-            className="btn btn-primary"
-          >
-            Sign in to message
-          </Link>
-          <p className="small" style={{ marginTop: 12 }}>
-            <Link href={`/${slug}`}>← Back to {business.name}</Link>
-          </p>
-        </div>
+        <p className="eyebrow">{business.name}</p>
+        <h1 className="center" style={{ fontSize: 27, marginBottom: 14 }}>Message {business.name}</h1>
+        <AccountGate
+          slug={slug}
+          businessName={business.name}
+          logoUrl={business.logo_url}
+          continuePath={`/${slug}/message?join=1`}
+        />
+        <p className="small center" style={{ marginTop: 14 }}>
+          <Link href={`/${slug}`}>← Back to {business.name}</Link>
+        </p>
       </main>
     );
   }

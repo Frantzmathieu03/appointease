@@ -30,13 +30,18 @@ export default function AccountGate({
   slug,
   businessName,
   logoUrl,
+  continuePath,
 }: {
   slug: string;
   businessName: string;
   logoUrl?: string | null;
+  /** Where the account step returns to (carries the join marker).
+   *  Booking by default; the message page passes its own path so
+   *  both gates offer the identical card. */
+  continuePath?: string;
 }) {
   const [error, setError] = useState("");
-  const back = `/${slug}/book?join=1`;
+  const back = continuePath ?? `/${slug}/book?join=1`;
 
   async function google() {
     setError("");
@@ -85,7 +90,7 @@ export default function AccountGate({
           className="btn btn-block"
           style={{ flex: 1, textAlign: "center" }}
         >
-          Sign in
+          Log in
         </Link>
       </div>
       <p className="small center" style={{ margin: "14px 0 0" }}>

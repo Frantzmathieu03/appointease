@@ -33,6 +33,7 @@ export default async function LoginPage({
       <BusinessContextHeader next={next} />
       <SignInForm
         nextPath={next ?? "/my-appointments"}
+        resetTo="/my-appointments"
         signupHref={next ? `/signup?next=${encodeURIComponent(next)}${email ? `&email=${encodeURIComponent(email)}` : ""}` : "/signup"}
         initialEmail={email ?? ""}
       />
