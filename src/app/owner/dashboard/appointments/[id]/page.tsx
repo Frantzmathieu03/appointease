@@ -41,7 +41,7 @@ const KIND_LABELS: Record<string, string> = {
 };
 const KIND_ORDER = ["confirmation", "before_24h", "before_2h"];
 
-// One appointment in full: who, what, when, with whom — plus the real
+// One appointment in full: who, what, when, with whom, plus the real
 // reminder state from public.reminders and the customer's own manage
 // link (owner-side reschedule/cancel buttons do not exist yet; changes
 // happen through that secure link, exactly like the customer's emails).
@@ -106,7 +106,7 @@ export default async function DashboardAppointmentPage({
   const assignedStaffId =
     (relRow as { assigned_staff_id?: string | null } | null)?.assigned_staff_id ?? null;
 
-  // Visit notes for this appointment (migration 0010) — empty until the
+  // Visit notes for this appointment (migration 0010): empty until the
   // migration lands or the first note is written.
   const { data: noteRows } = await supabase
     .from("visit_notes")
@@ -137,7 +137,7 @@ export default async function DashboardAppointmentPage({
 
   // Intake form state (migration 0012): the form attached to this
   // appointment's service, and whether the customer submitted it.
-  // Defensive — before the migration lands, no card is shown.
+  // Defensive: before the migration lands, no card is shown.
   let intake: { formName: string; submissionId: string | null; submittedAt: string | null } | null =
     null;
   try {
@@ -179,7 +179,7 @@ export default async function DashboardAppointmentPage({
   const templates = (templateRows ?? []) as NoteTemplate[];
 
   // Marked-paid events for this appointment (migration 0015's
-  // 'marked_paid' timeline type; the query is safe before it lands —
+  // 'marked_paid' timeline type; the query is safe before it lands,
   // it simply finds nothing). Offline bookkeeping only.
   const { data: paidRows } = await supabase
     .from("customer_events")
@@ -219,22 +219,28 @@ export default async function DashboardAppointmentPage({
 
   const fmtWhen = (iso: string) =>
     `${formatDateInZone(new Date(iso), tz)} · ${formatTimeInZone(new Date(iso), tz)}`;
-  const reminderStatus = (r: Reminder) => {
+  // Reminder state as a small pill plus a plain when line, never the
+  // old channel-dash-status text line.
+  const reminderStatus = (r: Reminder): { pill: string; cls: string; when: string } => {
     switch (r.status) {
       case "sent":
-        return `Sent${r.sent_at ? ` · ${fmtWhen(r.sent_at)}` : ""}`;
+        return { pill: "Sent", cls: "chip", when: r.sent_at ? fmtWhen(r.sent_at) : "" };
       case "pending":
-        return `Scheduled · ${fmtWhen(r.scheduled_at)}`;
-      case "skipped":
-        return "Skipped";
-      case "cancelled":
-        return "Cancelled";
+        return { pill: "Scheduled", cls: "chip chip-grey", when: fmtWhen(r.scheduled_at) };
       case "failed":
-        return "Failed";
+        return { pill: "Failed", cls: "chip chip-red", when: fmtWhen(r.scheduled_at) };
+      case "skipped":
+        return { pill: "Skipped", cls: "chip chip-grey", when: "" };
+      case "cancelled":
+        return { pill: "Cancelled", cls: "chip chip-grey", when: "" };
       default:
-        return r.status;
+        return { pill: r.status, cls: "chip chip-grey", when: "" };
     }
   };
+  const phoneDigits = (appt.customers?.phone ?? "").replace(/\D/g, "");
+  const telHref = phoneDigits
+    ? `tel:+${phoneDigits.length === 10 ? "1" : ""}${phoneDigits}`
+    : null;
 
   return (
     <div>
@@ -256,61 +262,107 @@ export default async function DashboardAppointmentPage({
 
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Appointment</h2>
-        <p style={{ margin: "4px 0" }}>
-          <strong>{appt.services?.name ?? "Appointment"}</strong>
-          {appt.services?.duration_minutes ? ` · ${appt.services.duration_minutes} min` : ""}
-        </p>
-        <p style={{ margin: "4px 0" }}>
-          {formatDateInZone(startsAt, tz)} at {formatTimeInZone(startsAt, tz)}
-        </p>
-        <p style={{ margin: "4px 0" }}>
-          With: {appt.staff?.name ?? "First available"}
-        </p>
-        {business.address && <p style={{ margin: "4px 0" }}>📍 {business.address}</p>}
-        {appt.confirmation_code && (
-          <p className="small" style={{ margin: "4px 0" }}>
-            Confirmation #: <strong>{appt.confirmation_code}</strong>
-          </p>
-        )}
-        {(appt.customers?.phone || appt.customers?.email) && (
-          <p className="small" style={{ margin: "4px 0" }}>
-            {[appt.customers?.phone ? formatPhone(appt.customers.phone) : null, appt.customers?.email].filter(Boolean).join(" · ")}
-          </p>
-        )}
-        {appt.status !== "cancelled" && (
-          <MarkPaid
-            appointmentId={appt.id}
-            priceLine={priceLine}
-            prefillCents={prefillCents}
-            marks={paidMarks}
-          />
-        )}
-        <p style={{ margin: "8px 0 0" }}>
-          <AssignControl
-            businessId={business.id}
-            customerId={appt.customer_id}
-            staff={staff}
-            assignedStaffId={assignedStaffId}
-            actorId={user.id}
-            compact
-          />
-        </p>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+        <dl className="appt-rows">
+          <div className="appt-row">
+            <dt>Service</dt>
+            <dd>
+              <strong>{appt.services?.name ?? "Appointment"}</strong>
+              {appt.services?.duration_minutes ? ` · ${appt.services.duration_minutes} min` : ""}
+            </dd>
+          </div>
+          <div className="appt-row">
+            <dt>When</dt>
+            <dd>{formatDateInZone(startsAt, tz)} at {formatTimeInZone(startsAt, tz)}</dd>
+          </div>
+          <div className="appt-row">
+            <dt>With</dt>
+            <dd>{appt.staff?.name ?? "First available"}</dd>
+          </div>
+          {business.address && (
+            <div className="appt-row">
+              <dt>Where</dt>
+              <dd>{business.address}</dd>
+            </div>
+          )}
+          {appt.confirmation_code && (
+            <div className="appt-row">
+              <dt>Confirmation #</dt>
+              <dd><strong>{appt.confirmation_code}</strong></dd>
+            </div>
+          )}
+        </dl>
+      </div>
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>Customer</h2>
+        <dl className="appt-rows">
+          <div className="appt-row">
+            <dt>Name</dt>
+            <dd>{appt.customers?.full_name ?? "Customer"}</dd>
+          </div>
+          {appt.customers?.phone && (
+            <div className="appt-row">
+              <dt>Phone</dt>
+              <dd>{formatPhone(appt.customers.phone)}</dd>
+            </div>
+          )}
+          {appt.customers?.email && (
+            <div className="appt-row">
+              <dt>Email</dt>
+              <dd>{appt.customers.email}</dd>
+            </div>
+          )}
+        </dl>
+        <div className="appt-actions">
           <Link href={`/owner/dashboard/customers/${appt.customer_id}`} className="btn">
             Customer profile
           </Link>
           <Link href={`/owner/dashboard/inbox/${appt.customer_id}`} className="btn">
             Message customer
           </Link>
-          <a href={manageUrl} className="btn" target="_blank" rel="noreferrer">
-            Open the customer&apos;s manage page
-          </a>
+          {telHref && (
+            <a href={telHref} className="btn">
+              Call {formatPhone(appt.customers?.phone ?? "")}
+            </a>
+          )}
         </div>
-        <p className="small" style={{ marginTop: 10 }}>
+      </div>
+
+      {appt.status !== "cancelled" && (
+        <div className="card">
+          {/* MarkPaid leads with its own bold price line ("Pay at
+              the office"), which titles this card. */}
+          <MarkPaid
+            appointmentId={appt.id}
+            priceLine={priceLine}
+            prefillCents={prefillCents}
+            marks={paidMarks}
+          />
+        </div>
+      )}
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>Assignment</h2>
+        <AssignControl
+          businessId={business.id}
+          customerId={appt.customer_id}
+          staff={staff}
+          assignedStaffId={assignedStaffId}
+          actorId={user.id}
+          compact
+        />
+      </div>
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>Change this appointment</h2>
+        <p className="small" style={{ margin: "0 0 12px" }}>
           Rescheduling and cancelling happen through the customer&apos;s secure
-          manage link — the same link in their confirmation and reminders.
+          manage link, the same link in their confirmation and reminders.
           Share it with the customer if they ask you to change this appointment.
         </p>
+        <a href={manageUrl} className="btn" target="_blank" rel="noreferrer">
+          Open the customer&apos;s manage page
+        </a>
       </div>
 
       <div className="card">
@@ -324,13 +376,18 @@ export default async function DashboardAppointmentPage({
           const rows = reminders.filter((r) => r.kind === kind);
           if (rows.length === 0) return null;
           return (
-            <div key={kind} style={{ marginBottom: 10 }}>
-              <div style={{ fontWeight: 600 }}>{KIND_LABELS[kind]}</div>
-              {rows.map((r, i) => (
-                <p key={i} className="small" style={{ margin: "2px 0 0" }}>
-                  {r.channel === "sms" ? "Text" : "Email"} — {reminderStatus(r)}
-                </p>
-              ))}
+            <div key={kind} className="rem-group">
+              <div className="rem-kind">{KIND_LABELS[kind]}</div>
+              {rows.map((r, i) => {
+                const st = reminderStatus(r);
+                return (
+                  <div key={i} className="rem-row">
+                    <span className="rem-channel">{r.channel === "sms" ? "Text" : "Email"}</span>
+                    <span className="rem-when">{st.when}</span>
+                    <span className={`${st.cls} chip-sm`}>{st.pill}</span>
+                  </div>
+                );
+              })}
             </div>
           );
         })}
@@ -341,7 +398,7 @@ export default async function DashboardAppointmentPage({
           <h2 style={{ marginTop: 0 }}>Form</h2>
           {intake.submissionId ? (
             <p className="small" style={{ margin: 0 }}>
-              <strong>{intake.formName}</strong> — filled in{" "}
+              <strong>{intake.formName}</strong>: filled in{" "}
               {intake.submittedAt ? fmtWhen(intake.submittedAt) : ""}.{" "}
               <Link href={`/owner/dashboard/forms/submissions/${intake.submissionId}`}>
                 See the answers
@@ -349,7 +406,7 @@ export default async function DashboardAppointmentPage({
             </p>
           ) : (
             <p className="small" style={{ margin: 0 }}>
-              <strong>{intake.formName}</strong> — not filled in yet. The
+              <strong>{intake.formName}</strong>: not filled in yet. The
               customer can fill it in from the link in their confirmation,
               or from My Appointments.
             </p>

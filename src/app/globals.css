@@ -1535,6 +1535,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .dash2 input, .dash2 select, .dash2 textarea { border-color: #dce4dd; border-radius: 10px; }
 .dash2 .chip { background: #e1f2e6; color: #1e6b3a; }
 .dash2 .chip-grey { background: #edf0ed; color: #5b6b61; }
+.dash2 .chip-red { background: #fbe9e7; color: var(--red); }
 .d2-setupbar {
   background: #fdf3e3; border: 1px solid #f0d9ae; border-radius: 12px;
   padding: 11px 15px; font-size: 14px; margin-bottom: 16px;
@@ -2379,3 +2380,26 @@ footer.site-footer { padding: 0; text-align: left; }
 .tpl-row-title { font-size: 14.5px; font-weight: 600; }
 .tpl-row-line { font-size: 13px; color: #5b6b61; line-height: 1.45; margin-top: 2px; }
 .tpl-added { font-size: 13.5px; font-weight: 600; color: #1e4d33; white-space: nowrap; }
+
+/* Appointment detail: aligned label/value rows, tidy action rows,
+   and reminder rows with a small status pill per channel. */
+.appt-rows { margin: 0; display: block; }
+.appt-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 18px; padding: 9px 0; border-top: 1px solid #eef2ee;
+}
+.appt-row:first-child { border-top: none; padding-top: 2px; }
+.appt-row:last-child { padding-bottom: 0; }
+.appt-row dt { color: #5b6b61; font-size: 14px; flex: none; }
+.appt-row dd { margin: 0; text-align: right; color: var(--ink, #16241b); overflow-wrap: anywhere; }
+.appt-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.rem-group { margin-bottom: 12px; }
+.rem-group:last-child { margin-bottom: 0; }
+.rem-kind { font-weight: 600; margin-bottom: 4px; }
+.rem-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 0; border-top: 1px solid #f0f3f0;
+}
+.rem-channel { width: 52px; flex: none; font-size: 14px; }
+.rem-when { flex: 1; color: #5b6b61; font-size: 14px; }
+.chip-sm { padding: 2px 9px; font-size: 12px; }
