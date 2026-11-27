@@ -47,16 +47,17 @@ export default async function BookPage({
 
   // Account-first booking (Frantz, 2026-11-25): a booking from a
   // business's page belongs to the customer's account WITH THIS
-  // BUSINESS. Being signed in to AppointEase alone is not enough —
-  // the gate keys off membership of this business, never the bare
+  // BUSINESS. Being signed in to AppointEase alone is not enough.
+  // The gate keys off membership of this business, never the bare
   // session:
   let accountPrefill: { name: string; email: string; phone: string } | null =
     null;
   //   - signed out: the short account step (Google, or email
   //     sign-up/sign-in), which returns here carrying the join marker;
-  //   - signed in, not a member of this business (the owner testing
-  //     their own page included): the join step — one tap joins this
-  //     business and continues into booking. A visitor who just
+  //   - signed in, not a member of this business: the join step.
+  //     One tap joins this business and continues into booking.
+  //     (Owners and team members never land here: they are joined
+  //     silently just below and go straight into the flow.) A visitor who just
   //     completed sign-in/sign-up through this business's own account
   //     step arrives with the join marker and is joined on the spot;
   //     they land on their own customer dashboard (/<slug>/my),
@@ -74,7 +75,7 @@ export default async function BookPage({
         <main className="column book-column">
           <p className="eyebrow">{page.business.name}</p>
           <h1 className="center" style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
-          <AccountGate slug={slug} businessName={page.business.name} />
+          <AccountGate slug={slug} businessName={page.business.name} logoUrl={page.business.logo_url} />
           <p className="small center" style={{ marginTop: 14 }}>
             <Link href={`/${slug}`}>← Back to {page.business.name}</Link>
           </p>
@@ -124,6 +125,7 @@ export default async function BookPage({
                 : `/${slug}/book`
             }
             actionLabel={`Join ${business.name} and book`}
+            logoUrl={business.logo_url}
           />
           <p className="small center" style={{ marginTop: 14 }}>
             <Link href={`/${slug}`}>← Back to {business.name}</Link>

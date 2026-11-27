@@ -8,24 +8,29 @@ import GoogleLogo from "@/components/GoogleLogo";
 /**
  * Account step at the front of booking from a business's page
  * (Frantz, 2026-11-25): booking belongs to the customer's account
- * WITH THIS BUSINESS — no more anonymous guest checkout from the
+ * WITH THIS BUSINESS. No more anonymous guest checkout from the
  * business page. Google first (one tap), or the existing email
  * sign-up / sign-in pages, always with next set back into this
  * booking so nothing is asked twice. The return path carries the
  * join marker (?join=1): completing sign-in or sign-up through THIS
  * business's account step is what joins the customer to this
- * business — the book page sees the marker, creates the membership,
+ * business. The book page sees the marker, creates the membership,
  * and continues into booking. Phone-code sign-in is NOT offered:
  * Supabase reports the phone provider disabled (texting is not
  * connected yet), and a button that cannot send a code is never
- * shipped.
+ * shipped. Styled as the business's own welcome card (Frantz,
+ * 2026-11-26): the business logo and name lead, then the heading,
+ * then Google, then email. Owners and team never see this step on
+ * their own business; the book page auto-joins them first.
  */
 export default function AccountGate({
   slug,
   businessName,
+  logoUrl,
 }: {
   slug: string;
   businessName: string;
+  logoUrl?: string | null;
 }) {
   const [error, setError] = useState("");
   const back = `/${slug}/book?join=1`;
@@ -41,15 +46,24 @@ export default function AccountGate({
     });
     if (error) {
       setError(
-        "Google sign-in is unavailable right now — please use email below, or try again shortly."
+        "Google sign-in is unavailable right now. Please use email below, or try again shortly."
       );
     }
   }
 
   return (
-    <div className="card">
-      <h2>Create your account or log in</h2>
-      <p className="lede" style={{ marginBottom: 16 }}>
+    <div className="card gate-card">
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="gate-logo" src={logoUrl} alt="" />
+      ) : (
+        <span className="gate-initial" aria-hidden="true">
+          {businessName.trim().charAt(0).toUpperCase() || "?"}
+        </span>
+      )}
+      <p className="gate-biz">{businessName}</p>
+      <h2 className="gate-title">Create your account or log in</h2>
+      <p className="lede gate-lede">
         Your account is only with {businessName}.
       </p>
       {error && <div className="error">{error}</div>}
@@ -57,10 +71,8 @@ export default function AccountGate({
         <GoogleLogo />
         Continue with Google
       </button>
-      <p className="small center" style={{ margin: "12px 0 14px" }}>
-        or use email
-      </p>
-      <div style={{ display: "flex", gap: 8 }}>
+      <p className="small center gate-or">or use email</p>
+      <div className="gate-email-row">
         <Link
           href={`/signup?next=${encodeURIComponent(back)}`}
           className="btn btn-block"
@@ -76,7 +88,7 @@ export default function AccountGate({
           Sign in
         </Link>
       </div>
-      <p className="small center" style={{ marginTop: 14 }}>
+      <p className="small center" style={{ margin: "14px 0 0" }}>
         New here? Creating your account takes a few seconds.
       </p>
     </div>

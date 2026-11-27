@@ -119,6 +119,7 @@ export default async function MessagePage({
           businessId={business.id}
           continuePath={`/${slug}/message`}
           actionLabel={`Join ${business.name} and message`}
+          logoUrl={business.logo_url}
         />
         <p className="small center">
           <Link href={`/${slug}`}>← Back to {business.name}</Link>
