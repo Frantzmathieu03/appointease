@@ -2,11 +2,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getBusinessPageDataWithPreview } from "@/lib/data";
 import { isDemoShop } from "@/lib/demo";
-import { createServerSupabase } from "@/lib/supabase";
+import { createAdminSupabase, createServerSupabase } from "@/lib/supabase";
 import {
   ensureBusinessMembership,
   ensureCustomerProfile,
   isBusinessMember,
+  isBusinessTeamMember,
 } from "@/lib/profile";
 import ThreadView from "@/components/ThreadView";
 import JoinStep from "@/components/JoinStep";
@@ -84,10 +85,21 @@ export default async function MessagePage({
   // creates the membership for this business, then the thread opens.
   // Members go straight in.
   const isOwner = user.id === business.owner_id;
-  const member =
-    !isOwner && (await isBusinessMember(supabase, business.id, user.id));
+  // Owners and active team members never hit the join wall on their
+  // own business (Frantz, 2026-11-26): silent auto-join, straight in.
+  const onTeam =
+    isOwner ||
+    (await isBusinessTeamMember(createAdminSupabase(), business.id, user.id));
+  let member = await isBusinessMember(supabase, business.id, user.id);
+  if (!member && onTeam) {
+    await ensureCustomerProfile(supabase, user);
+    await ensureBusinessMembership(supabase, business.id, user.id, {
+      smsConsent: consent === "1",
+    });
+    member = true;
+  }
   if (!member) {
-    if (!isOwner && join) {
+    if (join) {
       await ensureCustomerProfile(supabase, user);
       await ensureBusinessMembership(supabase, business.id, user.id, {
         smsConsent: consent === "1",
@@ -107,7 +119,6 @@ export default async function MessagePage({
           businessId={business.id}
           continuePath={`/${slug}/message`}
           actionLabel={`Join ${business.name} and message`}
-          ownerView={isOwner}
         />
         <p className="small center">
           <Link href={`/${slug}`}>← Back to {business.name}</Link>

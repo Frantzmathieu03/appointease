@@ -13,6 +13,7 @@ import {
   ensureBusinessMembership,
   ensureCustomerProfile,
   isBusinessMember,
+  isBusinessTeamMember,
   recordSmsConsent,
 } from "@/lib/profile";
 import { getBillingState } from "@/lib/plans";
@@ -124,10 +125,11 @@ export default async function BusinessPage({
   }
   const { business, services } = page;
   const tz = business.timezone;
-  // A published business with no services yet is not bookable: the page
-  // says so in one plain line and shows no booking button (Frantz,
-  // 2026-11-25 — services are added later, in the dashboard).
-  const hasServices = services.length > 0;
+  // The Book button always shows (Frantz, 2026-11-26): a business is
+  // never blocked from taking bookings for having no services yet —
+  // page data supplies the generic default appointment in that case
+  // (see lib/default-service), and every business also gets a real
+  // default service at creation and by backfill.
   // Demo shops (public examples): labeled as demos, contact rows hidden,
   // no call/message actions — booking is a safe simulation (see lib/demo).
   const demoShop = isDemoShop(slug);
@@ -165,14 +167,16 @@ export default async function BusinessPage({
   }
 
   // The top-right auth row (the plan replaces the old slim header on
-  // this page): "My dashboard" ONLY for a signed-in customer who is a
-  // member of THIS business and is not the owner — the exact rule
-  // BusinessHeader applies on the book / message / my surfaces. Demo
-  // shops keep their sample behavior (any signed-in visitor sees the
-  // dashboard pill). Everyone else sees Log in / Sign up, both
-  // carrying next=/<slug>?join=1 so completing auth joins them here.
+  // this page): "My dashboard" for anyone signed in with a home at
+  // this business — the OWNER dashboard for the owner and active
+  // team members, the customer dashboard for a joined customer (the
+  // exact rule BusinessHeader applies on the book / message / my
+  // surfaces, Frantz 2026-11-26). Demo shops keep their sample
+  // behavior (any signed-in visitor sees the dashboard pill).
+  // Everyone else sees Log in / Sign up, both carrying
+  // next=/<slug>?join=1 so completing auth joins them here.
   let signedInUser: { id: string } | null = null;
-  let showDashboard = false;
+  let dashboardHref: string | null = null;
   if (!page.demoMode && isSupabaseConfigured()) {
     try {
       const supabase = await createServerSupabase();
@@ -182,20 +186,25 @@ export default async function BusinessPage({
       if (user) {
         signedInUser = user;
         if (demoShop) {
-          showDashboard = true;
-        } else if (user.id !== business.owner_id) {
-          showDashboard = await isBusinessMember(supabase, business.id, user.id);
+          dashboardHref = `/${slug}/my`;
+        } else if (
+          user.id === business.owner_id ||
+          (await isBusinessTeamMember(createAdminSupabase(), business.id, user.id))
+        ) {
+          dashboardHref = "/owner/dashboard";
+        } else if (await isBusinessMember(supabase, business.id, user.id)) {
+          dashboardHref = `/${slug}/my`;
         }
       }
     } catch {
-      showDashboard = false;
+      dashboardHref = null;
     }
   }
   const nextPath = demoShop ? `/${slug}` : `/${slug}?join=1`;
   const authRow = (
     <div className="bp-auth">
-      {showDashboard ? (
-        <Link className="bp-auth-btn bp-auth-signup" href={`/${slug}/my`}>
+      {dashboardHref ? (
+        <Link className="bp-auth-btn bp-auth-signup" href={dashboardHref}>
           My dashboard
         </Link>
       ) : (
@@ -395,17 +404,12 @@ export default async function BusinessPage({
         </section>
       )}
 
-      {/* The one big Book button — same destination and gates as
-          before (the booking page runs its account/join steps). With
-          no services there is no button into an empty flow, just the
-          plain not-taking-bookings line. */}
-      {hasServices ? (
-        <Link className="bp-book" href={`/${slug}/book`}>
-          Book an appointment
-        </Link>
-      ) : (
-        <p className="bp-notbookable">This business is not taking bookings yet.</p>
-      )}
+      {/* The one big Book button — always shown, no matter how many
+          services the business has added (Frantz, 2026-11-26). The
+          booking page runs its account/join steps from here. */}
+      <Link className="bp-book" href={`/${slug}/book`}>
+        Book an appointment
+      </Link>
 
       {squares.length > 0 && (
         <div
@@ -450,7 +454,7 @@ export default async function BusinessPage({
         </section>
       )}
 
-      {hasServices && (
+      {services.length > 0 && (
         <section className="bp-card">
           <h2 className="bp-card-title">Services</h2>
           {services.map((s) => {

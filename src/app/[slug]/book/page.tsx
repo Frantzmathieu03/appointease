@@ -8,7 +8,9 @@ import {
   ensureBusinessMembership,
   ensureCustomerProfile,
   isBusinessMember,
+  isBusinessTeamMember,
 } from "@/lib/profile";
+import { createAdminSupabase } from "@/lib/supabase";
 import BookingFlow from "@/components/BookingFlow";
 import AccountGate from "@/components/AccountGate";
 import JoinStep from "@/components/JoinStep";
@@ -29,7 +31,7 @@ export default async function BookPage({
   // new bookings (existing appointments are unaffected).
   if (!getBillingState(page.business).bookingLive) {
     return (
-      <main className="column">
+      <main className="column book-column">
         <div className="card center">
           <h2>Online booking is temporarily unavailable</h2>
           <p className="lede">
@@ -69,7 +71,7 @@ export default async function BookPage({
     } = await supabase.auth.getUser();
     if (!user) {
       return (
-        <main className="column">
+        <main className="column book-column">
           <p className="eyebrow">{page.business.name}</p>
           <h1 className="center" style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
           <AccountGate slug={slug} businessName={page.business.name} />
@@ -81,10 +83,23 @@ export default async function BookPage({
     }
     const business = page.business;
     const isOwner = user.id === business.owner_id;
-    const member =
-      !isOwner && (await isBusinessMember(supabase, business.id, user.id));
+    // Owners and active team members never hit the join wall on their
+    // own business (Frantz, 2026-11-26): they are joined as customers
+    // silently and continue straight into the booking flow, so the
+    // owner can test the exact client experience end to end.
+    const onTeam =
+      isOwner ||
+      (await isBusinessTeamMember(createAdminSupabase(), business.id, user.id));
+    let member = await isBusinessMember(supabase, business.id, user.id);
+    if (!member && onTeam) {
+      await ensureCustomerProfile(supabase, user);
+      await ensureBusinessMembership(supabase, business.id, user.id, {
+        smsConsent: consent === "1",
+      });
+      member = true;
+    }
     if (!member) {
-      if (!isOwner && join) {
+      if (join) {
         await ensureCustomerProfile(supabase, user);
         await ensureBusinessMembership(supabase, business.id, user.id, {
           smsConsent: consent === "1",
@@ -96,7 +111,7 @@ export default async function BookPage({
         redirect(`/${slug}/my`);
       }
       return (
-        <main className="column">
+        <main className="column book-column">
           <p className="eyebrow">{business.name}</p>
           <h1 className="center" style={{ fontSize: 28, marginBottom: 14 }}>Book an appointment</h1>
           <JoinStep
@@ -109,7 +124,6 @@ export default async function BookPage({
                 : `/${slug}/book`
             }
             actionLabel={`Join ${business.name} and book`}
-            ownerView={isOwner}
           />
           <p className="small center" style={{ marginTop: 14 }}>
             <Link href={`/${slug}`}>← Back to {business.name}</Link>
@@ -137,7 +151,7 @@ export default async function BookPage({
   }
 
   return (
-    <main className="column">
+    <main className="column book-column">
       <BookingFlow
         slug={slug}
         businessName={page.business.name}

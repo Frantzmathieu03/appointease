@@ -1,23 +1,23 @@
 import Link from "next/link";
-import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { isBusinessMember } from "@/lib/profile";
+import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { isBusinessMember, isBusinessTeamMember } from "@/lib/profile";
 import { isDemoShop } from "@/lib/demo";
 
 // The slim header on a business's own pages (white label, Frantz
 // 2026-11-25): the business's logo and name on the left; on the right,
-// the CUSTOMER's account actions for this business. Accounts are per
-// business, so "My dashboard" appears ONLY for a signed-in customer
-// who is a member of THIS business (a business_customers row) and is
-// not the owner. Being signed in to AppointEase alone is not enough:
-// the owner testing their own page, and signed-in visitors who have
-// not joined this business, see the "Sign up" and "Sign in" buttons
-// (Frantz's words — real buttons, not shy text links; both carry
-// next=/<slug>?join=1 so the customer lands back on this business
-// AND joins it — see the join handling on the business page). Demo
-// shops keep their sample behavior (any signed-in visitor sees the
-// sample dashboard link). No AppointEase branding here — the only
-// platform mention on a business page is the small "Powered by
-// AppointEase" line at the very bottom.
+// the viewer's account action for this business. "My dashboard" goes
+// to the OWNER dashboard for the owner and active team members of
+// this business, and to the per-business customer dashboard for a
+// joined customer (Frantz, 2026-11-26 — the header must never show
+// the owner as logged out on their own pages). Signed-in visitors
+// who have not joined this business, and logged-out visitors, see
+// the "Sign up" and "Sign in" buttons (real buttons, not shy text
+// links; both carry next=/<slug>?join=1 so the customer lands back
+// on this business AND joins it — see the join handling on the
+// business page). Demo shops keep their sample behavior (any
+// signed-in visitor sees the sample dashboard link). No AppointEase
+// branding here — the only platform mention on a business page is
+// the small "Powered by AppointEase" line at the very bottom.
 export default async function BusinessHeader({
   slug,
   name,
@@ -31,7 +31,12 @@ export default async function BusinessHeader({
   businessId: string;
   ownerId: string;
 }) {
-  let showDashboard = false;
+  // "My dashboard" has two targets (Frantz, 2026-11-26): the owner
+  // and active team members of THIS business get their OWNER
+  // dashboard; a joined customer gets their customer dashboard for
+  // this business. Everyone else sees Sign up / Sign in. (The main
+  // business page applies the same rule in its own top row.)
+  let dashboardHref: string | null = null;
   if (isSupabaseConfigured()) {
     try {
       const supabase = await createServerSupabase();
@@ -40,13 +45,18 @@ export default async function BusinessHeader({
       } = await supabase.auth.getUser();
       if (user) {
         if (isDemoShop(slug)) {
-          showDashboard = true;
-        } else if (user.id !== ownerId) {
-          showDashboard = await isBusinessMember(supabase, businessId, user.id);
+          dashboardHref = `/${slug}/my`;
+        } else if (
+          user.id === ownerId ||
+          (await isBusinessTeamMember(createAdminSupabase(), businessId, user.id))
+        ) {
+          dashboardHref = "/owner/dashboard";
+        } else if (await isBusinessMember(supabase, businessId, user.id)) {
+          dashboardHref = `/${slug}/my`;
         }
       }
     } catch {
-      showDashboard = false;
+      dashboardHref = null;
     }
   }
 
@@ -72,8 +82,8 @@ export default async function BusinessHeader({
         <span className="biz-header-name">{name}</span>
       </Link>
       <nav className="biz-header-actions">
-        {showDashboard ? (
-          <Link href={`/${slug}/my`} className="btn btn-primary biz-header-btn">
+        {dashboardHref ? (
+          <Link href={dashboardHref} className="btn btn-primary biz-header-btn">
             My dashboard
           </Link>
         ) : (

@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "./supabase";
 import { isBusinessMember } from "./profile";
 import { DEMO_AVAILABILITY, DEMO_BUSINESS, DEMO_SERVICES, DEMO_STAFF } from "./demo-data";
+import { syntheticStandardServices } from "./default-service";
 import type {
   Availability,
   Business,
@@ -157,9 +158,18 @@ async function assembleBusinessPageData(
     .order("created_at", { ascending: true });
   if (!locRes.error) locations = (locRes.data ?? []) as Location[];
 
+  // Never an empty service list (Frantz, 2026-11-26): a business
+  // with no services still takes bookings against the standard pair
+  // the system provides (category standard + follow-up). The booking
+  // API turns the chosen stand-in into a real row on first use (see
+  // lib/default-service).
+  const serviceRows = (services ?? []) as Service[];
   return {
     business: business as Business,
-    services: (services ?? []) as Service[],
+    services:
+      serviceRows.length > 0
+        ? serviceRows
+        : syntheticStandardServices(business.id, business.category),
     staff: (staff ?? []) as StaffMember[],
     availability: (availability ?? []) as Availability[],
     photos: (photos ?? []) as BusinessPhoto[],

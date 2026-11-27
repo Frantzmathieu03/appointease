@@ -49,6 +49,33 @@ export async function isBusinessMember(
 }
 
 /**
+ * Is this user on the business's own team (an active business_members
+ * row — manager or staff)? The owner is checked separately against
+ * businesses.owner_id. Owners and team members never hit the customer
+ * join wall on their own business (Frantz, 2026-11-26): the gates
+ * auto-join them as customers instead, and the business headers show
+ * them their owner dashboard link.
+ */
+export async function isBusinessTeamMember(
+  supabase: SupabaseClient,
+  businessId: string,
+  userId: string
+): Promise<boolean> {
+  try {
+    const { data } = await supabase
+      .from("business_members")
+      .select("id")
+      .eq("business_id", businessId)
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle();
+    return Boolean(data);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Join this customer to ONE business (per-business account model,
  * Frantz 2026-11-25): the business_customers row is the membership —
  * the account's home at that business. Signing up from a business's

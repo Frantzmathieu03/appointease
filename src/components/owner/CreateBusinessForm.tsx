@@ -7,6 +7,7 @@ import { TRIAL_DAYS } from "@/lib/plans";
 import { slugify } from "@/lib/types";
 import { BUSINESS_TYPES } from "@/lib/owner-shared";
 import { CATEGORIES, DEFAULT_CATEGORY } from "@/lib/categories";
+import { standardServiceNames, DEFAULT_SERVICE_MINUTES } from "@/lib/default-service";
 
 /**
  * Creates the owner's business row with its slug reserved
@@ -61,6 +62,28 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         // best-effort follow-up so business creation never breaks if the
         // migration hasn't been applied yet.
         await supabase.from("businesses").update({ category }).eq("slug", slug);
+        // The standard pair (Frantz, 2026-11-26): every new business
+        // starts bookable — the category standard plus a follow-up
+        // appointment, provided by the system, free, no owner action
+        // needed. Best-effort like the category write; the booking
+        // flow's own fallback covers any miss.
+        const { data: biz } = await supabase
+          .from("businesses")
+          .select("id")
+          .eq("slug", slug)
+          .maybeSingle();
+        if (biz) {
+          await supabase.from("services").insert(
+            standardServiceNames(category).map((serviceName) => ({
+              business_id: biz.id,
+              name: serviceName,
+              duration_minutes: DEFAULT_SERVICE_MINUTES,
+              price_type: "none",
+              price_cents: null,
+              active: true,
+            }))
+          );
+        }
       } else if ((error as { code?: string }).code !== "23505") {
         setError("Could not create the business — please try again.");
         break;

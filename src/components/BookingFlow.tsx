@@ -544,31 +544,10 @@ export default function BookingFlow({
     );
   }
 
-  // No services yet: step 1 would render an empty "Service" card —
-  // services.map() emits nothing and Continue stays disabled with no
-  // explanation (Frantz hit exactly this on a brand-new business,
-  // 2026-11-26). Show one clear card instead of the dead flow. The
-  // business page already says the same thing and hides its Book
-  // button, but the flow is still reachable (e.g. the Book button on
-  // the customer's own dashboard), so it must stand on its own.
-  if (services.length === 0) {
-    return (
-      <div>
-        <p className="eyebrow">{businessName}</p>
-        <h1 style={{ fontSize: 28 }}>Book an appointment</h1>
-        <div className="card" style={{ marginTop: 16 }}>
-          <h2>Not taking bookings yet</h2>
-          <p className="lede">
-            This business has not added any services yet. Please check back
-            later.
-          </p>
-          <Link href={`/${slug}`} className="btn btn-primary">
-            Back to {businessName}
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // A business with no services of its own still books: page data
+  // supplies the generic default appointment as the service choice
+  // (lib/default-service), so this flow never renders an empty
+  // service step and never dead-ends (Frantz, 2026-11-26).
 
   const slotDate = slot ? new Date(slot) : null;
   const reviewWhen = slotDate
@@ -807,14 +786,22 @@ export default function BookingFlow({
                 <span>Where</span>
                 <strong>{businessAddress || visitTypeLabel(service?.visit_type)}</strong>
               </div>
-              <div className="c3-review-row">
-                <span>Price</span>
-                <strong>{price || "—"}</strong>
-              </div>
+              {/* No Price row at all when the service has no price
+                  (Frantz, 2026-11-26): a bare dash reads as broken,
+                  and the "Nothing to pay online" line below covers
+                  it. Priced services keep their row exactly as before. */}
+              {price ? (
+                <div className="c3-review-row">
+                  <span>Price</span>
+                  <strong>{price}</strong>
+                </div>
+              ) : null}
               <div className="c3-review-row">
                 <span>You</span>
-                <strong>
-                  {form.name} · {formatPhone(form.phone)} · {form.email}
+                <strong className="c3-review-stack">
+                  <span>{form.name}</span>
+                  <span>{formatPhone(form.phone)}</span>
+                  <span>{form.email}</span>
                 </strong>
               </div>
             </div>

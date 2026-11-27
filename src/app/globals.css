@@ -1382,10 +1382,6 @@ footer.site-footer { padding: 0; text-align: left; }
   background: #1e4d33; color: #fff;
   font-size: 17px; font-weight: 700; text-decoration: none;
 }
-.bp-notbookable {
-  text-align: center; color: #5b6b61; font-size: 15px; margin: 16px 4px 0;
-}
-
 /* 7 — Call / Message / Directions squares. */
 .bp-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
 .bp-actions-1 { grid-template-columns: 1fr; }
@@ -2218,3 +2214,16 @@ footer.site-footer { padding: 0; text-align: left; }
   .hp-day-stage { height: auto; }
   .hp-day-cap { animation: none; }
 }
+
+/* Booking Review polish (Frantz, 2026-11-26): the booking flow
+   column caps at the business page's 480px, centered, on every
+   step and the booked screen — no more wide slab on desktop. The
+   Review "You" value stacks name / phone / email on their own
+   right-aligned lines instead of wrapping mid-word. */
+.book-column { max-width: 480px; }
+.c3-review-stack {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 1px;
+  min-width: 0; text-align: right;
+}
+.c3-review-stack > span { max-width: 100%; overflow-wrap: break-word; }
+.c3-review-row:has(.c3-review-stack) { align-items: flex-start; }

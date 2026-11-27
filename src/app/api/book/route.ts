@@ -7,6 +7,7 @@ import { generateConfirmationCode } from "@/lib/confirmation";
 import { isDemoShop } from "@/lib/demo";
 import { logCustomerEvent } from "@/lib/events";
 import { sendNativePush } from "@/lib/native-push";
+import { ensureStandardServices, isStandardServiceId } from "@/lib/default-service";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
 // POST /api/book
@@ -39,7 +40,20 @@ export async function POST(req: NextRequest) {
   // still apply to insiders.
   const page = await getBusinessPageDataWithPreview(slug);
   if (!page) return NextResponse.json({ error: "Business not found" }, { status: 404 });
-  const service = page.services.find((s) => s.id === serviceId);
+  let service = page.services.find((s) => s.id === serviceId);
+  if (service && isStandardServiceId(service.id)) {
+    // A standard-pair stand-in from page data: make sure the real
+    // pair exists, then book against the real row with the same
+    // name — the booking always saves against a real service
+    // (Frantz, 2026-11-26).
+    const wanted = service.name;
+    const real = await ensureStandardServices(createAdminSupabase(), page.business);
+    const match = real?.find((s) => s.name === wanted);
+    if (!match) {
+      return NextResponse.json({ error: "Service not found" }, { status: 404 });
+    }
+    service = match;
+  }
   if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
 
   // Billing gate (defense in depth — the pages hide booking too): a paused
