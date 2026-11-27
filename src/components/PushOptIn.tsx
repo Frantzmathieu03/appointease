@@ -14,11 +14,11 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 /**
- * "Notify me on this device" — registers the service worker, asks
+ * "Notify me on this device": registers the service worker, asks
  * permission, and stores the Web Push subscription against the signed-in
  * user (push_subscriptions, RLS self-only). Delivery additionally needs
  * VAPID keys on the server; without the public key configured here the
- * control honestly says push is not switched on yet — email alerts are
+ * control honestly says push is not switched on yet: email alerts are
  * the working off-screen channel in the meantime.
  */
 export default function PushOptIn() {
@@ -39,7 +39,7 @@ export default function PushOptIn() {
   if (!vapidPublic) {
     return (
       <p className="small">
-        Push notifications are not switched on yet — new-message alerts are
+        Push notifications are not switched on yet. New message alerts are
         sent by email in the meantime.
       </p>
     );
@@ -88,7 +88,7 @@ export default function PushOptIn() {
         {state === "working" ? "Turning on…" : "Get push notifications on this device"}
       </button>
       {state === "denied" && (
-        <p className="small">Permission was denied — you can allow notifications in your browser settings.</p>
+        <p className="small">Permission was denied. You can allow notifications in your browser settings.</p>
       )}
       {state === "error" && <p className="small">Something went wrong turning push on. Email alerts still work.</p>}
     </div>

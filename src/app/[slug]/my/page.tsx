@@ -349,7 +349,7 @@ export default async function BusinessCustomerDashboard({
 
   const statusWord = (a: ApptRow) =>
     a.status === "no_show"
-      ? "No-show"
+      ? "No show"
       : a.status.replace("_", " ").replace(/^\w/, (c) => c.toUpperCase());
 
   const laterCard = (a: ApptRow) => (

@@ -3,7 +3,7 @@
 // HONESTY RULE: a message is only ever reported as "sent" when a real
 // provider accepted it. When a provider is not configured, the send functions
 // return { delivered: false } and the reminder engine records the reminder
-// as "skipped" with the reason — never as sent.
+// as "skipped" with the reason: never as sent.
 
 export interface SendResult {
   delivered: boolean;
@@ -11,7 +11,7 @@ export interface SendResult {
 }
 
 // ---------------------------------------------------------------------------
-// Email — Resend when RESEND_API_KEY is set; otherwise log-only.
+// Email: Resend when RESEND_API_KEY is set; otherwise log-only.
 // Swap providers by implementing this one function.
 // ---------------------------------------------------------------------------
 export async function sendEmail(opts: {
@@ -30,7 +30,7 @@ export async function sendEmail(opts: {
     );
     return {
       delivered: false,
-      detail: "Email provider not configured (RESEND_API_KEY missing) — logged only.",
+      detail: "Email provider not configured (RESEND_API_KEY missing). Logged only.",
     };
   }
 
@@ -59,10 +59,10 @@ export async function sendEmail(opts: {
 }
 
 // ---------------------------------------------------------------------------
-// SMS — Twilio interface stub.
+// SMS: Twilio interface stub.
 // Until TWILIO_* credentials exist (Phase 2, incl. A2P 10DLC registration),
 // this no-ops safely and reports not-delivered. When credentials land, the
-// real send goes in this same function — callers do not change.
+// real send goes in this same function: callers do not change.
 // ---------------------------------------------------------------------------
 export async function sendSms(opts: {
   to: string;
@@ -76,7 +76,7 @@ export async function sendSms(opts: {
     console.log(`[sms:stub] Would send to ${opts.to}: ${opts.body}`);
     return {
       delivered: false,
-      detail: "SMS not configured (Twilio credentials missing) — logged as would-send.",
+      detail: "SMS not configured (Twilio credentials missing). Logged instead of sent.",
     };
   }
 

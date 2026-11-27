@@ -6,7 +6,7 @@ import { isSupabaseConfigured } from "@/lib/supabase-config";
 
 /**
  * Exact unread-message count badge (owner requirement, 2026-11-24):
- * 1 unread message shows "1", 2 shows "2" — visible without opening the
+ * 1 unread message shows "1", 2 shows "2": visible without opening the
  * inbox. Updates live via Supabase Realtime on the messages table, with a
  * 30-second polling fallback so a missed event never leaves a stale count.
  * RLS scopes every count: a customer only ever counts their own threads;
@@ -22,7 +22,7 @@ export default function UnreadBadge({
   const [count, setCount] = useState(0);
   // Unique channel name per mounted instance: the browser Supabase
   // client is a singleton, so every badge asking for the same channel
-  // name gets the SAME channel back — and realtime-js throws when a
+  // name gets the SAME channel back: and realtime-js throws when a
   // second instance adds callbacks after the first one subscribed.
   // The dashboard renders three owner badges for one business, which
   // crashed every dashboard page until each instance got its own name.

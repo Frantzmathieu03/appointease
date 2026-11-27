@@ -72,7 +72,7 @@ export default function NativeBridge({ businessId }: { businessId?: string }) {
     // as soon as the first page has actually rendered.
     SplashScreen.hide().catch(() => {});
 
-    // Notification taps — one listener for the whole app session.
+    // Notification taps: one listener for the whole app session.
     if (!tapListenerReady) {
       tapListenerReady = true;
       PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
@@ -129,7 +129,7 @@ export default function NativeBridge({ businessId }: { businessId?: string }) {
                 { onConflict: "token" }
               );
             } catch {
-              // device_tokens arrives with migration 0017 — until it
+              // device_tokens arrives with migration 0017: until it
               // lands the write simply does not happen.
             }
           });
@@ -137,7 +137,7 @@ export default function NativeBridge({ businessId }: { businessId?: string }) {
           await PushNotifications.register();
         }
       } catch {
-        // Push is unavailable on this device — the app works without it.
+        // Push is unavailable on this device: the app works without it.
       }
 
       // Signing out removes this device's token row, so a shared

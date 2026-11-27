@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — AppointEase",
+  title: "Privacy Policy · AppointEase",
   description: "How AppointEase collects, uses and protects information for businesses and their customers.",
 };
 
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
 
       <h2>2. Health information</h2>
       <p>
-        AppointEase is an appointment-scheduling tool — it is not a medical
+        AppointEase is an appointment scheduling tool. It is not a medical
         record system, and it is not HIPAA-certified. Businesses that take
         bookings for health-related services, such as dental, medical or
         wellness practices, must not enter diagnoses, treatment notes, or
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
       <h2>4. How we share information</h2>
       <ul>
         <li><strong>With the business you book.</strong> Your name, contact details, booking details and messages are shared with that business so it can serve you.</li>
-        <li><strong>With service providers.</strong> We use trusted providers to run AppointEase — for example hosting and database, payment processing, email delivery and text messaging. They receive only the information needed to perform their service.</li>
+        <li><strong>With service providers.</strong> We use trusted providers to run AppointEase, for example hosting and database, payment processing, email delivery and text messaging. They receive only the information needed to perform their service.</li>
         <li><strong>For legal reasons.</strong> We may disclose information if required by law, court order, or to protect the rights and safety of our users and the platform.</li>
         <li><strong>Never sold.</strong> We do not sell your personal information, and we do not share it for third-party advertising.</li>
       </ul>

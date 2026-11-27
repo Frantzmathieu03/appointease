@@ -4,26 +4,26 @@ import { planById, seatLimitMessage } from "@/lib/plans";
 import { sendEmail } from "@/lib/notify";
 import { createAdminSupabase } from "@/lib/supabase";
 
-// POST /api/team/invite — team invites (Owner Dashboard Plan,
+// POST /api/team/invite: team invites (Owner Dashboard Plan,
 // 2026-11-26). OWNER ONLY: managers see the whole business except
 // Billing and Team management, so creating or re-sending an invite
 // is gated here on the server as well as in the UI (migration 0015
-// also tightens the RLS insert policies to the owner — this route
+// also tightens the RLS insert policies to the owner: this route
 // behaves the same before and after it lands).
 //
 // Body (new invite): { name, contact, role: "manager" | "staff",
 // serviceIds?: string[] }
 //   - contact must be an email: the join link is emailed via Resend
 //     and acceptance matches on the invite address. A mobile number
-//     gets a plain "not yet" answer — texting invites waits on the
+//     gets a plain "not yet" answer: texting invites waits on the
 //     same Twilio setup as texting reminders; no dead invite is
 //     created.
 //   - a staff invite links (or creates) the staff calendar carrying
 //     the person's name, and merges the picked services into that
 //     calendar's staff_services.
-// Body (re-send): { resendOf: inviteId } — emails the existing link
+// Body (re-send): { resendOf: inviteId }: emails the existing link
 // again.
-// Response: { ok, link, emailed } — the link is always returned so
+// Response: { ok, link, emailed }: the link is always returned so
 // the owner can also copy and send it themselves.
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     return res.delivered;
   };
 
-  // — Re-send an existing pending invite —
+  //: Re-send an existing pending invite: 
   if (typeof body.resendOf === "string" && body.resendOf) {
     const { data: invite } = await supabase
       .from("team_invites")
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, link, emailed });
   }
 
-  // — New invite —
+  //: New invite: 
   const name = typeof body.name === "string" ? body.name.trim() : "";
   const contact = typeof body.contact === "string" ? body.contact.trim() : "";
   const inviteRole = body.role === "manager" ? "manager" : "staff";
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Texting invites isn't on yet — use their email address for now, and they'll get the join link by email.",
+          "Texting invites isn't on yet. Use their email address for now, and they'll get the join link by email.",
       },
       { status: 400 }
     );
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
   if (inviteRole === "staff") {
     if (!name) {
       return NextResponse.json(
-        { error: "Add their name — it becomes the name on their calendar." },
+        { error: "Add their name. It becomes the name on their calendar." },
         { status: 400 }
       );
     }
@@ -151,8 +151,8 @@ export async function POST(req: NextRequest) {
     } else {
       // SEAT LIMIT (Frantz, 2026-11-26): a staff invite creates a new
       // calendar, and calendars are what the plan counts (owner
-      // included). At the cap the add stops here — server-side, not
-      // just in the UI — with the upgrade prompt. Linking an existing
+      // included). At the cap the add stops here: server-side, not
+      // just in the UI: with the upgrade prompt. Linking an existing
       // calendar (the match above) adds no seat and stays allowed;
       // manager invites carry no calendar and are not seat-capped.
       const plan = planById(business.plan);
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
         .single();
       if (staffErr || !created) {
         // The migration 0015 trigger says the same thing at the
-        // database level — surface it as the seat-limit prompt.
+        // database level: surface it as the seat-limit prompt.
         if (staffErr && /seat limit/i.test(staffErr.message)) {
           return NextResponse.json(
             { error: seatLimitMessage(planById(business.plan)), seatLimit: true },
@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
           );
         }
         return NextResponse.json(
-          { error: "Could not create their calendar — please try again." },
+          { error: "Could not create their calendar. Please try again." },
           { status: 500 }
         );
       }
@@ -214,13 +214,13 @@ export async function POST(req: NextRequest) {
     if (withName && name) row.name = name;
     return supabase.from("team_invites").insert(row).select("token").single();
   };
-  // The name column arrives with migration 0015 — fall back quietly
+  // The name column arrives with migration 0015: fall back quietly
   // until it lands so invites keep working either way.
   let { data, error } = await insertInvite(true);
   if (error) ({ data, error } = await insertInvite(false));
   if (error || !data) {
     return NextResponse.json(
-      { error: "Could not send the invite — please try again." },
+      { error: "Could not send the invite. Please try again." },
       { status: 500 }
     );
   }

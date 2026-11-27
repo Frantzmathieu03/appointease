@@ -8,15 +8,15 @@ import { isDemoShop } from "@/lib/demo";
 // the viewer's account action for this business. "My dashboard" goes
 // to the OWNER dashboard for the owner and active team members of
 // this business, and to the per-business customer dashboard for a
-// joined customer (Frantz, 2026-11-26 — the header must never show
+// joined customer (Frantz, 2026-11-26: the header must never show
 // the owner as logged out on their own pages). Signed-in visitors
 // who have not joined this business, and logged-out visitors, see
 // the "Sign up" and "Sign in" buttons (real buttons, not shy text
 // links; both carry next=/<slug>?join=1 so the customer lands back
-// on this business AND joins it — see the join handling on the
+// on this business AND joins it: see the join handling on the
 // business page). Demo shops keep their sample behavior (any
 // signed-in visitor sees the sample dashboard link). No AppointEase
-// branding here — the only platform mention on a business page is
+// branding here: the only platform mention on a business page is
 // the small "Powered by AppointEase" line at the very bottom.
 export default async function BusinessHeader({
   slug,
@@ -64,7 +64,7 @@ export default async function BusinessHeader({
   // customer to this business (per-business account model): the
   // buttons carry the join marker in their return path, and the
   // business page itself creates the membership when a signed-in
-  // non-owner lands back with it — the same ?join=1 mechanism as the
+  // non-owner lands back with it: the same ?join=1 mechanism as the
   // booking and message gates. Demo shops keep their plain return.
   const nextPath = isDemoShop(slug) ? `/${slug}` : `/${slug}?join=1`;
 

@@ -10,7 +10,7 @@ export default function CopyLinkButton({ url, label = "Copy booking link" }: { u
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard unavailable (older browser) — the URL is visible next to it.
+      // Clipboard unavailable (older browser): the URL is visible next to it.
     }
   }
   return (

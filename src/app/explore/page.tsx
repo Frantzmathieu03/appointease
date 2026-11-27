@@ -4,7 +4,7 @@ import { CATEGORIES } from "@/lib/categories";
 import ExploreDirectory from "@/components/ExploreDirectory";
 
 export const metadata: Metadata = {
-  title: "Find a business near you — AppointEase",
+  title: "Find a business near you · AppointEase",
   description:
     "Browse barbershops, salons, law offices, clinics and more that take bookings on AppointEase. Pick a business, pick a time, done.",
 };
@@ -31,13 +31,13 @@ export default async function ExplorePage({
           <p className="eyebrow">Marketplace</p>
           <h1>Find a business near you</h1>
           <p className="lede">
-            Browse local businesses that take bookings on AppointEase — pick
+            Browse local businesses that take bookings on AppointEase. Pick
             one, pick a time, done.
           </p>
         </div>
         {demoMode && (
           <div className="notice">
-            Demo mode: the live database is not connected yet — showing the
+            Demo mode: the live database is not connected yet. Showing the
             sample business only.
           </div>
         )}

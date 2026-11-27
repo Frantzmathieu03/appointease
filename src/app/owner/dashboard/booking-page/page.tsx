@@ -5,8 +5,8 @@ import { categoryLabel } from "@/lib/categories";
 import BookingPageEditor from "@/components/owner/BookingPageEditor";
 import type { Availability, BusinessPhoto } from "@/lib/types";
 
-// Booking page editor: one screen for everything a customer sees —
-// name, description, phone, address, logo and photos — with a live
+// Booking page editor: one screen for everything a customer sees: 
+// name, description, phone, address, logo and photos: with a live
 // preview of the public page header beside the form. Same data as
 // Settings (businesses row + business_photos); nothing is forked.
 export default async function DashboardBookingPageEditor() {
@@ -29,7 +29,7 @@ export default async function DashboardBookingPageEditor() {
       <h1 style={{ fontSize: 26 }}>Booking page</h1>
       <p className="small" style={{ marginTop: 0 }}>
         This is what customers see when they open your booking link. Type
-        on the left — the preview on the right changes as you go.
+        on the left, and the preview on the right changes as you go.
       </p>
       <BookingPageEditor
         business={business}

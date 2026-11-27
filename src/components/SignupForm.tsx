@@ -7,7 +7,7 @@ import { createBrowserSupabase } from "@/lib/supabase-browser";
 import GoogleLogo from "@/components/GoogleLogo";
 
 // Per-business customer accounts (Frantz, 2026-11-25): a customer
-// signs up WITH a business, on that business's page — the membership,
+// signs up WITH a business, on that business's page: the membership,
 // dashboard, messages and history live inside that business's world
 // and never mix with any other business. The same email can join
 // another business on its own page. Continue with Google first, or
@@ -15,12 +15,15 @@ import GoogleLogo from "@/components/GoogleLogo";
 export default function SignupForm({
   nextPath = "/my-appointments",
   businessName,
+  initialEmail = "",
 }: {
   nextPath?: string;
   businessName?: string;
+  /** Prefilled email (for example from an invite link that names the account to use). */
+  initialEmail?: string;
 }) {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: initialEmail, phone: "", password: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
@@ -38,7 +41,7 @@ export default function SignupForm({
       },
     });
     if (error) {
-      setError("Google sign-in is unavailable right now — please use email and password, or try again shortly.");
+      setError("Google sign in is unavailable right now. Please use email and password, or try again shortly.");
     }
   }
 
@@ -54,7 +57,7 @@ export default function SignupForm({
         data: { full_name: form.name, phone: form.phone },
         // The confirmation link must land back where the customer
         // started (a business's page carries its join marker there),
-        // through the same /auth/callback the sign-in link uses —
+        // through the same /auth/callback the sign-in link uses: 
         // never on the platform home page.
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
@@ -73,7 +76,7 @@ export default function SignupForm({
       router.refresh();
       return;
     }
-    // Email confirmation is on — the profile is created on first sign-in.
+    // Email confirmation is on: the profile is created on first sign-in.
     setCheckEmail(true);
     setBusy(false);
   }
@@ -83,7 +86,7 @@ export default function SignupForm({
       <div className="card center">
         <h2>Check your email</h2>
         <p className="lede">
-          We sent a confirmation link to {form.email}. Click it, then sign in —
+          We sent a confirmation link to {form.email}. Click it, then sign in and
           you&apos;ll land right back where you were.
         </p>
         <Link href="/login" className="btn btn-primary">Go to sign in</Link>

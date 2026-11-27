@@ -14,7 +14,7 @@ export default async function DashboardInboxPage() {
         <div className="card">
           <p className="lede" style={{ marginBottom: 0 }}>
             Pick a conversation to read and reply. When a customer messages
-            you, it lands here — and we email you the moment it arrives, so
+            you, it lands here, and we email you the moment it arrives, so
             nothing sits unseen.
           </p>
         </div>

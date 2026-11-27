@@ -7,9 +7,9 @@ import { usePathname } from "next/navigation";
  * The AppointEase marketing header/footer. Two kinds of pages show
  * ONLY the business's own branding, so the chrome renders nothing
  * there:
- *   - customer-facing manage pages (/manage/<token> — the
+ *   - customer-facing manage pages (/manage/<token>: the
  *     cancel/reschedule links from reminders, PDF §5);
- *   - public business pages (/<slug>, /<slug>/book, /<slug>/message —
+ *   - public business pages (/<slug>, /<slug>/book, /<slug>/message: 
  *     white label, Frantz 2026-11-25): the [slug] layout carries the
  *     business's own slim header and a small "Powered by AppointEase"
  *     line at the bottom;

@@ -6,16 +6,16 @@ import { sendNativePush } from "@/lib/native-push";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
 // Secure manage link from reminder messages: /manage/<token>
-// GET                                  — appointment details for the page
-// POST { action: "cancel", reason? }   — frees the slot, stops reminders
-// POST { action: "reschedule", startsAt } — moves the appointment,
+// GET: appointment details for the page
+// POST { action: "cancel", reason? }: frees the slot, stops reminders
+// POST { action: "reschedule", startsAt }: moves the appointment,
 //      re-times its reminders. The token itself is the credential.
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — nothing to manage yet." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode. Nothing to manage yet." }, { status: 400 });
   }
   const { token } = await params;
   const admin = createAdminSupabase();
@@ -30,7 +30,7 @@ export async function GET(
 
   // The business's booking rules (migration 0016): its cancellation
   // words and the reschedule cut-off / cancellation window hours.
-  // Feature-detected — before the migration lands the query errors
+  // Feature-detected: before the migration lands the query errors
   // and the page runs on the defaults (no policy words, 12 / 24).
   let settings: {
     cancellationPolicy: string | null;
@@ -63,7 +63,7 @@ export async function GET(
 
   // Intake form state (migration 0012): does this appointment's service
   // have a form attached, and has the customer already submitted it?
-  // Defensive — before the migration lands this stays null and the
+  // Defensive: before the migration lands this stays null and the
   // manage page simply shows no intake card.
   let intake: { formName: string; submitted: boolean } | null = null;
   try {
@@ -96,7 +96,7 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — nothing to change yet." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode. Nothing to change yet." }, { status: 400 });
   }
   const { token } = await params;
   const body = await req.json().catch(() => null);
@@ -142,7 +142,7 @@ export async function POST(
       details: { reason, was_starts_at: appt.starts_at },
     });
     // Native app push (app build phase 1): owner/team hear about the
-    // cancellation on their phones. Env-gated — no-ops silently until
+    // cancellation on their phones. Env-gated: no-ops silently until
     // FCM / APNs credentials exist; never fails the cancellation.
     try {
       const [{ data: biz }, { data: cust }, { data: svc }] = await Promise.all([
@@ -186,7 +186,7 @@ export async function POST(
     if (error) {
       if ((error as { code?: string }).code === "23P01") {
         return NextResponse.json(
-          { error: "That time was just taken — please pick another." },
+          { error: "That time was just taken. Please pick another." },
           { status: 409 }
         );
       }

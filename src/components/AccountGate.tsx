@@ -19,8 +19,10 @@ import GoogleLogo from "@/components/GoogleLogo";
  * Supabase reports the phone provider disabled (texting is not
  * connected yet), and a button that cannot send a code is never
  * shipped. Styled as the business's own welcome card (Frantz,
- * 2026-11-26): the business logo and name lead, then the heading,
- * then Google, then email. Owners and team never see this step on
+ * 2026-11-26): the business logo and name lead, then Google, then
+ * email. (The heading and the "only with" line were removed later
+ * the same day at Frantz's order: too much text, and the buttons
+ * already say create account and sign in.) Owners and team never see this step on
  * their own business; the book page auto-joins them first.
  */
 export default function AccountGate({
@@ -46,7 +48,7 @@ export default function AccountGate({
     });
     if (error) {
       setError(
-        "Google sign-in is unavailable right now. Please use email below, or try again shortly."
+        "Google sign in is unavailable right now. Please use email below, or try again shortly."
       );
     }
   }
@@ -62,10 +64,6 @@ export default function AccountGate({
         </span>
       )}
       <p className="gate-biz">{businessName}</p>
-      <h2 className="gate-title">Create your account or log in</h2>
-      <p className="lede gate-lede">
-        Your account is only with {businessName}.
-      </p>
       {error && <div className="error">{error}</div>}
       <button className="btn btn-block btn-google btn-google-white" type="button" onClick={google}>
         <GoogleLogo />

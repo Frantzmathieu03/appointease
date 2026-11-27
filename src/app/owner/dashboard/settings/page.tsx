@@ -20,7 +20,7 @@ import type { Availability, BusinessPhoto } from "@/lib/types";
 export default async function DashboardSettingsPage() {
   const { supabase, business, role } = await requireBusiness();
   // Settings (business details, billing, services, hours) are owner /
-  // manager territory — staff logins work from Today/Calendar/Inbox/
+  // manager territory: staff logins work from Today/Calendar/Inbox/
   // Customers only (PDF §9). Billing changes stay owner-gated inside
   // the billing API routes as before.
   if (role === "staff") redirect("/owner/dashboard");
@@ -79,7 +79,7 @@ export default async function DashboardSettingsPage() {
         <h2>Reminder schedule</h2>
         <p className="small" style={{ margin: 0 }}>
           Every confirmed appointment gets a confirmation right away, then a
-          reminder 24 hours before and another 2 hours before — by text
+          reminder 24 hours before and another 2 hours before, by text
           message and email at the same time (when the booking is made far
           enough ahead). Every reminder carries the customer&apos;s secure
           link to reschedule or cancel.
@@ -91,7 +91,7 @@ export default async function DashboardSettingsPage() {
         <h2>Plan &amp; billing</h2>
         <p className="small" style={{ marginTop: 0 }}>
           Your plan at a glance also lives on the{" "}
-          <Link href="/owner/dashboard/billing">Billing page</Link> — same
+          <Link href="/owner/dashboard/billing">Billing page</Link>: same
           buttons, plus your seats and texts sent.
         </p>
         <BillingPanel
@@ -118,9 +118,9 @@ export default async function DashboardSettingsPage() {
       </div>
 
       <div className="card" id="profile">
-        <h2>Profile — logo &amp; photos (optional)</h2>
+        <h2>Profile: logo &amp; photos (optional)</h2>
         <p className="small" style={{ marginBottom: 10 }}>
-          Optional — your logo and up to four photos of your work make your
+          Optional: your logo and up to four photos of your work make your
           booking page feel like your shop. You can publish and take bookings
           without them, and add them anytime.
         </p>

@@ -6,22 +6,22 @@ import { BOOKING_WINDOW_DAYS, formatDateInZone, formatTimeInZone, nextDates } fr
 import { DEFAULT_CANCEL_NOTE, formatPhone } from "@/lib/types";
 import DatePicker, { type DayState } from "@/components/DatePicker";
 
-// Secure manage page — the link from every confirmation/reminder.
+// Secure manage page: the link from every confirmation/reminder.
 // The token in the URL is the credential; no account needed.
 // Branding (PDF §5): this page carries the BUSINESS's logo, name and
-// phone only — no AppointEase menu (the root chrome hides itself here)
+// phone only: no AppointEase menu (the root chrome hides itself here)
 // and just a small "Powered by AppointEase" line at the bottom. The
 // cancel flow keeps [Keep appointment] as the primary action, and no
-// copy anywhere mentions deposits or refunds — AppointEase never holds
+// copy anywhere mentions deposits or refunds: AppointEase never holds
 // client money.
 //
 // Customer Side Plan (Frantz, 2026-11-26): the reschedule and cancel
-// screens follow the Book / Reschedule / Cancel plan — a NOW strip
+// screens follow the Book / Reschedule / Cancel plan: a NOW strip
 // with the current time struck through, the business's cut-off rule,
 // reason chips and a friendly policy note on cancel, and "All set!" /
 // "Appointment cancelled" endings. After a reschedule the page's own
 // summary shows the NEW time immediately (the appointment state is
-// updated in place — no refresh needed). The same screens serve the
+// updated in place: no refresh needed). The same screens serve the
 // My dashboard buttons, which link here.
 interface ManageData {
   id: string;
@@ -297,7 +297,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
 
   return (
     <main className="column">
-      {/* Business branding header — logo, name, phone (PDF §5). */}
+      {/* Business branding header: logo, name, phone (PDF §5). */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
         {biz.logo_url && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -390,7 +390,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
           <h1 style={{ fontSize: 27 }}>Manage your appointment</h1>
           {data.confirmation_code && (
             <p className="small" style={{ marginTop: -6 }}>
-              Confirmation #: <strong>{data.confirmation_code}</strong> — this is
+              Confirmation #: <strong>{data.confirmation_code}</strong>. This is
               the booking you&apos;re changing.
             </p>
           )}
@@ -411,7 +411,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
           <h3 style={{ marginTop: 0 }}>{intake.formName}</h3>
           {intake.submitted ? (
             <p className="small" style={{ margin: 0 }}>
-              ✓ You&apos;ve sent your form — {biz.name} has your answers.
+              ✓ You&apos;ve sent your form. {biz.name} has your answers.
             </p>
           ) : (
             <>
@@ -485,7 +485,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
                 Times in {tzLabel}
               </p>
               {slots.length === 0 ? (
-                <p className="small">No open times that day — try another day.</p>
+                <p className="small">No open times that day. Try another day.</p>
               ) : (
                 <div className="c3-times">
                   {slots.map((s) => (
@@ -500,7 +500,7 @@ export default function ManagePage({ params }: { params: Promise<{ token: string
               )}
               {sameSlot && (
                 <p className="small" style={{ marginTop: 10 }}>
-                  That&apos;s your current time — pick a different one to move the appointment.
+                  That&apos;s your current time. Pick a different one to move the appointment.
                 </p>
               )}
               <div className="c3-actions" style={{ marginTop: 16 }}>

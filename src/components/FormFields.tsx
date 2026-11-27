@@ -8,7 +8,7 @@ import type { FormAnswers, FormQuestion } from "@/lib/types";
  * File questions are handled by the parent: in interactive mode the
  * parent passes `files` (question id → chosen Files) and `onFiles`;
  * stored answers for file questions are storage-path arrays, rendered
- * by the parent (owner views) — here they show as a read-only note.
+ * by the parent (owner views): here they show as a read-only note.
  */
 export default function FormFields({
   questions,
@@ -163,7 +163,7 @@ export function AnswerList({
               )
             ) : (
               <p className="small" style={{ margin: 0, whiteSpace: "pre-wrap" }}>
-                {typeof v === "string" && v ? v : "—"}
+                {typeof v === "string" && v ? v : "No answer"}
               </p>
             )}
           </div>

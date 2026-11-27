@@ -11,7 +11,7 @@ import { availableSlots, nextDates, weekdayOf, type BookedRange } from "@/lib/sl
 // slot can still be picked. The picker renders open days outlined in
 // green and closed/full days as plain grey numbers, so a closed day
 // never looks bookable. Slots for a single day still come from the
-// slots route — this route only classifies days.
+// slots route: this route only classifies days.
 //
 // Same insider rule as the slots route: published businesses serve
 // everyone; an unpublished business serves only its insiders.
@@ -50,7 +50,7 @@ export async function GET(
   const dates = nextDates(days, tz);
 
   // Does the effective schedule (the picked person's own rows when
-  // they have any, else the business-wide rows — the same rule
+  // they have any, else the business-wide rows: the same rule
   // availableSlots applies) cover this weekday at all?
   const hasHours = (dateStr: string): boolean => {
     const weekday = weekdayOf(dateStr, tz);

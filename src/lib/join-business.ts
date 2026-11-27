@@ -7,9 +7,9 @@ import { ensureBusinessMembership, ensureCustomerProfile } from "@/lib/profile";
 /**
  * The deliberate join behind the JoinStep card (per-business account
  * model, Frantz 2026-11-25): a signed-in visitor who is not yet a
- * customer of this business joins THIS business only — the
+ * customer of this business joins THIS business only: the
  * business_customers row is created through the existing membership
- * path — and lands right back where they were headed (the booking
+ * path: and lands right back where they were headed (the booking
  * flow or the message thread), with nothing re-asked. The owner
  * never joins their own business as a customer. Best-effort: the
  * destination page re-checks membership and shows the join step
@@ -41,7 +41,7 @@ export async function joinBusiness(formData: FormData) {
         }
       }
     } catch {
-      // Fall through to the redirect — the destination re-checks.
+      // Fall through to the redirect: the destination re-checks.
     }
   }
   redirect(back);

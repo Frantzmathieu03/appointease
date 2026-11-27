@@ -98,7 +98,7 @@ export default function ExploreDirectory({
 
       {filtered.length === 0 ? (
         <div className="explore-empty">
-          <p>No businesses listed here yet — new shops are joining.</p>
+          <p>No businesses listed here yet. New shops are joining.</p>
           <Link href="/owner/signup" className="btn btn-primary">
             List your business
           </Link>

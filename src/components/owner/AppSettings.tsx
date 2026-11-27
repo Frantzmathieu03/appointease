@@ -12,7 +12,7 @@ import {
 } from "@/lib/native";
 
 // App settings (AppointEase App Pieces spec, Frantz 2026-11-26):
-// the two rows that only make sense with the mobile app — the four
+// the two rows that only make sense with the mobile app: the four
 // notification toggles (stored per user in public.notification_prefs,
 // migration 0017; the send path reads them before pushing) and the
 // Face ID toggle (device-local: the token lives in the phone's secure
@@ -64,7 +64,7 @@ export function NotificationPrefs() {
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) {
-        // Table arrives with migration 0017 — until then the toggles
+        // Table arrives with migration 0017: until then the toggles
         // show the defaults and nothing is stored yet.
         setState("pending");
         return;
@@ -123,7 +123,7 @@ export function NotificationPrefs() {
         they do now.
         {state === "saved" && <> Saved.</>}
         {state === "pending" && (
-          <> Your choices start saving with the next update — until then, all four are on.</>
+          <> Your choices start saving with the next update. Until then, all four are on.</>
         )}
       </p>
     </div>
@@ -175,7 +175,7 @@ export function FaceIdSetting() {
   if (state === "browser") {
     return (
       <p className="small" style={{ margin: 0 }}>
-        Face ID sign in works in the AppointEase app — sign in once with Google or email there
+        Face ID sign in works in the AppointEase app. Sign in once with Google or email there
         and the app offers Face ID for next time. In a browser, you sign in the normal way.
       </p>
     );
@@ -193,7 +193,7 @@ export function FaceIdSetting() {
       <p className="small" style={{ marginTop: 0 }}>
         {state === "on"
           ? "Face ID is on for this phone. Next time you open the app, your face signs you in."
-          : "Face ID is off. Turn it on and your face signs you in next time — no password to type."}
+          : "Face ID is off. Turn it on and your face signs you in next time, with no password to type."}
       </p>
       <button
         className="btn btn-primary"
@@ -204,7 +204,7 @@ export function FaceIdSetting() {
       </button>
       {state === "on" && (
         <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
-          Turning it off removes the saved sign-in from this phone right away.
+          Turning it off removes the saved sign in from this phone right away.
         </p>
       )}
     </div>

@@ -9,7 +9,7 @@ import GoogleLogo from "@/components/GoogleLogo";
 
 // Owner signup: create the login first, then the business (its link is
 // reserved the moment the business row lands). If email confirmation is
-// switched on, the business step waits until after the first sign-in —
+// switched on, the business step waits until after the first sign-in: 
 // the dashboard picks it up there.
 export default function OwnerSignupPage() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function OwnerSignupPage() {
       },
     });
     if (error) {
-      setError("Google sign-in is unavailable right now — please use email and password, or try again shortly.");
+      setError("Google sign in is unavailable right now. Please use email and password, or try again shortly.");
     }
   }
 
@@ -47,7 +47,7 @@ export default function OwnerSignupPage() {
         data: { full_name: form.name },
         // Confirming the email lands the owner straight in "Name
         // your business" (/owner/setup shows exactly that when no
-        // business exists yet) — no confirm-then-sign-in-again loop
+        // business exists yet): no confirm-then-sign-in-again loop
         // (Customer Side Plan friction fix, Frantz 2026-11-26).
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/owner/setup")}`,
       },
@@ -74,8 +74,8 @@ export default function OwnerSignupPage() {
           <h2>Check your email</h2>
           <p className="lede">
             We sent a confirmation link to {form.email}. Click it and
-            you&apos;ll go straight to naming your business — no extra
-            sign-in needed.
+            you&apos;ll go straight to naming your business, with no extra
+            sign in needed.
           </p>
           <Link href="/owner" className="btn btn-primary">Go to business sign-in</Link>
         </div>

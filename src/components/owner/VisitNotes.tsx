@@ -14,7 +14,7 @@ export interface NoteBundle {
 
 const OUTCOMES: { value: VisitNoteOutcome; label: string }[] = [
   { value: "completed", label: "Completed" },
-  { value: "no_show", label: "No-show" },
+  { value: "no_show", label: "No show" },
   { value: "cancelled_late", label: "Cancelled late" },
   { value: "rescheduled", label: "Rescheduled" },
 ];
@@ -30,7 +30,7 @@ interface DraftStep {
  * customer did/decided, next steps, and an internal/shared visibility
  * choice. Saving a note with outcome Completed / No-show also sets the
  * appointment's status. Notes are editable for 24 hours; after that,
- * changes are appended as addenda (author + time) — the original text
+ * changes are appended as addenda (author + time): the original text
  * is never rewritten. Every save appends a `note_added` timeline event.
  */
 export default function VisitNotes({
@@ -51,7 +51,7 @@ export default function VisitNotes({
   actorId: string;
   tz: string;
   bundles: NoteBundle[];
-  /** Note templates (migration 0012) — service-matching ones first. */
+  /** Note templates (migration 0012): service-matching ones first. */
   templates?: NoteTemplate[];
   serviceId?: string;
 }) {
@@ -98,7 +98,7 @@ export default function VisitNotes({
     if (next === "completed") patch.completed_at = new Date().toISOString();
     let { error } = await supabase.from("appointments").update(patch).eq("id", appointmentId);
     if (error && next === "completed") {
-      // completed_at arrives with migration 0010 — retry without it.
+      // completed_at arrives with migration 0010: retry without it.
       ({ error } = await supabase.from("appointments").update({ status: next }).eq("id", appointmentId));
     }
     if (!error) {
@@ -130,7 +130,7 @@ export default function VisitNotes({
       .select("*")
       .single();
     if (error || !created) {
-      setNote("Visit notes aren't available yet — they turn on with the next database update.");
+      setNote("Visit notes aren't available yet. It turns on with the next database update.");
       setBusy(false);
       return;
     }
@@ -217,7 +217,7 @@ export default function VisitNotes({
             Mark completed
           </button>
           <button className="btn" onClick={() => markStatus("no_show")} disabled={busy}>
-            Mark no-show
+            Mark no show
           </button>
         </div>
       )}
@@ -346,7 +346,7 @@ export default function VisitNotes({
                 onChange={(e) => {
                   const t = templates.find((x) => x.id === e.target.value);
                   if (!t) return;
-                  // The template's prompts are starter text — the
+                  // The template's prompts are starter text: the
                   // author edits them into the real note before saving.
                   if (t.discussed_prompt) setDiscussed(t.discussed_prompt);
                   if (t.actions_prompt) setActions(t.actions_prompt);
@@ -412,7 +412,7 @@ export default function VisitNotes({
           <div style={{ marginBottom: 10 }}>
             <label className="small" style={{ display: "block", marginBottom: 4 }}>Visibility</label>
             <label style={{ marginRight: 16 }}>
-              <input type="radio" checked={visibility === "internal"} onChange={() => setVisibility("internal")} /> Internal only — team
+              <input type="radio" checked={visibility === "internal"} onChange={() => setVisibility("internal")} /> Internal only (team)
             </label>
             <label>
               <input type="radio" checked={visibility === "shared"} onChange={() => setVisibility("shared")} /> Share a summary with the client

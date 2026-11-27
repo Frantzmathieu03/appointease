@@ -20,7 +20,7 @@ interface Row {
 // the right. Day view: one column per staff member. Week view: 7 day
 // columns for ONE person, chosen with the person picker (a staff
 // login always sees their own week). Working hours come from
-// availability — outside them the grid is grey and not clickable,
+// availability: outside them the grid is grey and not clickable,
 // gaps between stretches are striped breaks.
 export default async function DashboardCalendarPage({
   searchParams,
@@ -147,7 +147,7 @@ export default async function DashboardCalendarPage({
     formMissingIds.clear();
   }
 
-  // Grid hours: the business's opening span, defaulting to 8 AM–6 PM.
+  // Grid hours: the business's opening span, defaulting to 8 AM to 6 PM.
   const toMin = (t: string) => {
     const [h, m] = String(t).split(":").map(Number);
     return h * 60 + m;
@@ -194,7 +194,7 @@ export default async function DashboardCalendarPage({
 
   const statusWord = (r: Row) => {
     if (r.status === "completed") return "Completed";
-    if (r.status === "no_show") return "No-show";
+    if (r.status === "no_show") return "No show";
     if (r.status === "cancelled") return "Cancelled";
     if (formMissingIds.has(r.id)) return "Form missing";
     return "Confirmed";
@@ -263,7 +263,7 @@ export default async function DashboardCalendarPage({
             ‹
           </Link>
           <span className="d2-cal-title">
-            {view === "day" ? titleLabel(dates[0]) : `${dayLabel(dates[0])} – ${dayLabel(dates[dates.length - 1])}`}
+            {view === "day" ? titleLabel(dates[0]) : `${dayLabel(dates[0])} to ${dayLabel(dates[dates.length - 1])}`}
           </span>
           <Link href={qs(view, shiftDate(shift))} className="d2-arrow" aria-label="Next">
             ›

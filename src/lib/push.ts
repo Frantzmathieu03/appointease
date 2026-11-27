@@ -1,4 +1,4 @@
-// Web Push sending — SERVER ONLY.
+// Web Push sending: SERVER ONLY.
 //
 // Delivery is env-gated: without NEXT_PUBLIC_VAPID_PUBLIC_KEY +
 // VAPID_PRIVATE_KEY + VAPID_SUBJECT there is nothing to sign pushes with,
@@ -47,7 +47,7 @@ export async function sendPushToSubscription(
     return {
       delivered: false,
       detail: `Push service responded ${code ?? String(err)}`,
-      gone: code === 404 || code === 410, // subscription expired — caller deletes it
+      gone: code === 404 || code === 410, // subscription expired: caller deletes it
     };
   }
 }

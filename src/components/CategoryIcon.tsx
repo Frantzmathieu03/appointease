@@ -1,7 +1,7 @@
 import type { CategoryIconName } from "@/lib/categories";
 
 /**
- * Small white glyphs for the category tiles. Minimal geometric SVGs —
+ * Small white glyphs for the category tiles. Minimal geometric SVGs: 
  * stroke style for tools/objects, filled for organic shapes (paw, tooth).
  * Rendered in currentColor; tiles set color: #fff.
  */

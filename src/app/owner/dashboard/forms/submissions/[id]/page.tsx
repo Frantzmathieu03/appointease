@@ -10,7 +10,7 @@ import type { FormQuestion, FormSubmission } from "@/lib/types";
 // the customer's answers, and signed download links for uploaded
 // files. Access is verified against the signed-in user's business
 // first; the signed URLs are then minted with the service role (the
-// form-uploads bucket is private — links expire in an hour).
+// form-uploads bucket is private: links expire in an hour).
 export default async function DashboardSubmissionPage({
   params,
 }: {

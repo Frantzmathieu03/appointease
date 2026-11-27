@@ -10,7 +10,7 @@ import type { BusinessPhoto } from "@/lib/types";
 // stored in the public "business-media" Supabase Storage bucket under
 // <business_id>/. Writes are owner-only (RLS + storage policies,
 // migration 0006); the public business page reads the URLs. The cover
-// is its own image (businesses.cover_url, migration 0014) — the wide
+// is its own image (businesses.cover_url, migration 0014): the wide
 // photo across the top of the page in Frantz's page plan (2026-11-26).
 // Validation is honest and plain: JPEG/PNG/WebP only, logo ≤ 2 MB,
 // cover and photos ≤ 5 MB each.
@@ -180,7 +180,7 @@ export default function BusinessMediaManager({
   // Owners can pick many photos at once from their gallery. They are
   // added one after another; a plain note says how far along it is, and
   // the note at the end says how many were added. Only the open slots
-  // are filled — the limit is MAX_PHOTOS photos in total.
+  // are filled: the limit is MAX_PHOTOS photos in total.
   async function onPhotos(picked: File[]) {
     if (picked.length === 0) return;
     const open = MAX_PHOTOS - photos.length;
@@ -305,7 +305,7 @@ export default function BusinessMediaManager({
             textAlign: "center",
           }}
         >
-          No cover yet — your page shows a plain green space here
+          No cover yet. Your page shows a plain green space here
         </div>
       )}
       <div style={{ display: "flex", gap: 8 }}>
@@ -380,7 +380,7 @@ export default function BusinessMediaManager({
       <h3 style={{ marginTop: 18 }}>Photos of your work ({photos.length}/{MAX_PHOTOS})</h3>
       {photos.length === 0 ? (
         <p className="small">
-          No photos yet — add a few shots of your work and they&apos;ll appear
+          No photos yet. Add a few shots of your work and they&apos;ll appear
           in a gallery on your booking page.
         </p>
       ) : (

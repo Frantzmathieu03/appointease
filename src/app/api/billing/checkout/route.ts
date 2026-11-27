@@ -13,7 +13,7 @@ import { PLANS, type PlanId } from "@/lib/plans";
 // plan changes go through the Billing Portal instead (409 here).
 export async function POST(req: NextRequest) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — billing turns on with the live database." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode. Billing turns on with the live database." }, { status: 400 });
   }
   const supabase = await createServerSupabase();
   const {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       {
         error: "billing_not_configured",
         message:
-          "Billing isn't switched on yet — Stripe keys and prices are not configured. Your free trial keeps running meanwhile.",
+          "Billing isn't switched on yet. Stripe keys and prices are not configured. Your free trial keeps running meanwhile.",
       },
       { status: 503 }
     );
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "already_subscribed",
-        message: "You already have a subscription — use “Manage billing” to change plans.",
+        message: "You already have a subscription. Use “Manage billing” to change plans.",
       },
       { status: 409 }
     );
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
   const base = siteUrl();
   // The app-level 14-day free trial runs first and needs no card; if the
   // owner subscribes mid-trial, Stripe waits until the trial ends to
-  // charge — the owner is never double-charged for trial days.
+  // charge: the owner is never double-charged for trial days.
   const trialEndSecs = Math.floor(new Date(business.trial_ends_at).getTime() / 1000);
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",

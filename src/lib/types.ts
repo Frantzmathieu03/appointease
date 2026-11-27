@@ -35,7 +35,7 @@ export interface Business {
   // Customer-side booking rules (migration 0016). Optional: rows
   // fetched before the migration lands won't have them: the helpers
   // below supply the defaults (no policy words, 12 / 24 hours).
-  /** The business's own cancellation words ("Late-cancellation note"
+  /** The business's own cancellation words ("Late cancellation note"
       in Settings). Null/absent = the friendly standard note shows. */
   cancellation_policy?: string | null;
   /** Inside this many hours of the appointment, customers are asked

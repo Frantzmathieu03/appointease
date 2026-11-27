@@ -12,15 +12,18 @@ export default function SignInForm({
   subtitle = "Sign in to see your appointments and messages.",
   signupHref = "/signup",
   signupText = "New to AppointEase? Create an account",
+  initialEmail = "",
 }: {
   nextPath?: string;
   title?: string;
   subtitle?: string;
   signupHref?: string;
   signupText?: string;
+  /** Prefilled email (for example from an invite link that names the account to use). */
+  initialEmail?: string;
 }) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -51,7 +54,7 @@ export default function SignInForm({
       },
     });
     if (error) {
-      setError("Google sign-in is unavailable right now — please use email and password, or try again shortly.");
+      setError("Google sign in is unavailable right now. Please use email and password, or try again shortly.");
     }
   }
 
@@ -59,12 +62,12 @@ export default function SignInForm({
   // same mailer that already delivers this project's confirmation and
   // password-reset mail, and /auth/callback exchanges it for a
   // session. (Phone-code sign-in is NOT offered anywhere: the
-  // project's phone provider is disabled — texting is not connected
-  // yet — and a code button that cannot send is never shipped.)
+  // project's phone provider is disabled: texting is not connected
+  // yet: and a code button that cannot send is never shipped.)
   async function emailLink() {
     setError("");
     if (!email) {
-      setNotice("Type your email above first — then we'll send the sign-in link there.");
+      setNotice("Type your email above first. Then we'll send the sign in link there.");
       return;
     }
     const supabase = createBrowserSupabase();
@@ -75,20 +78,20 @@ export default function SignInForm({
       },
     });
     if (error) {
-      setError("That sign-in link didn't go out — check the email address, or use your password below.");
+      setError("That sign in link didn't go out. Check the email address, or use your password below.");
       return;
     }
-    setNotice("Check your email — we sent you a sign-in link. Tap it and you're in, no password needed.");
+    setNotice("Check your email. We sent you a sign in link. Tap it and you're in, no password needed.");
   }
 
   async function forgot() {
     setError("");
     if (!email) {
-      setNotice("Type your email above first — then we'll send the reset link there.");
+      setNotice("Type your email above first. Then we'll send the reset link there.");
       return;
     }
     const supabase = createBrowserSupabase();
-    // Same message whether or not the account exists — never reveal which.
+    // Same message whether or not the account exists: never reveal which.
     // The set-password page carries the owner lane home: after the
     // password is set, its button opens the dashboard.
     await supabase.auth.resetPasswordForEmail(email, {
@@ -134,7 +137,7 @@ export default function SignInForm({
             cursor: "pointer",
           }}
         >
-          Email me a sign-in link instead
+          Email me a sign in link instead
         </button>
       </p>
       <p className="small center" style={{ marginTop: 8 }}>

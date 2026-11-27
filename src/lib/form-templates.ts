@@ -96,7 +96,7 @@ export const INDUSTRY_TEMPLATES: IndustryTemplates[] = [
       name: "Visit notes",
       line: "Starter text for notes after a patient visit.",
       discussed: "We reviewed the reason for the visit, the symptoms, and the patient's history.",
-      actions: "The patient agreed to the plan discussed. Follow-up steps were explained.",
+      actions: "The patient agreed to the plan discussed. Follow up steps were explained.",
     },
   },
   {
@@ -218,7 +218,7 @@ export const INDUSTRY_TEMPLATES: IndustryTemplates[] = [
           label: "What does your pet need?",
           type: "multiple_choice",
           required: true,
-          options: ["Bath and tidy", "Full groom", "Nail trim", "De-shedding", "Something else"],
+          options: ["Bath and tidy", "Full groom", "Nail trim", "Deshedding", "Something else"],
         },
         { label: "Your pet's breed and size", type: "short_text", required: true },
         {

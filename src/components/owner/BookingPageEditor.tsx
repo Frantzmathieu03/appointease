@@ -12,7 +12,7 @@ import { formatPhone } from "@/lib/types";
 // The booking-page editor: one form for the words on the public page,
 // the cover / logo / photos manager (with the photos heading), the
 // publish switch, and a live preview that renders the top of the
-// public page — cover, logo, name, words, Book button — with the
+// public page: cover, logo, name, words, Book button: with the
 // words as you type them (Frantz's page plan, 2026-11-26).
 export default function BookingPageEditor({
   business,
@@ -45,7 +45,7 @@ export default function BookingPageEditor({
   const [galleryNote, setGalleryNote] = useState("");
 
   // After a logo/cover/photo upload the media manager refreshes the
-  // page — pick the fresh values up so the preview follows.
+  // page: pick the fresh values up so the preview follows.
   useEffect(() => setLogoUrl(business.logo_url), [business.logo_url]);
   useEffect(() => setCoverUrl(business.cover_url ?? null), [business.cover_url]);
   useEffect(() => setPhotos(initialPhotos), [initialPhotos]);
@@ -119,7 +119,7 @@ export default function BookingPageEditor({
                   value={form.description}
                   onChange={set("description")}
                   style={{ minHeight: 56 }}
-                  placeholder="Tell customers what you do — for example: Haircuts and beard trims for the whole family. Walk-ins welcome."
+                  placeholder="Tell customers what you do. For example: Haircuts and beard trims for the whole family. Walk ins welcome."
                 />
               </label>
               <label className="field">
@@ -139,7 +139,7 @@ export default function BookingPageEditor({
           <div className="card">
             <h2>Cover, logo &amp; photos (optional)</h2>
             <p className="small" style={{ marginBottom: 10 }}>
-              Optional — a cover photo, a logo and up to four photos of
+              Optional: a cover photo, a logo and up to four photos of
               your work. You can take bookings without them.
             </p>
             <label className="field">
@@ -180,7 +180,7 @@ export default function BookingPageEditor({
         </div>
 
         <div>
-          <p className="eyebrow" style={{ marginTop: 0 }}>Preview — the top of your page</p>
+          <p className="eyebrow" style={{ marginTop: 0 }}>Preview: the top of your page</p>
           <div
             className="bizpage"
             style={{

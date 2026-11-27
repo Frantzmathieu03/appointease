@@ -15,7 +15,7 @@ import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 // - Signed-in customers book as themselves. The business page is
 //   ACCOUNT-FIRST (Frantz, 2026-11-25): the book page sends signed-out
 //   customers through a short account step first, so this is the
-//   normal path — and booking joins the customer to THIS business
+//   normal path: and booking joins the customer to THIS business
 //   (business_customers below). Accounts are per business: the
 //   membership, dashboard, messages and history never mix across
 //   businesses.
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
 
   // Insider rule (Frantz, 2026-11-25): published businesses take
   // bookings from anyone, as before; an UNPUBLISHED business can be
-  // booked only by insiders — the owner, active team members, and
-  // joined customers — so a new business can be tested end to end
+  // booked only by insiders: the owner, active team members, and
+  // joined customers: so a new business can be tested end to end
   // before it goes public. Everyone else gets the same 404 as a
   // missing business. The billing gate and all other checks below
   // still apply to insiders.
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   if (service && isStandardServiceId(service.id)) {
     // A standard-pair stand-in from page data: make sure the real
     // pair exists, then book against the real row with the same
-    // name — the booking always saves against a real service
+    // name: the booking always saves against a real service
     // (Frantz, 2026-11-26).
     const wanted = service.name;
     const real = await ensureStandardServices(createAdminSupabase(), page.business);
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   }
   if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
 
-  // Billing gate (defense in depth — the pages hide booking too): a paused
+  // Billing gate (defense in depth: the pages hide booking too): a paused
   // business takes no new bookings. Existing appointments are unaffected.
   if (!getBillingState(page.business).bookingLive) {
     return NextResponse.json(
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     const offering = page.staffServices.filter((r) => r.service_id === serviceId);
     if (offering.length > 0 && !offering.some((r) => r.staff_id === staffId)) {
       return NextResponse.json(
-        { error: "That team member doesn't offer this service — please pick another person or choose First available." },
+        { error: "That team member doesn't offer this service. Please pick another person or choose First available." },
         { status: 400 }
       );
     }
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
   }
   const end = new Date(start.getTime() + service.duration_minutes * 60000);
 
-  // DEMO SHOPS: the public example businesses are simulations — never
+  // DEMO SHOPS: the public example businesses are simulations: never
   // write an appointment, never schedule a reminder, no matter how the
   // request arrives. The client flow doesn't even call this route; this
   // is defense in depth. Same honest simulated shape as demo mode below.
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // DEMO MODE: no database yet — simulate the confirmation honestly.
+  // DEMO MODE: no database yet: simulate the confirmation honestly.
   if (page.demoMode || !isSupabaseConfigured()) {
     return NextResponse.json({
       ok: true,
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
     });
     if (createErr || !created.user) {
       return NextResponse.json(
-        { error: "That email already has an account — sign in to finish booking, or use a different email." },
+        { error: "That email already has an account. Sign in to finish booking, or use a different email." },
         { status: 409 }
       );
     }
@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Customer profile basics (name/contact). The account's home is the
-  // per-business membership created just below — nothing about this
+  // per-business membership created just below: nothing about this
   // booking is visible at any other business.
   await admin.from("customers").upsert(
     { id: customerId, full_name: name ?? "", email: email ?? null, phone: phone ?? null },
@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
       { onConflict: "business_id,customer_id", ignoreDuplicates: true }
     );
   // Booking with a specific person makes that person the customer's
-  // person at this business — only when nobody is assigned yet (the
+  // person at this business: only when nobody is assigned yet (the
   // owner can reassign anytime; a later booking never silently moves
   // a customer). Customer Side Plan, Frantz 2026-11-26. The column
   // arrives with migration 0010; a failure here never fails a booking.
@@ -189,14 +189,14 @@ export async function POST(req: NextRequest) {
         .eq("customer_id", customerId)
         .is("assigned_staff_id", null);
     } catch {
-      // Assignment is additive — the booking itself already landed.
+      // Assignment is additive: the booking itself already landed.
     }
   }
 
   // Insert with a fresh confirmation code per attempt: the unique
   // constraint on confirmation_code makes collisions come back as 23505,
   // and we simply draw a new code (the slot exclusion constraint is a
-  // different code — 23P01 — and is NOT retried).
+  // different code: 23P01: and is NOT retried).
   interface BookedAppt {
     id: string;
     manage_token: string;
@@ -232,18 +232,18 @@ export async function POST(req: NextRequest) {
     // 23P01 = exclusion violation → the slot was just taken.
     if (apptErr && (apptErr as { code?: string }).code === "23P01") {
       return NextResponse.json(
-        { error: "That time was just taken — please pick another." },
+        { error: "That time was just taken. Please pick another." },
         { status: 409 }
       );
     }
-    return NextResponse.json({ error: "Booking failed — please try again." }, { status: 500 });
+    return NextResponse.json({ error: "Booking failed. Please try again." }, { status: 500 });
   }
 
   await scheduleReminders(admin, appt.id, start);
 
   // Intake form (migration 0012): if this service has a form attached,
   // the confirmation screen offers the customer a "Complete your
-  // intake form" step. Defensive — no form_id column before 0012.
+  // intake form" step. Defensive: no form_id column before 0012.
   let intakeFormName: string | null = null;
   if (service.form_id) {
     try {
@@ -259,7 +259,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Timeline: the booking itself (migration 0010). Guest bookings are
-  // still "by customer" — the account was created for them at checkout.
+  // still "by customer": the account was created for them at checkout.
   await logCustomerEvent(admin, {
     businessId: page.business.id,
     customerId,
@@ -277,7 +277,7 @@ export async function POST(req: NextRequest) {
 
   // Native app push (app build phase 1): the owner/team learn about
   // the booking on their phones the moment it lands. Env-gated on
-  // FCM / APNs credentials — until those exist this no-ops silently.
+  // FCM / APNs credentials: until those exist this no-ops silently.
   // A push failure never fails a booking.
   try {
     const tz = page.business.timezone ?? "America/New_York";

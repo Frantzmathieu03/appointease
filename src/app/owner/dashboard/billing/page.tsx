@@ -4,13 +4,13 @@ import BillingPanel from "@/components/owner/BillingPanel";
 import { formatPlanPrice, getBillingState, planById } from "@/lib/plans";
 import { isAnnualBillingConfigured, isBillingConfigured } from "@/lib/stripe";
 
-// Billing: the owner's own AppointEase subscription — the ONLY money
+// Billing: the owner's own AppointEase subscription: the ONLY money
 // on this page, and the only money AppointEase ever touches. What
 // customers pay the business happens between them and the business,
 // outside AppointEase, and never appears here.
 export default async function DashboardBillingPage() {
   const { supabase, business, role } = await requireBusiness();
-  // Billing is the owner's alone — managers see everything at the
+  // Billing is the owner's alone: managers see everything at the
   // business EXCEPT billing and team management (2026-11-26 plan).
   if (role !== "owner") redirect("/owner/dashboard");
 
@@ -26,7 +26,7 @@ export default async function DashboardBillingPage() {
 
   // Seats: staff calendars in use vs the plan's limit, and team logins
   // (you + invited members). business_members arrives with migration
-  // 0011 — counted defensively.
+  // 0011: counted defensively.
   const { count: staffCount } = await supabase
     .from("staff")
     .select("id", { count: "exact", head: true })
@@ -40,7 +40,7 @@ export default async function DashboardBillingPage() {
     .eq("status", "active");
   if (!membersRes.error) memberCount = membersRes.count ?? 0;
 
-  // Texts sent this month: counted from the reminder records — only
+  // Texts sent this month: counted from the reminder records: only
   // rows actually marked sent. If the records can't be read, the page
   // says texting isn't connected instead of inventing a number.
   const monthStart = new Date();
@@ -59,7 +59,7 @@ export default async function DashboardBillingPage() {
     <div>
       <h1 style={{ fontSize: 26 }}>Billing</h1>
       <p className="small" style={{ marginTop: 0 }}>
-        This is your AppointEase plan — what you pay us for the booking
+        This is your AppointEase plan, what you pay us for the booking
         page. Money from your customers is always between you and them;
         AppointEase never touches it.
       </p>
@@ -68,16 +68,16 @@ export default async function DashboardBillingPage() {
         <div className="card" style={{ margin: 0 }}>
           <p className="eyebrow">Your plan</p>
           <p className="lede" style={{ margin: "4px 0" }}>
-            {plan.name} — {formatPlanPrice(plan.monthlyCents)}/month
+            {plan.name} · {formatPlanPrice(plan.monthlyCents)}/month
           </p>
           <p className="small" style={{ margin: 0 }}>
             {billing.phase === "trial" && trialDaysLeft !== null
-              ? `Free trial — ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left (ends ${fmtDate(business.trial_ends_at)})`
+              ? `Free trial: ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left (ends ${fmtDate(business.trial_ends_at)})`
               : billing.phase === "active"
                 ? "Subscription active"
                 : billing.phase === "grace"
-                  ? "Payment problem — fix it below to keep your page live"
-                  : "Trial ended — subscribe below to turn your page back on"}
+                  ? "Payment problem. Fix it below to keep your page live"
+                  : "Trial ended. Subscribe below to turn your page back on"}
           </p>
         </div>
         <div className="card" style={{ margin: 0 }}>
@@ -99,8 +99,8 @@ export default async function DashboardBillingPage() {
           </p>
           <p className="small" style={{ margin: 0 }}>
             {textsSent === null
-              ? "Text reminders turn on when texting is connected — email reminders already work."
-              : "Counted from reminders actually sent — confirmations, 24-hour and 2-hour reminders."}
+              ? "Text reminders turn on when texting is connected. Email reminders already work."
+              : "Counted from reminders actually sent: confirmations, 24 hour and 2 hour reminders."}
           </p>
         </div>
       </div>

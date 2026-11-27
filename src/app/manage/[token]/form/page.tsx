@@ -8,7 +8,7 @@ import type { FormAnswers, FormQuestion } from "@/lib/types";
 import { formatPhone } from "@/lib/types";
 
 // The customer's intake form, behind the same secure manage link as
-// reschedule/cancel — the token is the credential, no account needed.
+// reschedule/cancel: the token is the credential, no account needed.
 // Branding is the BUSINESS's (PDF §5), like the manage page.
 interface FormData {
   business: { name: string; logo_url: string | null; phone: string | null; timezone: string } | null;
@@ -126,7 +126,7 @@ export default function ManageFormPage({ params }: { params: Promise<{ token: st
           <h2 style={{ marginTop: 0 }}>No form to fill in</h2>
           <p className="small" style={{ margin: 0 }}>
             {biz?.name} doesn&apos;t have a form for your{" "}
-            {data.appointment.service_name} appointment ({when}) — there&apos;s
+            {data.appointment.service_name} appointment ({when}). There&apos;s
             nothing to fill in here.
           </p>
         </div>
@@ -134,7 +134,7 @@ export default function ManageFormPage({ params }: { params: Promise<{ token: st
         <div className="card">
           <div style={{ fontSize: 34, marginBottom: 4 }}>✓</div>
           <h2 style={{ marginTop: 0 }}>
-            {done ? "Thank you — your answers are in." : "You've already sent this form."}
+            {done ? "Thank you. Your answers are in." : "You've already sent this form."}
           </h2>
           <p className="small" style={{ margin: 0 }}>
             {biz?.name} has your {data.form.name} answers for your{" "}

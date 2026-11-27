@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // POST /api/contact { name, email, topic, message }
 // Sends the message to the AppointEase inbox via Resend (same provider and
-// env as the reminder engine — see src/lib/notify.ts). reply_to is set to
+// env as the reminder engine: see src/lib/notify.ts). reply_to is set to
 // the submitter so replies go straight back to them. Honest errors: if the
 // email provider is not configured, we say so instead of pretending to send.
 const CONTACT_TO = "appointeaseapp@gmail.com";
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   const from = process.env.EMAIL_FROM ?? "AppointEase <reminders@appointease.io>";
   if (!apiKey) {
     return NextResponse.json(
-      { error: "Email is not configured yet — please write to support@appointease.io directly." },
+      { error: "Email is not configured yet. Please write to support@appointease.io directly." },
       { status: 503 }
     );
   }
@@ -42,20 +42,20 @@ export async function POST(req: NextRequest) {
         from,
         to: CONTACT_TO,
         reply_to: email,
-        subject: `AppointEase contact — ${topic}: ${name}`,
+        subject: `AppointEase contact · ${topic}: ${name}`,
         text: `New message from the AppointEase contact page.\n\nName: ${name}\nEmail: ${email}\nTopic: ${topic}\n\n${message}\n`,
       }),
     });
     if (!res.ok) {
       return NextResponse.json(
-        { error: "The message could not be sent right now — please email support@appointease.io directly." },
+        { error: "The message could not be sent right now. Please email support@appointease.io directly." },
         { status: 502 }
       );
     }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(
-      { error: "The message could not be sent right now — please email support@appointease.io directly." },
+      { error: "The message could not be sent right now. Please email support@appointease.io directly." },
       { status: 502 }
     );
   }

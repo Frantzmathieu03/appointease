@@ -4,11 +4,11 @@ import { logCustomerEvent } from "@/lib/events";
 import type { FormAnswers, FormQuestion } from "@/lib/types";
 
 // Intake form behind the secure manage link: /manage/<token>/form
-// GET  — the appointment's attached form, its questions, and any
+// GET: the appointment's attached form, its questions, and any
 //        submission already on file.
-// POST — multipart: `answers` (JSON of text answers) + one
+// POST: multipart: `answers` (JSON of text answers) + one
 //        `file_<questionId>` field per uploaded file. The token is
-//        the credential, exactly like reschedule/cancel — a guest who
+//        the credential, exactly like reschedule/cancel: a guest who
 //        booked without a password can still complete their intake.
 // Files land in the PRIVATE form-uploads bucket under
 // <business_id>/<customer_id>/… via the service role (the customer may
@@ -75,7 +75,7 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> }
 ) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — nothing to fill in yet." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode. Nothing to fill in yet." }, { status: 400 });
   }
   const { token } = await params;
   const { admin, appt } = await loadAppt(token);
@@ -113,14 +113,14 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — nothing to fill in yet." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode. Nothing to fill in yet." }, { status: 400 });
   }
   const { token } = await params;
   const { admin, appt } = await loadAppt(token);
   if (!appt) return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
   if (appt.status === "cancelled") {
     return NextResponse.json(
-      { error: "This appointment was cancelled — there's nothing to fill in." },
+      { error: "This appointment was cancelled. There's nothing to fill in." },
       { status: 409 }
     );
   }
@@ -131,7 +131,7 @@ export async function POST(
   }
   const { form, questions } = loaded;
 
-  // One submission per appointment: a second submit replaces nothing —
+  // One submission per appointment: a second submit replaces nothing: 
   // the first stands as the record (the owner sees the original).
   const { data: existing } = await admin
     .from("form_submissions")
@@ -141,7 +141,7 @@ export async function POST(
     .maybeSingle();
   if (existing) {
     return NextResponse.json(
-      { error: "You've already sent this form — the business has your answers." },
+      { error: "You've already sent this form. The business has your answers." },
       { status: 409 }
     );
   }
@@ -174,7 +174,7 @@ export async function POST(
           .upload(path, file, { contentType: file.type || undefined });
         if (upErr) {
           return NextResponse.json(
-            { error: "A file couldn't be uploaded — please try again." },
+            { error: "A file couldn't be uploaded. Please try again." },
             { status: 500 }
           );
         }
@@ -200,7 +200,7 @@ export async function POST(
   });
   if (insErr) {
     return NextResponse.json(
-      { error: "Your answers couldn't be saved — please try again." },
+      { error: "Your answers couldn't be saved. Please try again." },
       { status: 500 }
     );
   }

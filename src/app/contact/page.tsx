@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
 
 export const metadata: Metadata = {
-  title: "Contact — AppointEase",
-  description: "Get in touch with the AppointEase team — questions from business owners and customers welcome.",
+  title: "Contact · AppointEase",
+  description: "Get in touch with the AppointEase team. Questions from business owners and customers welcome.",
 };
 
 export default function ContactPage() {
@@ -15,7 +15,7 @@ export default function ContactPage() {
           <h1 style={{ fontSize: "clamp(30px, 4.6vw, 42px)" }}>Talk to a human</h1>
           <p className="lede">
             Questions about your booking page, a booking you made, or anything
-            else — send us a message and we&apos;ll get back to you.
+            else, send us a message and we&apos;ll get back to you.
           </p>
         </div>
 
@@ -29,13 +29,13 @@ export default function ContactPage() {
             </p>
             <h3>Business owners</h3>
             <p className="small" style={{ fontSize: 14, lineHeight: 1.55, margin: "0 0 14px" }}>
-              Setting up your page, billing questions, or help for your team —
+              Setting up your page, billing questions, or help for your team:
               pick &quot;Business owner&quot; in the form.
             </p>
             <h3>Customers</h3>
             <p className="small" style={{ fontSize: 14, lineHeight: 1.55, margin: 0 }}>
               For a specific appointment, the fastest route is the reschedule
-              or message link in your confirmation — but we&apos;re happy to
+              or message link in your confirmation, but we&apos;re happy to
               help here too.
             </p>
           </div>

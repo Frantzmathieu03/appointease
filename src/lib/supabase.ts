@@ -33,7 +33,7 @@ export async function createServerSupabase() {
             cookieStore.set(name, value, options)
           );
         } catch {
-          // Called from a Server Component — middleware refreshes the session.
+          // Called from a Server Component: middleware refreshes the session.
         }
       },
     },
@@ -41,7 +41,7 @@ export async function createServerSupabase() {
 }
 
 /**
- * Service-role client. SERVER ONLY — bypasses RLS, used by the reminder
+ * Service-role client. SERVER ONLY: bypasses RLS, used by the reminder
  * engine and other trusted jobs. Never import from client components.
  */
 export function createAdminSupabase() {

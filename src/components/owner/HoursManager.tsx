@@ -14,8 +14,8 @@ interface DayState {
 }
 
 // Build the editor's days from the saved rows. A business with NO
-// saved rows yet starts from the suggested week — Monday to Friday
-// 9:00 AM–5:00 PM open, Saturday and Sunday closed — as a starting
+// saved rows yet starts from the suggested week: Monday to Friday
+// 9:00 AM to 5:00 PM open, Saturday and Sunday closed: as a starting
 // point only: nothing is saved until the owner presses Save hours.
 function buildDays(initial: Availability[]): DayState[] {
   const hasRows = initial.length > 0;
@@ -83,7 +83,7 @@ export default function HoursManager({
     <div>
       {initial.length === 0 && (
         <p className="small" style={{ marginTop: 0 }}>
-          We filled in a common week to start you off — change anything you
+          We filled in a common week to start you off. Change anything you
           like, then press Save hours.
         </p>
       )}

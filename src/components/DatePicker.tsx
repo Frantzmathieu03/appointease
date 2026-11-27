@@ -5,16 +5,16 @@ import { weekdayOf } from "@/lib/slots";
 
 // Month-grid date picker over a fixed list of bookable dates
 // (yyyy-mm-dd strings in the business's timezone). Month arrows jump
-// a whole month at a time, so a date ~60 days out is two taps away —
+// a whole month at a time, so a date ~60 days out is two taps away: 
 // no endless sideways scrolling through a strip of day buttons.
 // Only the days in `dates` are enabled; slots are still computed per
 // selected day by the caller, never precomputed for the whole window.
 //
 // Customer Side Plan (Frantz, 2026-11-26): callers that know each
-// day's state pass `dayStates` — open days render as white boxes with
+// day's state pass `dayStates`: open days render as white boxes with
 // a green outline, closed and fully booked days as plain grey numbers
 // (never strikethrough, per the plan's pictures), and only open days
-// are tappable. `markedDate` outlines one day with a dashed border —
+// are tappable. `markedDate` outlines one day with a dashed border: 
 // the reschedule screen marks the appointment's current day that way.
 // Without `dayStates` the original behavior stands: days in `dates`
 // are enabled, the rest are disabled and faded.

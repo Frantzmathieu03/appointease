@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 
 // Owner "Booking rules" (Customer Side Plan, Frantz 2026-11-26):
-// the business's own cancellation words — labeled "Late-cancellation
-// note" in plain words — plus the reschedule cut-off and the free
+// the business's own cancellation words: labeled "Late-cancellation
+// note" in plain words: plus the reschedule cut-off and the free
 // cancellation window in hours. All three live on the business row
 // (migration 0016). The note is words only: the business collects
 // any fee itself; AppointEase never charges its clients. Before the
@@ -45,7 +45,7 @@ export default function BookingRulesForm({
       })
       .eq("id", businessId);
     if (error) {
-      // The columns arrive with the next database update — until
+      // The columns arrive with the next database update: until
       // then nothing was saved and the defaults apply.
       setState("pending");
       return;
@@ -57,18 +57,18 @@ export default function BookingRulesForm({
   return (
     <form onSubmit={save}>
       <label className="field">
-        <span>Late-cancellation note</span>
+        <span>Late cancellation note</span>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           style={{ minHeight: 64 }}
-          placeholder="Please cancel at least 24 hours ahead — a late cancellation is $25, paid at the office."
+          placeholder="Please cancel at least 24 hours ahead. A late cancellation is $25, paid at the office."
         />
       </label>
       <p className="small" style={{ marginTop: -6, marginBottom: 14 }}>
         Shown to customers when they cancel, and on the booking review.
         Leave it blank to use the friendly standard note. You collect any
-        fee yourself — AppointEase never charges your clients.
+        fee yourself. AppointEase never charges your clients.
       </p>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         <label className="field" style={{ flex: "1 1 180px" }}>
@@ -104,13 +104,13 @@ export default function BookingRulesForm({
       )}
       {state === "pending" && (
         <p className="small" style={{ marginTop: 10 }}>
-          These settings turn on with the next update — your customers
+          These settings turn on with the next update. Your customers
           see the standard note and the 12 / 24 hour defaults until then.
         </p>
       )}
       {state === "error" && (
         <p className="small" style={{ marginTop: 10 }}>
-          That didn&apos;t save — please try again.
+          That didn&apos;t save. Please try again.
         </p>
       )}
     </form>

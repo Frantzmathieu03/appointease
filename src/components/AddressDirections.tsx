@@ -13,13 +13,13 @@ export default function AddressDirections({
 }: {
   address: string;
   /**
-   * "link" (default): the address itself is the underlined trigger —
+   * "link" (default): the address itself is the underlined trigger: 
    * the original inline use. "action": the trigger is a small quiet
    * "Get directions" button and the parent renders the address as
-   * plain text (the business page's contact card — no underlined
+   * plain text (the business page's contact card: no underlined
    * link look, Frantz 2026-11-25). "square": the trigger is the
    * full Directions square of the rebuilt business page (Frantz's
-   * page plan, 2026-11-26) — icon above the word "Directions",
+   * page plan, 2026-11-26): icon above the word "Directions",
    * filling its grid cell; the menu opens right-aligned so it stays
    * on screen.
    */

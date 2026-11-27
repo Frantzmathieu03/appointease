@@ -9,12 +9,12 @@ import type { BusinessAuthContext } from "@/lib/auth-context";
 
 // The per-business sign up / log in screen (Customer Side Plan,
 // Frantz 2026-11-26): reached from a business's own pages, it wears
-// that business — a back link to its page, its round logo, "with
-// <Business>. Your account is only with this office." — and nothing
+// that business: a back link to its page, its round logo, "with
+// <Business>. Your account is only with this office.": and nothing
 // of the platform around it. One screen flips between Create your
 // account and Log in. Working methods are Google and email +
 // password; code-by-text is NOT offered (texting is not connected
-// yet — a button that cannot send a code is never shipped). The
+// yet: a button that cannot send a code is never shipped). The
 // texting consent box starts unchecked; ticking it rides along the
 // return path (&consent=1) and is stamped on the membership when the
 // join lands (business_customers.sms_consent_at, migration 0016).
@@ -58,7 +58,7 @@ export default function CustomerAuth({
       },
     });
     if (error) {
-      setError("Google sign-in is unavailable right now — please use email and password, or try again shortly.");
+      setError("Google sign in is unavailable right now. Please use email and password, or try again shortly.");
     }
   }
 
@@ -90,7 +90,7 @@ export default function CustomerAuth({
       router.refresh();
       return;
     }
-    // Email confirmation is on — the profile is created on first sign-in.
+    // Email confirmation is on: the profile is created on first sign-in.
     setCheckEmail(true);
     setBusy(false);
   }
@@ -116,7 +116,7 @@ export default function CustomerAuth({
   async function emailLink() {
     setError("");
     if (!form.email) {
-      setNotice("Type your email above first — then we'll send the sign-in link there.");
+      setNotice("Type your email above first. Then we'll send the sign in link there.");
       return;
     }
     const supabase = createBrowserSupabase();
@@ -127,16 +127,16 @@ export default function CustomerAuth({
       },
     });
     if (error) {
-      setError("That sign-in link didn't go out — check the email address, or use your password below.");
+      setError("That sign in link didn't go out. Check the email address, or use your password below.");
       return;
     }
-    setNotice("Check your email — we sent you a sign-in link. Tap it and you're in, no password needed.");
+    setNotice("Check your email. We sent you a sign in link. Tap it and you're in, no password needed.");
   }
 
   async function forgot() {
     setError("");
     if (!form.email) {
-      setNotice("Type your email above first — then we'll send the reset link there.");
+      setNotice("Type your email above first. Then we'll send the reset link there.");
       return;
     }
     const supabase = createBrowserSupabase();
@@ -154,7 +154,7 @@ export default function CustomerAuth({
       <div className="card center">
         <h2>Check your email</h2>
         <p className="lede">
-          We sent a confirmation link to {form.email}. Click it, then sign in —
+          We sent a confirmation link to {form.email}. Click it, then sign in and
           you&apos;ll land right back at {business.name}.
         </p>
         <button className="btn btn-primary" onClick={() => setCheckEmail(false)}>
@@ -259,7 +259,7 @@ export default function CustomerAuth({
         {mode === "login" && (
           <p className="small center" style={{ marginTop: 12 }}>
             <button type="button" className="c3-underlink" onClick={emailLink}>
-              Email me a sign-in link instead
+              Email me a sign in link instead
             </button>
             {" · "}
             <button type="button" className="c3-underlink" onClick={forgot}>

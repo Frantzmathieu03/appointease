@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import InviteAccept from "@/components/InviteAccept";
 import InviteDecline from "@/components/InviteDecline";
+import InviteSwitchAccount from "@/components/InviteSwitchAccount";
 
 // Team invite landing: /invite/<token>. The token is the credential for
 // VIEWING the invite; accepting requires signing in with the invited
@@ -71,6 +72,14 @@ export default async function InvitePage({
     data: { user },
   } = await session.auth.getUser();
   const next = `/invite/${token}`;
+  // The email match rule stays (an invite is accepted only by the
+  // account signed in with the invited email), but a wrong account
+  // is no longer a dead end: the page names the problem and offers
+  // the one tap switch (Frantz, 2026-11-26).
+  const wrongEmail =
+    !!user &&
+    !!user.email &&
+    user.email.toLowerCase() !== inv.email.toLowerCase();
 
   return (
     <main className="column">
@@ -80,7 +89,7 @@ export default async function InvitePage({
         {businessName} invited <strong>{inv.email}</strong> to join as{" "}
         {inv.role === "manager" ? "a manager" : "a staff member"} on AppointEase.
         {inv.role === "staff" &&
-          " You'll see the customers assigned to you — your calendar, their appointments and your message threads."}
+          " You'll see the customers assigned to you: your calendar, their appointments and your message threads."}
       </p>
 
       {inv.accepted_at ? (
@@ -93,20 +102,37 @@ export default async function InvitePage({
           You declined this invite. If that was a mistake, ask {businessName} to send a new one.
         </div>
       ) : expired ? (
-        <div className="error">This invite has expired — ask {businessName} to send a new one.</div>
+        <div className="error">This invite has expired. Ask {businessName} to send a new one.</div>
       ) : !user ? (
         <div className="card">
           <p className="small" style={{ marginTop: 0 }}>
             Sign in or create your account with <strong>{inv.email}</strong> to accept.
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <Link className="btn btn-primary" href={`/login?next=${encodeURIComponent(next)}`}>
+            <Link
+              className="btn btn-primary"
+              href={`/login?next=${encodeURIComponent(next)}&email=${encodeURIComponent(inv.email)}`}
+            >
               Sign in
             </Link>
-            <Link className="btn" href={`/signup?next=${encodeURIComponent(next)}`}>
+            <Link
+              className="btn"
+              href={`/signup?next=${encodeURIComponent(next)}&email=${encodeURIComponent(inv.email)}`}
+            >
               Create account
             </Link>
           </div>
+          {declinedKnown && <InviteDecline token={token} />}
+        </div>
+      ) : wrongEmail ? (
+        <div className="card">
+          <p className="small" style={{ marginTop: 0 }}>
+            Signed in as {user.email}.
+          </p>
+          <div className="error">
+            This invite was sent to {inv.email}. Sign in with that email address to accept it.
+          </div>
+          <InviteSwitchAccount invitedEmail={inv.email} token={token} />
           {declinedKnown && <InviteDecline token={token} />}
         </div>
       ) : (

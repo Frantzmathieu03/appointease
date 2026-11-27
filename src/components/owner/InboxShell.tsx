@@ -5,7 +5,7 @@ import type { Business } from "@/lib/types";
 /**
  * Two-column inbox shell (PDF §4): conversation list on the left, the
  * open thread (children) on the right. On mobile the list hides while a
- * thread is open — the thread route stands alone there. RLS does the
+ * thread is open: the thread route stands alone there. RLS does the
  * scoping: a staff login's queries only return their assigned
  * customers' threads (migration 0011), so this component needs no
  * hand-filtering.

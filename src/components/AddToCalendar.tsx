@@ -4,7 +4,7 @@ import { useState } from "react";
 
 // "Add to my calendar" for the customer's next-appointment card
 // (Customer Side Plan, Frantz 2026-11-26): one button that opens the
-// three calendar choices — Google (web), Apple (ICS download),
+// three calendar choices: Google (web), Apple (ICS download),
 // Outlook (web). Links are built by the server page from the real
 // appointment, so this component only toggles.
 export default function AddToCalendar({

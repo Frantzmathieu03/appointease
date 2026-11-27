@@ -6,7 +6,7 @@
 // paths. The main page renders its own top row and footer from the
 // plan; the book / message / my sub-routes add the slim business
 // header via their own layouts (BusinessChrome), exactly as this
-// layout rendered it before the plan. Unknown slugs render bare —
+// layout rendered it before the plan. Unknown slugs render bare: 
 // the page itself 404s.
 export default async function BusinessLayout({
   children,

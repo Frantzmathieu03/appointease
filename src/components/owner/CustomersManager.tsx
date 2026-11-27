@@ -26,13 +26,13 @@ type Chip = "all" | "unassigned" | "upcoming" | "new";
 /**
  * Customers (Owner Dashboard Plan, 2026-11-26): count line, Export
  * (CSV of the visible list), search, filter chips (All / Not
- * assigned / Upcoming / New this month) and a table — checkbox,
+ * assigned / Upcoming / New this month) and a table: checkbox,
  * Name, Phone (with dashes), Assigned to, Next appointment, Visits.
  * Ticking rows raises the dark green Assign bar; assignments write
  * through the browser client under RLS and each one appends an
  * `assigned` timeline event. There is deliberately NO "+ Add
  * customer" button: customers are accounts people create themselves
- * on the business's page — the business cannot create one for them.
+ * on the business's page: the business cannot create one for them.
  */
 export default function CustomersManager({
   businessId,
@@ -121,7 +121,7 @@ export default function CustomersManager({
     }
     setBusy(false);
     if (failed) {
-      setNote("Assignment isn't available yet — it turns on with the next database update.");
+      setNote("Assignment isn't available yet. It turns on with the next database update.");
       return;
     }
     setSelected(new Set());
@@ -156,7 +156,7 @@ export default function CustomersManager({
     return (
       <div className="card">
         <p className="lede" style={{ marginBottom: 0 }}>
-          No customers yet — the first person who books or messages you appears here.
+          No customers yet. The first person who books or messages you appears here.
         </p>
       </div>
     );
@@ -258,13 +258,13 @@ export default function CustomersManager({
                   </Link>
                   {c.unread > 0 && <span className="badge">{c.unread}</span>}
                 </td>
-                <td>{c.phone ? formatPhone(c.phone) : "—"}</td>
+                <td>{c.phone ? formatPhone(c.phone) : "None"}</td>
                 <td>
                   {staffName(c.assigned_staff_id) ?? (
                     <span className="d2-notassigned">Not assigned</span>
                   )}
                 </td>
-                <td>{c.nextLabel ?? "—"}</td>
+                <td>{c.nextLabel ?? "None"}</td>
                 <td>{c.total}</td>
               </tr>
             ))}

@@ -8,10 +8,10 @@ import { getStripe, isBillingConfigured } from "@/lib/stripe";
 // update card, change plan, cancel. Requires the business to already
 // have a Stripe customer (created at first checkout). The portal itself
 // must be activated once in the Stripe dashboard (Settings → Billing →
-// Customer portal) — if it isn't, Stripe errors and we say so plainly.
+// Customer portal): if it isn't, Stripe errors and we say so plainly.
 export async function POST() {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — billing turns on with the live database." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode. Billing turns on with the live database." }, { status: 400 });
   }
   const supabase = await createServerSupabase();
   const {
@@ -30,7 +30,7 @@ export async function POST() {
   }
   if (!business.stripe_customer_id) {
     return NextResponse.json(
-      { error: "No billing account yet — subscribe first, then you can manage it here." },
+      { error: "No billing account yet. Subscribe first, then you can manage it here." },
       { status: 409 }
     );
   }
@@ -47,7 +47,7 @@ export async function POST() {
       {
         error: "portal_unavailable",
         message:
-          "Stripe's billing portal isn't available yet — it needs a one-time activation in the Stripe dashboard (Settings → Billing → Customer portal).",
+          "Stripe's billing portal isn't available yet. It needs a one time activation in the Stripe dashboard (Settings → Billing → Customer portal).",
         detail: String(err),
       },
       { status: 502 }

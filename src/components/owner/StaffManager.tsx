@@ -9,7 +9,7 @@ import type { StaffMember } from "@/lib/types";
 /**
  * Bookable staff calendars. Plan team-size bands live in
  * src/lib/plans.ts (Solo 1 · Team up to 5 · Business up to 15 people
- * with a calendar, owner included — Frantz, 2026-11-26). Adding past
+ * with a calendar, owner included: Frantz, 2026-11-26). Adding past
  * the cap stops with the upgrade prompt, here in the UI and again on
  * the server (the invite route, and a database trigger in migration
  * 0015 for direct inserts like this one).
@@ -75,7 +75,7 @@ export default function StaffManager({ businessId }: { businessId: string }) {
   return (
     <div>
       {staff.length === 0 && (
-        <p className="small">No team members yet. Add the people customers can book with — for a solo shop, that&apos;s you.</p>
+        <p className="small">No team members yet. Add the people customers can book with. For a solo shop, that&apos;s you.</p>
       )}
       {staff.map((m) => (
         <div key={m.id} className="service-row">
@@ -106,7 +106,7 @@ export default function StaffManager({ businessId }: { businessId: string }) {
         </form>
       )}
       <p className="small" style={{ marginTop: 10 }}>
-        {staff.length} active — Solo includes 1, Team up to 5, Business up to 15.
+        {staff.length} active. Solo includes 1, Team up to 5, Business up to 15.
       </p>
     </div>
   );

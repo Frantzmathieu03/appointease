@@ -3,9 +3,9 @@ import { isSupabaseConfigured } from "@/lib/supabase-config";
 
 // When a customer arrives at /login or /signup from a business's booking
 // page (next=/<slug>/book), remind them whose page they're booking with:
-// the business's logo + name above the form. Anything unexpected — no
+// the business's logo + name above the form. Anything unexpected: no
 // next, a reserved path, an unknown or unpublished slug, a database
-// error — renders nothing extra.
+// error: renders nothing extra.
 const RESERVED_SEGMENTS = new Set([
   "login",
   "signup",

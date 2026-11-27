@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-/** Accept button for /invite/[token] — posts to the accept API route. */
+/** Accept button for /invite/[token]: posts to the accept API route. */
 export default function InviteAccept({ token }: { token: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);

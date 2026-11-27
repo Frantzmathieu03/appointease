@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — AppointEase",
-  description: "The terms that govern use of AppointEase, the booking platform for appointment-based businesses.",
+  title: "Terms of Service · AppointEase",
+  description: "The terms that govern use of AppointEase, the booking platform for appointment based businesses.",
 };
 
 export default function TermsPage() {
@@ -15,9 +15,9 @@ export default function TermsPage() {
 
       <p>
         Welcome to AppointEase. AppointEase provides an online booking platform
-        that lets appointment-based businesses publish a booking page, manage
+        that lets appointment based businesses publish a booking page, manage
         appointments, message customers, and send automatic reminders. By using
-        AppointEase — as a business or as a customer booking an appointment —
+        AppointEase, as a business or as a customer booking an appointment,
         you agree to these Terms of Service.
       </p>
 
@@ -37,8 +37,8 @@ export default function TermsPage() {
       <h2>2. Accounts</h2>
       <ul>
         <li><strong>Business accounts.</strong> A business owner creates an account, sets up their business profile, services, staff and hours, and publishes a booking page.</li>
-        <li><strong>Customer accounts.</strong> Customers create an account with a business, on that business&apos;s page — with Google sign-in or with email and password. The account belongs to that business: its appointments, messages and history live in that business&apos;s dashboard and are not shared with any other business. A customer who uses several businesses joins each one on its own page; the same email may be used at each.</li>
-        <li>You are responsible for keeping your sign-in credentials confidential and for activity under your account. Tell us promptly if you believe your account has been compromised.</li>
+        <li><strong>Customer accounts.</strong> Customers create an account with a business, on that business&apos;s page, with Google sign in or with email and password. The account belongs to that business: its appointments, messages and history live in that business&apos;s dashboard and are not shared with any other business. A customer who uses several businesses joins each one on its own page; the same email may be used at each.</li>
+        <li>You are responsible for keeping your sign in credentials confidential and for activity under your account. Tell us promptly if you believe your account has been compromised.</li>
         <li>You must provide accurate information and keep it up to date.</li>
       </ul>
 
@@ -53,7 +53,7 @@ export default function TermsPage() {
 
       <h2>4. Bookings, reminders and messages</h2>
       <ul>
-        <li>When a customer books, AppointEase sends a confirmation and reminders before the appointment by text message and email — at booking, 24 hours before, and 2 hours before (when the booking is made far enough ahead) — each with a secure link to reschedule or cancel.</li>
+        <li>When a customer books, AppointEase sends a confirmation and reminders before the appointment by text message and email at booking, 24 hours before, and 2 hours before (when the booking is made far enough ahead), each with a secure link to reschedule or cancel.</li>
         <li>By providing a phone number and email address when booking, the customer agrees to receive these transactional messages about their appointments. Message and data rates may apply. Reply STOP to a text to stop text reminders for that number; appointment emails can be managed through the business.</li>
         <li>Businesses are responsible for honoring appointments booked through their page, for the accuracy of their services, prices and hours, and for responding to customer messages.</li>
         <li>Customers are responsible for showing up on time or using the reschedule/cancel link as early as possible when plans change.</li>
@@ -71,7 +71,7 @@ export default function TermsPage() {
 
       <h2>6. Your content</h2>
       <p>
-        Businesses keep ownership of the content they add — business names,
+        Businesses keep ownership of the content they add: business names,
         descriptions, photos, services and prices. By adding content, you give
         AppointEase permission to display it on your booking page and in
         customer discovery listings so customers can find and book with you.

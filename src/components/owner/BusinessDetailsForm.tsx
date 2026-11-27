@@ -53,7 +53,7 @@ export default function BusinessDetailsForm({ business }: { business: Business }
         timezone: form.timezone,
       })
       .eq("id", business.id);
-    // Category is its own column (migration 0007) — saved separately,
+    // Category is its own column (migration 0007): saved separately,
     // best-effort, so a missing column can never fail the details save.
     await supabase.from("businesses").update({ category }).eq("id", business.id);
     setBusy(false);
@@ -106,7 +106,7 @@ export default function BusinessDetailsForm({ business }: { business: Business }
           value={form.description}
           onChange={set("description")}
           style={{ minHeight: 56 }}
-          placeholder="Tell customers what you do — for example: Haircuts and beard trims for the whole family. Walk-ins welcome."
+          placeholder="Tell customers what you do. For example: Haircuts and beard trims for the whole family. Walk ins welcome."
         />
       </label>
       <label className="field">

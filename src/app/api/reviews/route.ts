@@ -6,14 +6,14 @@ import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 // by that appointment's customer (enforced again by RLS on insert).
 export async function POST(req: NextRequest) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.json({ error: "Demo mode — reviews are not saved yet." }, { status: 400 });
+    return NextResponse.json({ error: "Demo mode. Reviews are not saved yet." }, { status: 400 });
   }
   const body = await req.json().catch(() => null);
   const appointmentId: string = body?.appointmentId ?? "";
   const rating: number = Number(body?.rating);
   const comment: string | null = body?.comment?.trim() ? String(body.comment).trim() : null;
   if (!appointmentId || !(rating >= 1 && rating <= 5)) {
-    return NextResponse.json({ error: "appointmentId and a 1–5 rating are required" }, { status: 400 });
+    return NextResponse.json({ error: "appointmentId and a rating from 1 to 5 are required" }, { status: 400 });
   }
 
   const supabase = await createServerSupabase();
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     if ((error as { code?: string }).code === "23505") {
       return NextResponse.json({ error: "You already reviewed this appointment." }, { status: 409 });
     }
-    return NextResponse.json({ error: "Review failed — please try again." }, { status: 500 });
+    return NextResponse.json({ error: "Review failed. Please try again." }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 // Friendly 404 (Customer Side Plan, Frantz 2026-11-26): a wrong or
-// mistyped business link lands here — one calm business-family page
+// mistyped business link lands here: one calm business-family page
 // with the plan's exact words, never a bare error. Platform paths
 // that don't exist land here too and get the same calm treatment,
 // with a way home.

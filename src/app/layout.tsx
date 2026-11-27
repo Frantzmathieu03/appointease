@@ -5,13 +5,13 @@ import NativeBridge from "@/components/NativeBridge";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.appointease.io"),
-  title: "AppointEase — Let customers book. Get back to work.",
+  title: "AppointEase · Let customers book. Get back to work.",
   description:
-    "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment-based businesses.",
+    "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment based businesses.",
   openGraph: {
-    title: "AppointEase — Let customers book. Get back to work.",
+    title: "AppointEase · Let customers book. Get back to work.",
     description:
-      "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment-based businesses.",
+      "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment based businesses.",
     url: "https://www.appointease.io",
     siteName: "AppointEase",
     images: [{ url: "/hero/hero-poster.jpg" }],
@@ -19,9 +19,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AppointEase — Let customers book. Get back to work.",
+    title: "AppointEase · Let customers book. Get back to work.",
     description:
-      "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment-based businesses.",
+      "Online booking, reminders and messaging for salons, barbershops, law firms, medical offices and other appointment based businesses.",
     images: ["/hero/hero-poster.jpg"],
   },
   manifest: "/manifest.webmanifest",
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <SiteChrome>{children}</SiteChrome>
-        {/* Native app bridge — completely inert in a normal browser. */}
+        {/* Native app bridge: completely inert in a normal browser. */}
         <NativeBridge />
       </body>
     </html>

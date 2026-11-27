@@ -1,4 +1,4 @@
-// Native app bridge — CLIENT SIDE (AppointEase App Pieces spec,
+// Native app bridge: CLIENT SIDE (AppointEase App Pieces spec,
 // Frantz 2026-11-26; app build phase 1).
 //
 // Everything in this module is feature-detected: in a normal browser
@@ -82,7 +82,7 @@ export async function saveBiometricSession(email: string, sessionToken: string):
 /**
  * Ask for Face ID / fingerprint and, on success, release the stored
  * refresh token. Returns null when there is nothing stored, the
- * person declines, or biometrics fail — the normal sign-in screen is
+ * person declines, or biometrics fail: the normal sign-in screen is
  * always the fallback; nobody gets locked out.
  */
 export async function readBiometricSession(): Promise<{ email: string; refreshToken: string } | null> {
@@ -109,6 +109,6 @@ export async function wipeBiometricSession(): Promise<void> {
   try {
     await NativeBiometric.deleteCredentials({ server: BIOMETRIC_SERVER });
   } catch {
-    // Nothing stored — that is the desired end state anyway.
+    // Nothing stored: that is the desired end state anyway.
   }
 }

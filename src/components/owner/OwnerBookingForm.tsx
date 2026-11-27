@@ -16,7 +16,7 @@ export interface OwnerBookingCustomer {
 /**
  * Owner-side "New appointment" (PDF §4): pick an existing customer (or
  * add a new guest), a service, a staff member, and a REAL available
- * time — slots come from the same availability endpoint the public
+ * time: slots come from the same availability endpoint the public
  * booking page uses, so the calendar can't double-book. Submits to
  * /api/owner/book, which writes the timeline event as a team member.
  */
@@ -123,14 +123,14 @@ export default function OwnerBookingForm({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Booking failed — please try again.");
+        setError(data.error ?? "Booking failed. Please try again.");
         setBusy(false);
         return;
       }
       setDoneId(data.appointmentId as string);
       router.refresh();
     } catch {
-      setError("Booking failed — please try again.");
+      setError("Booking failed. Please try again.");
     }
     setBusy(false);
   }
@@ -138,7 +138,7 @@ export default function OwnerBookingForm({
   if (services.length === 0) {
     return (
       <p className="small">
-        Add a service first — appointments need something to book.{" "}
+        Add a service first. Appointments need something to book.{" "}
         <Link href="/owner/dashboard/settings#services">Go to Services</Link>
       </p>
     );
@@ -199,7 +199,7 @@ export default function OwnerBookingForm({
             </select>
           </label>
           {filteredCustomers.length === 0 && (
-            <p className="small">No customer matches — add them as a new customer instead.</p>
+            <p className="small">No customer matches. Add them as a new customer instead.</p>
           )}
         </>
       ) : (
@@ -255,7 +255,7 @@ export default function OwnerBookingForm({
       <div className="field">
         <span>Available times</span>
         {slots.length === 0 ? (
-          <p className="small">No open times that day — try another day or team member.</p>
+          <p className="small">No open times that day. Try another day or team member.</p>
         ) : (
           <div className="slot-grid">
             {slots.map((s) => (

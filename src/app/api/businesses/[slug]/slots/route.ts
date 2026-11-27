@@ -18,7 +18,7 @@ export async function GET(
   }
 
   // Insider rule (Frantz, 2026-11-25): published businesses serve
-  // everyone; an UNPUBLISHED business serves slots only to insiders —
+  // everyone; an UNPUBLISHED business serves slots only to insiders: 
   // the owner, active team members, and joined customers. Signed-out
   // callers and non-members get the same 404 as a missing business.
   const page = await getBusinessPageDataWithPreview(slug);

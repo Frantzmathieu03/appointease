@@ -34,7 +34,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      setError("Your session expired — sign in again.");
+      setError("Your session expired. Sign in again.");
       setBusy(false);
       return;
     }
@@ -63,7 +63,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         // migration hasn't been applied yet.
         await supabase.from("businesses").update({ category }).eq("slug", slug);
         // The standard pair (Frantz, 2026-11-26): every new business
-        // starts bookable — the category standard plus a follow-up
+        // starts bookable: the category standard plus a follow-up
         // appointment, provided by the system, free, no owner action
         // needed. Best-effort like the category write; the booking
         // flow's own fallback covers any miss.
@@ -85,7 +85,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
           );
         }
       } else if ((error as { code?: string }).code !== "23505") {
-        setError("Could not create the business — please try again.");
+        setError("Could not create the business. Please try again.");
         break;
       }
     }
@@ -94,7 +94,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
       router.push(afterCreate);
       router.refresh();
     } else if (!error) {
-      setError("That business link is taken in every variation — try a slightly different name.");
+      setError("That business link is taken in every variation. Try a slightly different name.");
     }
   }
 
@@ -107,7 +107,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
       </label>
       {name && (
         <p className="small" style={{ marginTop: -8, marginBottom: 12 }}>
-          Your link: <strong>appointease.io/{slugify(name) || "your-business"}</strong>
+          Your link: <strong>appointease.io/{slugify(name) || "yourshop"}</strong>
         </p>
       )}
       <label className="field">
@@ -127,14 +127,14 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
         </select>
       </label>
       <p className="small" style={{ margin: "0 0 10px" }}>
-        The rest is optional — you can add this later.
+        The rest is optional. You can add this later.
       </p>
       <label className="field">
-        <span>Office phone (optional — customers will tap to call)</span>
+        <span>Office phone (optional, customers will tap to call)</span>
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" />
       </label>
       <label className="field">
-        <span>Business address (optional — customers tap it for directions)</span>
+        <span>Business address (optional, customers tap it for directions)</span>
         <input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" placeholder="25 Main St, Boston, MA" />
       </label>
       <label className="field">
@@ -143,7 +143,7 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           style={{ minHeight: 56 }}
-          placeholder="Tell customers what you do — for example: Haircuts and beard trims for the whole family. Walk-ins welcome."
+          placeholder="Tell customers what you do. For example: Haircuts and beard trims for the whole family. Walk ins welcome."
         />
       </label>
       <button className="btn btn-primary btn-block" type="submit" disabled={busy || !name.trim()}>

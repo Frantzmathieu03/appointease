@@ -30,15 +30,15 @@ function describe(e: CustomerEvent, fmt: (iso: string) => string): string {
     case "registered":
       return "Created an account";
     case "booked":
-      return `Booked ${str(d.service_name) ?? "an appointment"}${d.starts_at ? ` — ${fmt(String(d.starts_at))}` : ""}`;
+      return `Booked ${str(d.service_name) ?? "an appointment"}${d.starts_at ? ` · ${fmt(String(d.starts_at))}` : ""}`;
     case "rescheduled":
       return `Rescheduled${d.from ? ` from ${fmt(String(d.from))}` : ""}${d.to ? ` to ${fmt(String(d.to))}` : ""}`;
     case "cancelled":
-      return `Cancelled appointment${str(d.reason) ? ` — reason: “${str(d.reason)}”` : ""}`;
+      return `Cancelled appointment${str(d.reason) ? `. Reason: “${str(d.reason)}”` : ""}`;
     case "completed":
       return "Visit completed";
     case "no_show":
-      return "Marked as no-show";
+      return "Marked as no show";
     case "message":
       return d.sender === "business" ? "Message sent by the business" : "Message sent by the customer";
     case "assigned":
@@ -47,7 +47,7 @@ function describe(e: CustomerEvent, fmt: (iso: string) => string): string {
         : "Assignment removed (unassigned)";
     case "note_added": {
       const outcome = str(d.outcome);
-      return `Visit notes added${outcome ? ` — outcome: ${outcome.replace("_", " ")}` : ""}`;
+      return `Visit notes added${outcome ? `. Outcome: ${outcome.replace("_", " ")}` : ""}`;
     }
     case "reminder_sent":
       return "Reminder sent";
@@ -64,7 +64,7 @@ function describe(e: CustomerEvent, fmt: (iso: string) => string): string {
       const cents = typeof d.amount_cents === "number" ? d.amount_cents : null;
       const amount =
         cents !== null ? `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}` : "Payment";
-      return `${amount} paid at the office — marked by ${str(d.marked_by_name) ?? "the team"}`;
+      return `${amount} paid at the office. Marked by ${str(d.marked_by_name) ?? "the team"}`;
     }
     default:
       return "Event";
@@ -77,7 +77,7 @@ const ACTOR_LABEL: Record<string, string> = {
   system: "automatic",
 };
 
-/** The customer's full history, newest first (PDF §6). Append-only —
+/** The customer's full history, newest first (PDF §6). Append-only: 
  *  there is deliberately no edit or delete anywhere near this list.
  *  Payment filters from the PDF are omitted: AppointEase never handles
  *  client money, so there are no payment events. */
@@ -110,12 +110,12 @@ export default function Timeline({ events, tz }: { events: CustomerEvent[]; tz: 
       </div>
       {shown.length === 0 && (
         <p className="small" style={{ margin: 0 }}>
-          Nothing here yet — bookings, messages and notes appear automatically as they happen.
+          Nothing here yet. Bookings, messages and notes appear automatically as they happen.
         </p>
       )}
       {shown.map((e) => (
         <p key={e.id} className="small" style={{ margin: "0 0 8px" }}>
-          <strong>{fmtDateTime(e.created_at)}</strong> — {describe(e, fmtDateTime)}{" "}
+          <strong>{fmtDateTime(e.created_at)}</strong> · {describe(e, fmtDateTime)}{" "}
           <span style={{ opacity: 0.75 }}>({ACTOR_LABEL[e.actor_type] ?? e.actor_type})</span>
         </p>
       ))}

@@ -1,10 +1,10 @@
-// Notification dispatcher — the single door every off-screen alert goes
+// Notification dispatcher: the single door every off-screen alert goes
 // through (owner directive, 2026-11-24):
 //
-//  - Email sends through Resend (RESEND_API_KEY, EMAIL_FROM — see notify.ts).
+//  - Email sends through Resend (RESEND_API_KEY, EMAIL_FROM: see notify.ts).
 //  - SMS sends through Twilio (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
 //    TWILIO_FROM_NUMBER). When that env is absent the dispatcher does NOT
-//    send and reports status "sms_pending_provider" — the other channels
+//    send and reports status "sms_pending_provider": the other channels
 //    still go out. Nothing is ever reported as sent that was not accepted
 //    by a real provider.
 //  - Web Push sends when VAPID keys are configured; otherwise it is
@@ -54,7 +54,7 @@ export async function dispatchSms(opts: {
       delivered: false,
       status: "sms_pending_provider",
       detail:
-        "SMS provider not configured yet (TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER missing) — no SMS sent.",
+        "SMS provider not configured yet (TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER missing). No SMS sent.",
     };
   }
   const r = await sendSms(opts);
@@ -104,7 +104,7 @@ async function logAttempt(
  * Burst rule: alerts fire only on the FIRST unread message of a burst
  * (when the recipient's unread count for this thread is exactly 1 after
  * the insert). Further messages while earlier ones are still unread are
- * recorded once as "burst_suppressed" — one alert per burst, no spam.
+ * recorded once as "burst_suppressed": one alert per burst, no spam.
  */
 export async function notifyNewMessage(admin: SupabaseClient, p: MessageParties) {
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://appointease.io";
@@ -128,7 +128,7 @@ export async function notifyNewMessage(admin: SupabaseClient, p: MessageParties)
       channel: "email",
       recipient: null,
       status: "burst_suppressed",
-      detail: `${unread} unread messages in this thread — one alert per burst.`,
+      detail: `${unread} unread messages in this thread. One alert per burst.`,
     });
     return { alerted: false, unread };
   }
@@ -158,7 +158,7 @@ export async function notifyNewMessage(admin: SupabaseClient, p: MessageParties)
   } else {
     const r = await dispatchEmail({
       to: emailTo,
-      subject: `New message from ${senderName} — AppointEase`,
+      subject: `New message from ${senderName} on AppointEase`,
       text:
         `You have ${unread} unread message${unread === 1 ? "" : "s"} on AppointEase.\n\n` +
         `${senderName}: "${snippet}"\n\n` +
@@ -228,7 +228,7 @@ export async function notifyNewMessage(admin: SupabaseClient, p: MessageParties)
       recipient: null,
       status: "skipped",
       detail:
-        "Web Push env-gated: NEXT_PUBLIC_VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY not configured — no push sent.",
+        "Web Push env gated: NEXT_PUBLIC_VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY not configured. No push sent.",
     });
   } else {
     let anySent = false;

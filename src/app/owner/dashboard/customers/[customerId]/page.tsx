@@ -38,11 +38,11 @@ type TabId = (typeof TABS)[number]["id"];
 // Customer profile (Owner Dashboard Plan, 2026-11-26): a header card
 // (initials avatar, name, phone · email · client since, "Assigned
 // to … · Change", Message / Add note / Book for <name> buttons, and
-// the counts row — Visits, Completed, Cancelled, No-shows, plus Paid
+// the counts row: Visits, Completed, Cancelled, No-shows, plus Paid
 // at office), then tabs Overview / Visits / Timeline / Messages /
 // Forms & files / Payments. "Paid at office" and the Payments tab
 // (revised PDF, 2026-11-26) cover ONLY what the front desk marked as
-// paid at the office — AppointEase never collects client money.
+// paid at the office: AppointEase never collects client money.
 // Overview leads with the last visit's note card and the timeline.
 export default async function DashboardCustomerProfilePage({
   params,
@@ -274,7 +274,7 @@ export default async function DashboardCustomerProfilePage({
             <p className="d2-count-num">{cancelled}</p>
           </div>
           <div className="d2-count">
-            <p className="d2-count-label">No-shows</p>
+            <p className="d2-count-label">No shows</p>
             <p className="d2-count-num">{noShows}</p>
           </div>
           <div className="d2-count">
@@ -309,14 +309,14 @@ export default async function DashboardCustomerProfilePage({
               <p className="small" style={{ margin: "2px 0 10px" }}>
                 <strong>Next appointment:</strong>{" "}
                 <Link href={`/owner/dashboard/appointments/${nextAppt.id}`}>
-                  {nextAppt.services?.name ?? "Appointment"} — {fmtDT(nextAppt.starts_at)}
+                  {nextAppt.services?.name ?? "Appointment"} · {fmtDT(nextAppt.starts_at)}
                 </Link>
                 {nextAppt.staff ? ` with ${nextAppt.staff.name}` : ""}
               </p>
             )}
             {!lastNote && (
               <p className="small" style={{ margin: 0 }}>
-                No visit notes yet. After a visit, open the appointment and add notes — what you
+                No visit notes yet. After a visit, open the appointment and add notes: what you
                 talked about, what the client decided, and the next steps. They show up here.
               </p>
             )}
@@ -383,7 +383,7 @@ export default async function DashboardCustomerProfilePage({
             return (
               <p key={a.id} className="small" style={{ margin: "0 0 10px" }}>
                 <Link href={`/owner/dashboard/appointments/${a.id}`}>
-                  <strong>{a.services?.name ?? "Appointment"}</strong> — {fmtDT(a.starts_at)}
+                  <strong>{a.services?.name ?? "Appointment"}</strong> · {fmtDT(a.starts_at)}
                 </Link>{" "}
                 <span className={statusTag(a.status)}>{statusLabel(a.status)}</span>
                 {a.staff ? ` · with ${a.staff.name}` : ""}
@@ -430,7 +430,7 @@ export default async function DashboardCustomerProfilePage({
                 <Link href={`/owner/dashboard/forms/submissions/${s.id}`}>
                   <strong>{s.forms?.name ?? "Form"}</strong>
                 </Link>{" "}
-                — filled in {fmtDT(s.submitted_at)} · {answerCount} answer
+                · filled in {fmtDT(s.submitted_at)} · {answerCount} answer
                 {answerCount === 1 ? "" : "s"}
                 {fileCount > 0 ? ` · ${fileCount} file${fileCount === 1 ? "" : "s"}` : ""}
               </p>
@@ -454,7 +454,7 @@ export default async function DashboardCustomerProfilePage({
           {paidMarks.map((e) => (
             <p key={e.id} className="small" style={{ margin: "0 0 8px" }}>
               <strong>{fmtMoney(e.details.amount_cents as number)}</strong>
-              {" — "}
+              {" · "}
               {fmtDT(e.created_at)} · marked by{" "}
               {typeof e.details.marked_by_name === "string"
                 ? e.details.marked_by_name

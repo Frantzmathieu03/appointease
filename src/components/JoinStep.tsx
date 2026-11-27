@@ -37,7 +37,6 @@ export default function JoinStep({
         </span>
       )}
       <p className="gate-biz">{businessName}</p>
-      <h2 className="gate-title">Create your account or log in</h2>
       <p className="lede gate-lede">
         You are not a customer of {businessName} yet. Join to continue.
       </p>

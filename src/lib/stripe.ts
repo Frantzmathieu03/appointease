@@ -1,9 +1,9 @@
-// Stripe server client + configuration checks. SERVER ONLY — never import
+// Stripe server client + configuration checks. SERVER ONLY: never import
 // from a client component (the secret key must never reach the browser).
 //
 // BILLING-NOT-CONFIGURED MODE (same honesty pattern as demo mode): until
 // STRIPE_SECRET_KEY and the three monthly price IDs are set in env, the
-// app runs normally — trials keep running, booking stays live — and the
+// app runs normally: trials keep running, booking stays live: and the
 // owner Billing UI shows subscribe buttons disabled with a plain note
 // that billing isn't switched on yet. Nothing pretends to charge anyone.
 

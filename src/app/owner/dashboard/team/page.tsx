@@ -8,7 +8,7 @@ import type { BusinessMember, Service, StaffMember, TeamInvite } from "@/lib/typ
 // Team (Owner Dashboard Plan, 2026-11-26): heading + the seat line
 // ("N of M seats used on the <Plan> plan · Upgrade"), member cards
 // on the left, the invite card on the right (TeamManager), and the
-// bookable calendars below (StaffManager — a login is linked to one
+// bookable calendars below (StaffManager: a login is linked to one
 // calendar, and that link scopes everything a staff login sees).
 // Only the OWNER manages the team: managers get this page read-only
 // and staff logins keep their narrower view.
@@ -122,8 +122,8 @@ export default async function DashboardTeamPage() {
       <div className="card" style={{ marginTop: 16 }}>
         <h2>Bookable staff calendars</h2>
         <p className="small" style={{ marginTop: 0 }}>
-          The calendars customers can book. A team sign-in is linked to one of
-          these — that link decides whose customers they see.
+          The calendars customers can book. A team sign in is linked to one of
+          these. That link decides whose customers they see.
         </p>
         <StaffManager businessId={business.id} />
       </div>

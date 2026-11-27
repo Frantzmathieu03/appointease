@@ -29,7 +29,7 @@ const CELL_H = 32; // px per 30-minute row → 64px hour rows (plan spec)
  * Time grid (Owner Dashboard Plan, 2026-11-26): hour rows are 64px,
  * columns are staff members (Day view) or the days of one person's
  * week (Week view). Appointment blocks carry a thick colored left
- * edge and a status tint — Completed green, Confirmed blue, Form
+ * edge and a status tint: Completed green, Confirmed blue, Form
  * missing orange. Working hours come from availability: slots
  * outside them are plain light grey and not clickable, and the gaps
  * between two working stretches on the same day (breaks) are
@@ -64,7 +64,7 @@ export default function CalendarGrid({
     `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
 
   const cellState = (intervals: [number, number][], m: number): "work" | "break" | "off" => {
-    if (intervals.length === 0) return "work"; // no hours set — old behavior
+    if (intervals.length === 0) return "work"; // no hours set: old behavior
     for (const [s, e] of intervals) if (m >= s && m < e) return "work";
     const first = intervals[0][0];
     const last = intervals[intervals.length - 1][1];

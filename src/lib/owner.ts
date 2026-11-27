@@ -39,7 +39,7 @@ export const requireUser = cache(
 
 /**
  * The user's team membership (migration 0011), or null. Before the
- * migration is applied the table doesn't exist and this returns null —
+ * migration is applied the table doesn't exist and this returns null: 
  * callers fall back to plain owner behavior, exactly as before.
  */
 export async function getMembership(

@@ -1,4 +1,4 @@
-// Native push sending — SERVER ONLY (AppointEase App Pieces spec,
+// Native push sending: SERVER ONLY (AppointEase App Pieces spec,
 // Frantz 2026-11-26; app build phase 1).
 //
 // Delivers to the Capacitor app through FCM (Android) and APNs (iOS),
@@ -6,13 +6,13 @@
 // toggles from public.notification_prefs (migration 0017).
 //
 // HONESTY RULE (same as notify.ts / push.ts): delivery is env-gated.
-//   Android: FCM_SERVICE_ACCOUNT_JSON — the Firebase service account
+//   Android: FCM_SERVICE_ACCOUNT_JSON: the Firebase service account
 //     JSON, as one string. No Firebase project exists yet.
 //   iOS:     APNS_KEY_ID + APNS_TEAM_ID + APNS_PRIVATE_KEY (the .p8
 //     contents), APNS_BUNDLE_ID optional (default io.appointease.app),
 //     APNS_SANDBOX=1 for the sandbox host.
 // With credentials absent, every send no-ops silently and reports
-// "not_configured" — nothing is ever faked as delivered. Until
+// "not_configured": nothing is ever faked as delivered. Until
 // migration 0017 lands, the token/prefs reads fail soft the same way.
 // This module never throws into its callers.
 
@@ -28,7 +28,7 @@ export interface NativePushEvent {
   body: string;
   /** Deep-link payload; the app routes on data.url (see NativeBridge). */
   data: Record<string, string>;
-  /** The customer the event is about — drives the staff rule. */
+  /** The customer the event is about: drives the staff rule. */
   customerId?: string | null;
   /** Never push this user (e.g. the person who caused the event). */
   excludeUserId?: string | null;
@@ -306,7 +306,7 @@ export async function sendNativePush(
         .map((r) => r.user_id as string)
     );
 
-    // Staff rule: staff are pushed only about their own clients — the
+    // Staff rule: staff are pushed only about their own clients: the
     // customer must be assigned to their staff record.
     let assignedStaffId: string | null = null;
     if (ev.customerId) {
@@ -336,7 +336,7 @@ export async function sendNativePush(
       return { status: "no_recipients", attempted: 0, delivered: 0 };
     }
 
-    // Law offices: message previews stay off the lock screen — the
+    // Law offices: message previews stay off the lock screen: the
     // push carries the title only (spec privacy rule).
     let title = ev.title;
     let body = ev.body;

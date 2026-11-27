@@ -4,7 +4,7 @@ import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from 
 // POST /api/invite/accept  { token }
 // The invite token is the credential; the signed-in user's email must
 // match the invite address. Acceptance writes the business_members row
-// with the service role (migration 0011) — no client insert policy is
+// with the service role (migration 0011): no client insert policy is
 // relied on, and a token can be accepted exactly once.
 export async function POST(req: NextRequest) {
   if (!isSupabaseConfigured()) {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "This invite was already accepted." }, { status: 409 });
   }
   if (new Date(invite.expires_at).getTime() < Date.now()) {
-    return NextResponse.json({ error: "This invite has expired — ask the business to send a new one." }, { status: 410 });
+    return NextResponse.json({ error: "This invite has expired. Ask the business to send a new one." }, { status: 410 });
   }
   if (!user.email || user.email.toLowerCase() !== String(invite.email).toLowerCase()) {
     return NextResponse.json(
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     if ((insErr as { code?: string }).code === "23505") {
       return NextResponse.json({ ok: true, alreadyMember: true });
     }
-    return NextResponse.json({ error: "Could not accept the invite — please try again." }, { status: 500 });
+    return NextResponse.json({ error: "Could not accept the invite. Please try again." }, { status: 500 });
   }
   await admin
     .from("team_invites")

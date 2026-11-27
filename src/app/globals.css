@@ -1,4 +1,4 @@
-/* AppointEase design system — mirrors the design demo:
+/* AppointEase design system: mirrors the design demo:
    pale sage/mint background, white rounded cards, deep forest-green
    primary actions, charcoal text, red only for destructive actions.
    Mobile-first narrow column. */
@@ -112,7 +112,7 @@ h3 { font-size: 16px; margin: 0 0 6px; }
 .action-row .btn { padding: 12px 6px; font-size: 14px; }
 
 /* Business pages (white label): the business's own slim header, and a
-   centered, calm hero. Presentation only — same green hero family. */
+   centered, calm hero. Presentation only: same green hero family. */
 .biz-header {
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; padding: 14px 2px 2px;
@@ -142,7 +142,7 @@ h3 { font-size: 16px; margin: 0 0 6px; }
 }
 .biz-header-btn { padding: 9px 16px; font-size: 14px; white-space: nowrap; }
 
-/* Visit us contact card (Frantz 2026-11-25): clean professional rows —
+/* Visit us contact card (Frantz 2026-11-25): clean professional rows: 
    one line icon per row on a shared left edge, plain text (no
    underlined links), thin dividers, even spacing. */
 .contact-list { display: flex; flex-direction: column; }
@@ -358,7 +358,7 @@ textarea { min-height: 84px; resize: vertical; }
 footer.site-footer { padding: 22px 4px; color: var(--muted); font-size: 13px; text-align: center; }
 
 /* ==========================================================================
-   Marketing layer — landing + legal + contact pages.
+   Marketing layer: landing + legal + contact pages.
    Scoped under .mkt / .legal so the app pages (booking, owner, customer)
    keep their narrow-column design untouched.
    ========================================================================== */
@@ -384,13 +384,13 @@ img, video { max-width: 100%; }
 }
 .header-links .header-link-text { white-space: nowrap; }
 
-/* Hero — responsive split at 1024px.
+/* Hero: responsive split at 1024px.
    Desktop (≥1024px, .hero-desktop): video panel with the headline on
    the footage. The deep-green gradient is lightened by roughly a third
    versus the original panel hero (0.90/0.74/0.32 → 0.60/0.46/0.18)
    so the footage reads bright; it stays strongest at the left, behind
    the text block, so the white headline remains readable.
-   Mobile (<1024px, .hero-mobile): light stacked hero — centered text
+   Mobile (<1024px, .hero-mobile): light stacked hero: centered text
    on the pale sage background, hero video in a clean rounded panel
    below it. No overlay, no gradient, nothing on the video.
    The two variants reuse inner class names, so every shared rule is
@@ -402,7 +402,7 @@ img, video { max-width: 100%; }
   .hero-mobile { display: none; }
 }
 
-/* Desktop hero — photo panel, text on image */
+/* Desktop hero: photo panel, text on image */
 .hero-panel {
   position: relative; border-radius: 24px; overflow: hidden;
   min-height: 540px; display: flex; align-items: center;
@@ -437,7 +437,7 @@ img, video { max-width: 100%; }
 .hero-desktop .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
 .hero-desktop .hero-ctas .btn-primary { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35); }
 
-/* Mobile hero — light and open, stacked */
+/* Mobile hero: light and open, stacked */
 .hero-mobile { padding-top: 34px; text-align: center; }
 .hero-mobile .hero-content { max-width: 720px; margin: 0 auto; }
 .hero-mobile .hero-badge {
@@ -472,7 +472,7 @@ img, video { max-width: 100%; }
 .section-head { text-align: center; max-width: 620px; margin: 0 auto 28px; }
 .section-head .lede { margin-bottom: 0; }
 
-/* Steps — centered at every width: number on top, title, paragraph.
+/* Steps: centered at every width: number on top, title, paragraph.
    No divider lines anywhere; blocks separate with whitespace only. */
 .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
 .step { text-align: center; padding: 4px; }
@@ -489,7 +489,7 @@ img, video { max-width: 100%; }
   border-radius: 20px; box-shadow: 0 12px 40px rgba(20, 60, 35, 0.15); display: block;
 }
 
-/* Built phone mock for step 3 — same rounded 16/9 panel footprint as
+/* Built phone mock for step 3: same rounded 16/9 panel footprint as
    the photo it replaced; the phone is oversized and cropped by the
    panel's bottom edge so the message text stays large and readable. */
 .phone-panel {
@@ -521,7 +521,7 @@ img, video { max-width: 100%; }
 .bubble-link { color: var(--green); font-weight: 600; text-decoration: underline; }
 .phone-note { text-align: center; font-size: 11.5px; color: var(--muted); }
 
-/* Animated product loops — real app screens recorded inside the
+/* Animated product loops: real app screens recorded inside the
    same phone frame as the built mocks. The phone stands fully
    visible in its panel (no crop): the recordings carry important
    UI at the bottom of the frame, so the panel grows to fit it. */
@@ -532,13 +532,13 @@ img, video { max-width: 100%; }
   border-radius: 26px; background: #f7f9f7;
 }
 
-/* Card icon chip — used by the benefits carousel cards */
+/* Card icon chip: used by the benefits carousel cards */
 .feature-icon {
   width: 46px; height: 46px; border-radius: 13px; background: var(--mint);
   display: grid; place-items: center; font-size: 22px; margin-bottom: 12px;
 }
 
-/* Category tiles — photo, pale-green duotone shade, white icon + label */
+/* Category tiles: photo, pale-green duotone shade, white icon + label */
 .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .cat-tile {
   position: relative; display: block; border-radius: 20px; overflow: hidden;
@@ -569,7 +569,7 @@ img, video { max-width: 100%; }
 .showcase img { width: 100%; border-radius: 16px; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
 .showcase video { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: center; border-radius: 16px; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
 
-/* Reminder showcase — photo with a floating notification card */
+/* Reminder showcase: photo with a floating notification card */
 .showcase-photo { position: relative; max-width: 880px; margin: 0 auto; }
 .showcase-photo > img {
   width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: center;
@@ -592,7 +592,7 @@ img, video { max-width: 100%; }
 .notify-text { margin: 0; font-size: 17px; line-height: 1.5; color: #f2f7f3; }
 .notify-hl { color: #a9dfb6; font-weight: 600; }
 
-/* Reminder loop — the phone stands in a sage panel where the photo
+/* Reminder loop: the phone stands in a sage panel where the photo
    used to be; the notify card keeps its overlap below the panel,
    so the panel carries extra bottom padding and the phone stays
    fully clear of the card. */
@@ -604,7 +604,7 @@ img, video { max-width: 100%; }
 }
 .reminder-frame { margin-top: 0; }
 
-/* Journey strip — the life of one appointment in four connected
+/* Journey strip: the life of one appointment in four connected
    steps. White cards and whitespace separate the steps; the arrows
    are the only connectors (no lines). */
 .journey-steps {
@@ -627,7 +627,7 @@ img, video { max-width: 100%; }
   color: var(--green); font-size: 19px; font-weight: 800;
 }
 
-/* Feature rows — alternating copy/visual blocks with generous
+/* Feature rows: alternating copy/visual blocks with generous
    spacing. Visuals are built mocks on the same soft green panel as
    the steps phone mock; no screenshots, no photos. */
 .feature-rows { padding-top: 64px; }
@@ -640,7 +640,7 @@ img, video { max-width: 100%; }
 .feature-copy h2 { margin-bottom: 10px; }
 .feature-copy .lede { margin-bottom: 0; max-width: 42ch; }
 /* Grid items must be allowed to shrink below their content's
-   preferred size — otherwise a wide mock inside stretches the whole
+   preferred size: otherwise a wide mock inside stretches the whole
    row past the screen on phones (the Nov 25 overflow bug). */
 .feature-copy, .feat-visual { min-width: 0; }
 .mock-panel {
@@ -650,7 +650,7 @@ img, video { max-width: 100%; }
   min-width: 0;
 }
 
-/* Chat mock — reuses the phone frame/screen; the screen becomes a
+/* Chat mock: reuses the phone frame/screen; the screen becomes a
    flex column so outgoing bubbles can sit on the right. */
 .chat-frame { width: 300px; max-width: 100%; margin-top: 0; }
 .chat-screen { display: flex; flex-direction: column; }
@@ -660,7 +660,7 @@ img, video { max-width: 100%; }
   border-bottom-left-radius: 16px; border-bottom-right-radius: 5px;
 }
 
-/* Mock buttons — spans styled like real buttons, inside role="img"
+/* Mock buttons: spans styled like real buttons, inside role="img"
    mocks only. Red stays text-only here: destructive, but calm. */
 .mock-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -670,7 +670,7 @@ img, video { max-width: 100%; }
 .mock-btn-primary { background: var(--green); color: #fff; }
 .mock-btn-danger { background: #fff; color: var(--red); border: 1px solid #ecc5c1; }
 
-/* Manage-appointment mock — mirrors the real /manage card: service
+/* Manage-appointment mock: mirrors the real /manage card: service
    box, the two actions, then the "new time held" success strip. */
 .manage-mock {
   background: #fff; border-radius: 18px; box-shadow: var(--shadow);
@@ -693,7 +693,7 @@ img, video { max-width: 100%; }
   display: flex; gap: 8px;
 }
 
-/* Dashboard mock — mirrors the real owner Today page: business +
+/* Dashboard mock: mirrors the real owner Today page: business +
    tabs header, appointment rows as soft blocks (no divider lines),
    status chips, and the booking-link row. */
 .dash-mock {
@@ -744,7 +744,7 @@ img, video { max-width: 100%; }
   .journey-arrow { display: none; }
 }
 
-/* Benefits carousel — scroll-snap row of honest benefit cards */
+/* Benefits carousel: scroll-snap row of honest benefit cards */
 .carousel {
   display: flex; gap: 16px; overflow-x: auto;
   padding: 6px 0 18px;
@@ -784,7 +784,7 @@ img, video { max-width: 100%; }
 .price-check { color: var(--green); font-weight: 800; flex: 0 0 auto; }
 .price-card .btn { margin-top: auto; }
 
-/* Plan comparison table — scrolls sideways on narrow screens */
+/* Plan comparison table: scrolls sideways on narrow screens */
 .compare-wrap { overflow-x: auto; margin-top: 28px; -webkit-overflow-scrolling: touch; }
 .compare {
   width: 100%; min-width: 620px; border-collapse: collapse;
@@ -853,7 +853,7 @@ footer.site-footer { padding: 0; text-align: left; }
   box-shadow: var(--shadow); padding: 24px;
 }
 
-/* Explore — marketplace directory */
+/* Explore: marketplace directory */
 .explore-head { text-align: center; max-width: 640px; margin: 0 auto; padding: 44px 0 4px; }
 .explore-head .lede { margin-bottom: 0; }
 .filters-toggle { display: none; }
@@ -907,7 +907,7 @@ footer.site-footer { padding: 0; text-align: left; }
      stays full-size instead of shrinking with the 16/9 panel. */
   .phone-panel { aspect-ratio: 10 / 11; }
   .phone-frame { width: 84%; margin-top: 22px; }
-  /* Loop panels stay auto-height on mobile too — the recorded
+  /* Loop panels stay auto-height on mobile too: the recorded
      phone is never cropped. */
   .phone-panel.loop-panel { aspect-ratio: auto; padding: 24px 12px 30px; }
   .loop-panel .phone-frame { margin-top: 0; }
@@ -925,7 +925,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 
 /* Mobile header (≤760px): the menu wraps under the logo (Homepage
-   New Design, 2026-11-26) — Pricing and Business sign-in stay
+   New Design, 2026-11-26): Pricing and Business sign-in stay
    visible on their own row and Start free stays visible with them.
    This block also carries the mobile explore filters and the
    2-column category grid. */
@@ -937,7 +937,7 @@ footer.site-footer { padding: 0; text-align: left; }
   .site-header-wrap .site-header { flex-wrap: wrap; }
   /* One tidy row of three pills under the logo (Frantz, 2026-11-26):
      Pricing and Business sign-in wear the soft pill, Start free stays
-     the filled primary — all exactly 44px, centered as a group. */
+     the filled primary: all exactly 44px, centered as a group. */
   .header-links { gap: 8px; flex-wrap: nowrap; width: 100%; justify-content: center; }
   .header-links .header-link-text {
     display: inline-flex; align-items: center; justify-content: center;
@@ -955,7 +955,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 
 
-/* Demo shops — badge on the public page, sample tag + message previews
+/* Demo shops: badge on the public page, sample tag + message previews
    in the demo booking flow. Amber palette matches .notice: a demo is
    friendly, but it must never be mistaken for the real thing. */
 .demo-badge {
@@ -977,7 +977,7 @@ footer.site-footer { padding: 0; text-align: left; }
   line-height: 1.55; text-align: left;
 }
 
-/* Phase B (PDF §§2–4): mobile tab bar, two-column inbox, calendar
+/* Phase B (PDF §§2 to 4): mobile tab bar, two-column inbox, calendar
    time grid. The top bar was restyled 2026-11-25 (late) into the
    business pages' simple top row: round logo + name on the left,
    a round bell button and a white Account pill on the right. */
@@ -1063,7 +1063,7 @@ footer.site-footer { padding: 0; text-align: left; }
 /* Calendar time grid: columns are days (week) or staff (day); each
    column is a relative stack of 30-minute slot cells with appointment
    blocks positioned over them. NOTE: this class must never be named
-   .cal-grid — that name belongs to the DatePicker month grid above,
+   .cal-grid: that name belongs to the DatePicker month grid above,
    and a shared name silently crushed the picker into a flex strip. */
 .cal-time-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
 .cal-col { flex: 1 0 150px; min-width: 150px; }
@@ -1105,7 +1105,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .cta-micro { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; }
 .cta-micro-light { color: #d7e8da; }
 
-/* Floating hero pills — three product moments cycle in one spot:
+/* Floating hero pills: three product moments cycle in one spot:
    a booking lands, a reminder goes out, notes get saved. Pure CSS
    keyframes on a 9s loop, staggered by delay. */
 .hero-pills {
@@ -1141,7 +1141,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .hero-pills-m { right: auto; left: 12px; bottom: 12px; width: min(308px, calc(100% - 24px)); }
 .hero-pills-m .hero-pill { box-shadow: 0 10px 26px rgba(10, 30, 18, 0.35); }
 
-/* Scroll reveal — hidden state exists ONLY under .home-anim, the
+/* Scroll reveal: hidden state exists ONLY under .home-anim, the
    class HomeAnimations adds when it runs. No JS = no hiding. */
 .home-anim [data-reveal] {
   opacity: 0; transform: translateY(16px);
@@ -1149,7 +1149,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .home-anim [data-reveal].in { opacity: 1; transform: none; }
 
-/* Journey — four named steps that light up in sequence on scroll.
+/* Journey: four named steps that light up in sequence on scroll.
    Under .home-anim the steps start soft; .lit (added by the
    observer) brings them to full strength one after another. */
 .journey2 {
@@ -1182,7 +1182,7 @@ footer.site-footer { padding: 0; text-align: left; }
   .journey2 { grid-template-columns: 1fr; }
 }
 
-/* Feature detail rows — native <details>, styled like the FAQ but
+/* Feature detail rows: native <details>, styled like the FAQ but
    left-aligned inside the copy column. First row ships open. */
 .feature-copy { min-width: 0; }
 .feat-visual { min-width: 0; }
@@ -1202,13 +1202,13 @@ footer.site-footer { padding: 0; text-align: left; }
 .feat-detail summary::after {
   content: "+"; color: var(--green); font-weight: 800; font-size: 19px; flex: 0 0 auto;
 }
-.feat-detail[open ] summary::after { content: "–"; }
+.feat-detail[open ] summary::after { content: "−"; }
 .feat-detail p { color: var(--muted); font-size: 15px; line-height: 1.55; margin: 0 0 15px; }
 @media (max-width: 900px) {
   .feat-details { max-width: 560px; margin-left: auto; margin-right: auto; }
 }
 
-/* Built UI mocks for the feature sections — same white-card language
+/* Built UI mocks for the feature sections: same white-card language
    as the dashboard mock (.dash-* pieces are reused inside). */
 .ui-mock {
   background: #fff; border-radius: 18px; box-shadow: var(--shadow);
@@ -1296,7 +1296,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .statement .eyebrow { margin-bottom: 10px; }
 .statement .cta-micro { margin-top: 10px; }
 
-/* Reduced motion — everything static and fully visible; the hero
+/* Reduced motion: everything static and fully visible; the hero
    shows its first pill as a still card. */
 @media (prefers-reduced-motion: reduce) {
   .hero-pill { animation: none; opacity: 0; }
@@ -1316,7 +1316,7 @@ footer.site-footer { padding: 0; text-align: left; }
 /* ================================================================
    Business page plan (Frantz's written plan + design pictures,
    2026-11-26). Scoped to /[slug] pages via .bizpage: Inter font,
-   #F3F6F1 background, a centered 390–480px column, everything
+   #F3F6F1 background, a centered 390 to 480px column, everything
    centered. The main page's own classes are prefixed .bp-; the
    book / message / my surfaces keep their existing components and
    only inherit the font + background from .bizpage.
@@ -1329,7 +1329,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .bp-column { max-width: 480px; margin: 0 auto; padding: 4px 20px 40px; }
 
-/* 1 — the only auth buttons on the page, top right. */
+/* 1: the only auth buttons on the page, top right. */
 .bp-auth { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 0 12px; }
 .bp-auth-btn {
   height: 40px; padding: 0 18px; border-radius: 999px;
@@ -1339,7 +1339,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .bp-auth-login { background: #fff; border: 1px solid #c9d4ca; color: #16221b; }
 .bp-auth-signup { background: #1e4d33; border: 1px solid #1e4d33; color: #fff; }
 
-/* 2 — cover photo: inset 16px each side of the column, 150px tall. */
+/* 2: cover photo: inset 16px each side of the column, 150px tall. */
 .bp-cover-wrap { padding: 0 16px; }
 .bp-cover {
   height: 150px; border-radius: 18px; overflow: hidden; background: #dfebdd;
@@ -1347,7 +1347,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .bp-cover img { width: 100%; height: 100%; object-fit: cover; object-position: center 38%; display: block; }
 
-/* 3 — round logo overlapping the cover's bottom by 46px. */
+/* 3: round logo overlapping the cover's bottom by 46px. */
 .bp-logo {
   width: 92px; height: 92px; border-radius: 50%;
   border: 4px solid #fff; background: #1e4d33;
@@ -1360,7 +1360,7 @@ footer.site-footer { padding: 0; text-align: left; }
   color: #fff; font-size: 36px; font-weight: 700;
 }
 
-/* 4–5 — name, quiet type · city line, open-status pill. */
+/* 4 to 5: name, quiet type · city line, open-status pill. */
 .bp-name {
   font-size: 28px; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em;
   text-align: center; margin: 10px 0 4px; color: #16221b;
@@ -1379,7 +1379,7 @@ footer.site-footer { padding: 0; text-align: left; }
 /* The owner's own words, one centered paragraph. */
 .bp-about { text-align: center; font-size: 15px; line-height: 1.55; color: #16221b; margin: 14px 4px 0; }
 
-/* 6 — the Book button. */
+/* 6: the Book button. */
 .bp-book {
   display: flex; align-items: center; justify-content: center;
   width: 100%; height: 56px; margin-top: 16px;
@@ -1388,7 +1388,7 @@ footer.site-footer { padding: 0; text-align: left; }
   font-size: 17px; font-weight: 700; text-decoration: none;
   box-shadow: 0 8px 20px rgba(30, 77, 51, 0.22);
 }
-/* 7 — Call / Message / Directions squares. */
+/* 7: Call / Message / Directions squares. */
 .bp-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
 .bp-actions-1 { grid-template-columns: 1fr; }
 .bp-actions-2 { grid-template-columns: repeat(2, 1fr); }
@@ -1401,7 +1401,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .bp-square svg { width: 22px; height: 22px; color: #1e4d33; display: block; }
 
-/* 8–10 — white cards. */
+/* 8 to 10: white cards. */
 .bp-card {
   background: #fff; border: 1px solid #dce4dd; border-radius: 16px;
   padding: 22px 20px; margin-top: 16px;
@@ -1435,7 +1435,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .bp-next-when { font-weight: 700; font-size: 16px; margin: 0 0 4px; }
 .bp-next-actions { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
 
-/* 11 — footer. */
+/* 11: footer. */
 .bp-footer { text-align: center; margin-top: 28px; }
 .bp-footer-links { font-size: 13.5px; color: #5b6b61; }
 .bp-footer-links a { color: #5b6b61; text-decoration: none; }
@@ -1458,7 +1458,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .dash2 a { color: #1e4d33; }
 
-/* — Top bar — */
+/*: Top bar: */
 .d2-topbar {
   background: #fff; border-bottom: 1px solid #dce4dd;
   position: sticky; top: 0; z-index: 45;
@@ -1492,7 +1492,7 @@ footer.site-footer { padding: 0; text-align: left; }
   display: grid; place-items: center; font-weight: 700; font-size: 13.5px; flex: 0 0 auto;
 }
 
-/* — Shell: side menu + content — */
+/*: Shell: side menu + content: */
 .d2-shell { display: flex; align-items: stretch; }
 .d2-side {
   width: 220px; flex: 0 0 220px; background: #fff; border-right: 1px solid #dce4dd;
@@ -1522,7 +1522,7 @@ footer.site-footer { padding: 0; text-align: left; }
   .d2-view-link { display: none; }
 }
 
-/* — Shared elements inside the dashboard — */
+/*: Shared elements inside the dashboard: */
 .dash2 .card {
   background: #fff; border: 1px solid #dce4dd; border-radius: 16px;
   box-shadow: 0 1px 2px rgba(22, 34, 27, 0.04); padding: 20px; margin-bottom: 16px;
@@ -1548,7 +1548,7 @@ footer.site-footer { padding: 0; text-align: left; }
   display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
 }
 
-/* — Status tags — */
+/*: Status tags: */
 .tag {
   display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px;
   font-size: 12px; font-weight: 700; white-space: nowrap; flex: 0 0 auto;
@@ -1564,7 +1564,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .tag-invited { background: #fcebd5; color: #8a5410; }
 .tag-declined { background: #fbe9e7; color: #b3261e; }
 
-/* — Today — */
+/*: Today: */
 .d2-date-line { font-size: 13.5px; color: #5b6b61; margin: 0 0 2px; }
 .d2-greeting { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
 .d2-head-row {
@@ -1604,7 +1604,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .d2-attn-sub { font-size: 13px; color: #5b6b61; margin: 0 0 4px; }
 .d2-attn a { font-size: 13.5px; font-weight: 600; }
 
-/* — Calendar — */
+/*: Calendar: */
 .d2-cal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .d2-cal-nav { display: flex; align-items: center; gap: 10px; }
 .d2-arrow {
@@ -1640,7 +1640,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .d2-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .d2-swatch { width: 13px; height: 13px; border-radius: 4px; display: inline-block; }
 
-/* — Customers — */
+/*: Customers: */
 .d2-count-line { font-size: 13.5px; color: #5b6b61; margin: 2px 0 0; }
 .d2-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 14px 0; }
 .d2-toolbar input[type="search"] { flex: 1 1 260px; }
@@ -1668,7 +1668,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .d2-table .who { font-weight: 700; color: #16221b; text-decoration: none; }
 .d2-notassigned { color: #c77414; font-weight: 600; }
 
-/* — Customer profile — */
+/*: Customer profile: */
 .d2-profile-head { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
 .d2-ava {
   width: 52px; height: 52px; border-radius: 50%; background: #dce9dc; color: #1e4d33;
@@ -1687,7 +1687,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .d2-tabs a.active { color: #16221b; box-shadow: inset 0 -2px 0 #1e4d33; }
 
-/* — Inbox — */
+/*: Inbox: */
 .dash2 .inbox-shell { grid-template-columns: 340px minmax(0, 1fr); gap: 16px; }
 .dash2 .inbox-list { gap: 8px; }
 .dash2 .inbox-item {
@@ -1705,7 +1705,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .msg-cap { font-size: 11.5px; color: #5b6b61; margin: 3px 2px 0; }
 .d2-daylabel { text-align: center; font-size: 12.5px; color: #5b6b61; margin: 12px 0 4px; font-weight: 600; }
 
-/* — Team — */
+/*: Team: */
 .d2-team-grid { display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: 16px; align-items: start; }
 @media (max-width: 1000px) { .d2-team-grid { grid-template-columns: 1fr; } }
 .d2-member {
@@ -1732,7 +1732,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .d2-editbox { border-top: 1px solid #eef2ee; margin-top: 12px; padding-top: 12px; width: 100%; }
 
 /* ================================================================
-   Customer Side Plan (Frantz, 2026-11-26) — Phase 3. Classes are
+   Customer Side Plan (Frantz, 2026-11-26): Phase 3. Classes are
    prefixed .c3- and used by the customer surfaces: the per-business
    sign up / log in screen, My dashboard, the booking flow, and the
    reschedule / cancel screens. Same family as the business page
@@ -1741,7 +1741,7 @@ footer.site-footer { padding: 0; text-align: left; }
    ================================================================ */
 
 /* White outlined Google button for customer auth surfaces (the
-   plan's picture: white, bordered, dark text — the owner signup
+   plan's picture: white, bordered, dark text: the owner signup
    keeps its green treatment). */
 .btn-google-white {
   background: #fff; border: 1px solid #c9d4ca; color: #16221b;
@@ -1867,18 +1867,34 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .c3-legend-day.open { border: 1.5px solid #1e4d33; color: #16221b; font-weight: 600; }
 
-/* Review rows + note box. */
-.c3-review { display: flex; flex-direction: column; }
+/* Review rows + note box. The rows sit in their own bordered box
+   (Frantz, 2026-11-26: the Review text looked scattered; he asked
+   for borders and one clean alignment): labels left, values right
+   on one shared edge, a light divider between rows. */
+.c3-review {
+  display: flex; flex-direction: column;
+  border: 1px solid #dfe7df; border-radius: 16px;
+  background: #ffffff; padding: 2px 16px; margin-top: 6px;
+  box-shadow: 0 1px 3px rgba(22, 34, 27, 0.05);
+}
 .c3-review-row {
   display: flex; justify-content: space-between; align-items: baseline;
-  gap: 16px; padding: 9px 0; border-bottom: 1px solid #edf1ed;
+  gap: 16px; padding: 11px 0; border-bottom: 1px solid #e4ebe4;
 }
 .c3-review-row:last-child { border-bottom: none; }
 .c3-review-row > span { color: #5b6b61; font-size: 14px; flex: 0 0 auto; }
 .c3-review-row > strong { text-align: right; font-size: 14.5px; }
 .c3-note-box {
-  background: #f3f6f1; border-radius: 12px; padding: 12px 14px;
-  margin-top: 14px; font-size: 14.5px;
+  background: #f3f6f1; border: 1px solid #dfe7df; border-radius: 16px;
+  padding: 12px 14px;
+  margin-top: 12px; font-size: 14.5px;
+}
+/* Finished blocks under the Review rows: the reminders line, the
+   business's cancellation words and the pay line each get their own
+   pale bordered box with centered text, never a loose paragraph. */
+.c3-info-box {
+  background: #f3f6f1; border: 1px solid #dfe7df; border-radius: 16px;
+  padding: 12px 14px; margin: 12px 0 0; text-align: center;
 }
 .c3-note-head {
   display: flex; justify-content: space-between; align-items: center;
@@ -1896,7 +1912,7 @@ footer.site-footer { padding: 0; text-align: left; }
 }
 .c3-check.grey { background: #edf0ed; color: #5b6b61; }
 .c3-appt-card {
-  background: #f8faf8; border: 1px solid #dce4dd; border-radius: 14px;
+  background: #f8faf8; border: 1px solid #dce4dd; border-radius: 16px;
   padding: 16px; margin-top: 14px; text-align: center;
 }
 .c3-appt-label {
@@ -2000,7 +2016,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .c3-btn-cancel:hover { background: #fdf1f0; }
 
 /* ==========================================================================
-   Homepage New Design (Phase 4, 2026-11-26) — scoped under .hp.
+   Homepage New Design (Phase 4, 2026-11-26): scoped under .hp.
    Redesign family values: green #1E4D33, background #F3F6F1, cards
    white with 1px #DCE4DD borders, text #16221B, secondary #5B6B61.
    ========================================================================== */
@@ -2009,7 +2025,7 @@ footer.site-footer { padding: 0; text-align: left; }
 /* Hero layout: on desktop the copy reads as one centered block in
    the left column (top = badge + headline, bottom = sub + buttons)
    with the video in the right column. On phones the same areas stack
-   badge + headline, then the VIDEO, then the rest — so the film sits
+   badge + headline, then the VIDEO, then the rest: so the film sits
    right with the hero, never buried below the fold (Frantz,
    2026-11-26: the video looked removed on his phone). */
 .hp-hero-grid {
@@ -2017,7 +2033,7 @@ footer.site-footer { padding: 0; text-align: left; }
   grid-template-areas: "top media" "bottom media";
 }
 /* Hero copy is center aligned at every width (Frantz, 2026-11-26:
-   "Make sure things are centered" — mobile friendly, app-like). */
+   "Make sure things are centered": mobile friendly, app-like). */
 .hp-hero-top { grid-area: top; align-self: end; text-align: center; }
 .hp-hero-bottom { grid-area: bottom; align-self: start; text-align: center; }
 .hp-badge {
@@ -2090,7 +2106,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .mkt .btn, .site-header .btn { min-height: 44px; }
 .header-links .header-cta { min-height: 44px; }
 
-/* Owner signup — centered page headings and a comfortable card
+/* Owner signup: centered page headings and a comfortable card
    (Frantz, 2026-11-26). Field labels stay left aligned above their
    full width fields; the Google and Continue buttons stay full width. */
 .signup-page .card { padding: 26px 24px; }
@@ -2253,7 +2269,7 @@ footer.site-footer { padding: 0; text-align: left; }
 
 /* Booking Review polish (Frantz, 2026-11-26): the booking flow
    column caps at the business page's 480px, centered, on every
-   step and the booked screen — no more wide slab on desktop. The
+   step and the booked screen: no more wide slab on desktop. The
    Review "You" value stacks name / phone / email on their own
    right-aligned lines instead of wrapping mid-word. */
 .book-column { max-width: 480px; }
@@ -2266,7 +2282,7 @@ footer.site-footer { padding: 0; text-align: left; }
 
 /* Account step welcome card (Frantz, 2026-11-26): the booking and
    message account steps lead with the business's own logo and name,
-   centered, with tidy spacing — never a plain card on an empty page. */
+   centered, with tidy spacing: never a plain card on an empty page. */
 .gate-card { text-align: center; padding: 28px 22px 24px; }
 .gate-logo {
   width: 64px; height: 64px; border-radius: 50%; object-fit: cover;

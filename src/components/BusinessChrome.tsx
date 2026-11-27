@@ -5,7 +5,7 @@ import BusinessHeader from "@/components/BusinessHeader";
 // book / message / my surfaces wear (white label, Frantz 2026-11-25).
 // The main business page renders its own top row and footer per
 // Frantz's page plan (2026-11-26), so this chrome is applied by the
-// sub-route layouts only — its markup and behavior are exactly what
+// sub-route layouts only: its markup and behavior are exactly what
 // the shared [slug] layout rendered before the plan.
 export default async function BusinessChrome({
   slug,

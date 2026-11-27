@@ -2,7 +2,7 @@
 //
 // Rules (owner spec, 2026-11-24):
 //  - Every confirmed appointment gets a CONFIRMATION at booking time,
-//    then a reminder 24 HOURS before and again 2 HOURS before —
+//    then a reminder 24 HOURS before and again 2 HOURS before: 
 //    each by BOTH email and SMS, when those times are still ahead.
 //  - Every reminder names the business, the appointment time, the location,
 //    and a secure manage link (reschedule / cancel).
@@ -11,7 +11,7 @@
 //
 // This module schedules rows in public.reminders and processes due rows.
 // Processing is triggered by GET /api/cron/reminders (see
-// src/app/api/cron/reminders/route.ts) — point any scheduler at it:
+// src/app/api/cron/reminders/route.ts): point any scheduler at it:
 // Vercel Cron (vercel.json), Supabase pg_cron + pg_net, or an external
 // pinger. A Supabase Edge Function version of the same processor lives in
 // supabase/functions/reminders/ for projects that prefer it there.
@@ -42,7 +42,7 @@ interface AppointmentRow {
  * Create the full reminder set for an appointment. Safe to call repeatedly:
  * the unique (appointment_id, kind, channel) constraint + upsert means no
  * duplicates. Past-due reminder times (e.g. booking made 1h before the
- * appointment) are simply not created — "when those times are still ahead".
+ * appointment) are simply not created: "when those times are still ahead".
  */
 export async function scheduleReminders(
   admin: SupabaseClient,
@@ -112,13 +112,13 @@ function reminderCopy(kind: string, a: AppointmentRow): { subject: string; body:
 
   if (kind === "confirmation") {
     return {
-      subject: `You're booked: ${service} at ${biz?.name} — ${when}`,
+      subject: `You're booked: ${service} at ${biz?.name} for ${when}`,
       body:
         `Hi ${firstName},\n\n` +
         `Your appointment is confirmed.\n\n` +
         `${service} at ${biz?.name}\n${when}\n${biz?.address ?? ""}${refLine}\n\n` +
         `Need to change it? Reschedule or cancel here: ${manageUrl}\n\n` +
-        `We look forward to seeing you.\n— ${biz?.name} (via AppointEase)`,
+        `We look forward to seeing you.\n${biz?.name} (via AppointEase)`,
     };
   }
   const lead = kind === "before_24h" ? "tomorrow" : "in about 2 hours";
@@ -126,11 +126,11 @@ function reminderCopy(kind: string, a: AppointmentRow): { subject: string; body:
     subject: `Reminder: ${service} at ${biz?.name} ${lead}`,
     body:
       `Hi ${firstName},\n\n` +
-      `Just a friendly reminder — you have an appointment ${lead}.\n\n` +
+      `Just a friendly reminder: you have an appointment ${lead}.\n\n` +
       `${service} at ${biz?.name}\n${when}\n${biz?.address ?? ""}${refLine}\n\n` +
       `Please arrive a few minutes early. If something has come up, you can ` +
       `reschedule or cancel here: ${manageUrl}\n\n` +
-      `We look forward to seeing you.\n— ${biz?.name} (via AppointEase)`,
+      `We look forward to seeing you.\n${biz?.name} (via AppointEase)`,
   };
 }
 
@@ -189,7 +189,7 @@ export async function processDueReminders(admin: SupabaseClient) {
           const r = await dispatchSms({ to, body: `${subject}. ${body.split("\n\n")[2] ?? ""} Manage: ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://appointease.io"}/manage/${appt.manage_token}` });
           if (r.status === "sms_pending_provider") {
             status = "skipped";
-            detail = `sms_pending_provider — ${r.detail}`;
+            detail = `sms_pending_provider: ${r.detail}`;
           } else {
             status = r.status === "failed" ? "failed" : r.delivered ? "sent" : "skipped";
             detail = r.detail;

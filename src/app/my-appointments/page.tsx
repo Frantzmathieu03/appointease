@@ -28,10 +28,10 @@ interface BizLite {
 
 // Customer appointments, PER-BUSINESS model (Frantz, 2026-11-25):
 // there is no cross-business customer home anymore. With a business
-// in context (?business=<slug> — old links, the sign-in default) this
+// in context (?business=<slug>: old links, the sign-in default) this
 // page shows ONLY that business's appointments; the full dashboard
 // for a business lives at /<slug>/my. Without a business in context
-// it is a plain picker — "Your businesses" — listing the businesses
+// it is a plain picker: "Your businesses": listing the businesses
 // this customer has joined, each opening its own separate dashboard.
 // Appointments, messages and history never mix across businesses.
 export default async function MyAppointmentsPage({
@@ -44,7 +44,7 @@ export default async function MyAppointmentsPage({
     return (
       <main className="column">
         <div className="notice">
-          Demo mode — accounts and saved appointments turn on when the live
+          Demo mode. Accounts and saved appointments turn on when the live
           database is connected. Try the sample business meanwhile:
         </div>
         <Link href="/main-street-barbers" className="btn btn-primary btn-block">
@@ -144,7 +144,7 @@ export default async function MyAppointmentsPage({
         }
       }
     } catch {
-      // Intake display is additive — never break the appointments list.
+      // Intake display is additive: never break the appointments list.
     }
   }
 
@@ -156,7 +156,7 @@ export default async function MyAppointmentsPage({
 
   // Shared visit summaries (migration 0010): when a business shares a
   // visit summary, the customer sees it here with their own to-dos.
-  // RLS only ever returns this customer's shared notes — internal notes
+  // RLS only ever returns this customer's shared notes: internal notes
   // are never visible on this side. Empty until the migration lands.
   interface SharedNote {
     appointment_id: string;
@@ -214,7 +214,7 @@ export default async function MyAppointmentsPage({
             />
           )}
           <span>
-            {a.services?.name ?? "Appointment"} — {a.businesses?.name}
+            {a.services?.name ?? "Appointment"} · {a.businesses?.name}
           </span>
         </h3>
         <p className="small" style={{ margin: "2px 0 10px" }}>
@@ -280,7 +280,7 @@ export default async function MyAppointmentsPage({
     );
   };
 
-  // ── No business in context: the picker. Names and logos only —
+  // ── No business in context: the picker. Names and logos only: 
   // no appointment, message or history data from any business here.
   if (!focusBiz) {
     const { data: memberRows } = await supabase
@@ -310,7 +310,7 @@ export default async function MyAppointmentsPage({
       <main className="column">
         <h1 style={{ fontSize: 28 }}>Your businesses</h1>
         <p className="small" style={{ margin: "0 0 16px" }}>
-          Each business has its own dashboard — your appointments,
+          Each business has its own dashboard. Your appointments,
           messages and history with that business live there, and only
           there.
         </p>
@@ -319,7 +319,7 @@ export default async function MyAppointmentsPage({
           <div className="card">
             <p className="lede" style={{ marginBottom: 10 }}>
               You haven&apos;t joined a business yet. Open a business&apos;s
-              page link and sign up there — or browse businesses near you.
+              page link and sign up there, or browse businesses near you.
             </p>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <Link href="/explore" className="btn btn-primary">Find a business</Link>

@@ -3,12 +3,12 @@
 import { useEffect } from "react";
 
 /**
- * Homepage motion — scroll-reveal for [data-reveal] sections and the
+ * Homepage motion: scroll-reveal for [data-reveal] sections and the
  * sequential light-up for the [data-journey] step strip.
  *
  * Progressive enhancement only: content is fully visible with JS off.
  * The `home-anim` class is added to <html> by this effect, and the CSS
- * hides [data-reveal] / dims journey steps ONLY under that class — so
+ * hides [data-reveal] / dims journey steps ONLY under that class: so
  * nothing is ever hidden before (or without) this code running.
  * prefers-reduced-motion is honored in CSS (everything static/visible)
  * and here (classes applied immediately, no observation needed).

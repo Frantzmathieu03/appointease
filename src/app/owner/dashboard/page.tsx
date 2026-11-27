@@ -17,7 +17,7 @@ interface Row {
 // Dashboard home (Owner Dashboard Plan, 2026-11-26): date line,
 // greeting, three actions, FIVE stat cards (Appointments today,
 // Unread messages, Forms not submitted, No-shows this week, Bookings
-// this week — bookings, never revenue: AppointEase does not touch
+// this week: bookings, never revenue: AppointEase does not touch
 // client money), today's schedule grouped by staff with status tags
 // (Completed green tint, Confirmed blue tint, Form missing orange
 // tint), and a Needs attention card. A business with nothing set up
@@ -170,7 +170,7 @@ export default async function DashboardTodayPage() {
   }
   const intakesMissing = formMissingIds.size;
 
-  // Visits without notes (last 30 days) — Needs attention.
+  // Visits without notes (last 30 days): Needs attention.
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
   const { data: pastAppts } = await supabase
     .from("appointments")
@@ -265,7 +265,7 @@ export default async function DashboardTodayPage() {
 
   const tagFor = (r: Row): { label: string; cls: string } => {
     if (r.status === "completed") return { label: "Completed", cls: "tag tag-completed" };
-    if (r.status === "no_show") return { label: "No-show", cls: "tag tag-red" };
+    if (r.status === "no_show") return { label: "No show", cls: "tag tag-red" };
     if (formMissingIds.has(r.id)) return { label: "Form missing", cls: "tag tag-action" };
     return { label: "Confirmed", cls: "tag tag-confirmed" };
   };
@@ -325,7 +325,7 @@ export default async function DashboardTodayPage() {
           <p className="d2-stat-sub">for upcoming visits</p>
         </div>
         <div className="d2-stat">
-          <p className="d2-stat-label">No-shows this week</p>
+          <p className="d2-stat-label">No shows this week</p>
           <p className="d2-stat-num">{weekNoShows ?? 0}</p>
           <p className="d2-stat-sub">since Monday</p>
         </div>

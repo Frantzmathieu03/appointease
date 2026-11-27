@@ -6,7 +6,7 @@ import type { StaffMember } from "@/lib/types";
 
 // The business's own customers only (tenant isolation): people who booked
 // or messaged THIS business. One global customer can appear at many
-// businesses; each business sees only its own relationship — including
+// businesses; each business sees only its own relationship: including
 // its own staff assignment (migration 0010).
 export default async function DashboardCustomersPage({
   searchParams,
@@ -18,7 +18,7 @@ export default async function DashboardCustomersPage({
   const tz = business.timezone;
 
   // Assignment lives on business_customers (migration 0010). Until that
-  // migration is applied the column doesn't exist — fall back to the
+  // migration is applied the column doesn't exist: fall back to the
   // pre-0010 select so this page never breaks.
   interface Rel {
     customer_id: string;
@@ -48,7 +48,7 @@ export default async function DashboardCustomersPage({
     return (withAssign.data ?? []) as unknown as Rel[];
   };
 
-  // location_id arrives with migration 0013 — fall back to the plain
+  // location_id arrives with migration 0013: fall back to the plain
   // select if the column isn't there yet. Bounded at 2000 rows, most
   // recent first, as an interim limit: this page only counts the rows
   // and finds the latest visit per customer.
@@ -72,7 +72,7 @@ export default async function DashboardCustomersPage({
   };
 
   // Locations, relationships, appointments, unread messages, and staff
-  // are independent of each other — fire them together instead of in
+  // are independent of each other: fire them together instead of in
   // sequence. The location set is computed after they land. The unread
   // messages query is bounded at 2000 rows as an interim limit; it
   // only feeds a per-customer count.

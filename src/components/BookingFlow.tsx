@@ -20,7 +20,7 @@ import { generateConfirmationCode } from "@/lib/confirmation";
 
 // Optional account claim shown on the confirmation screen when a guest
 // booking just created the customer's account. Booking as a guest needs
-// no password — the link in the confirmation text/email always works —
+// no password: the link in the confirmation text/email always works: 
 // but a password lets the customer sign in and see everything in one
 // place. This only ever SENDS a set-password email; it never blocks or
 // delays the confirmation itself.
@@ -41,11 +41,11 @@ function ClaimAccountCard({ email, slug }: { email: string; slug: string }) {
       <h2>Your booking is saved</h2>
       <p className="lede">
         The link in your confirmation text and email always works to change
-        or cancel — no password needed. Want a password too, so you can sign
+        or cancel, no password needed. Want a password too, so you can sign
         in and see your appointments with this business in one place?
       </p>
       {state === "sent" ? (
-        <p className="small">Check your email — we sent you a link to set your password.</p>
+        <p className="small">Check your email. We sent you a link to set your password.</p>
       ) : (
         <>
           <button className="btn btn-primary" onClick={claim} disabled={state === "sending"}>
@@ -53,7 +53,7 @@ function ClaimAccountCard({ email, slug }: { email: string; slug: string }) {
           </button>
           {state === "error" && (
             <p className="small" style={{ marginTop: 10 }}>
-              That didn&apos;t go through — please try again in a moment.
+              That didn&apos;t go through. Please try again in a moment.
             </p>
           )}
         </>
@@ -97,7 +97,7 @@ const STEP_NAMES = ["Service", "Pick a time", "Your details", "Review"];
 // ACCOUNT-FIRST (Frantz, 2026-11-25): the book page gates signed-out
 // customers into a short account step (AccountGate) before this flow
 // ever renders, so a booking from a business's page always belongs to
-// the customer's account WITH THIS BUSINESS — details prefill from
+// the customer's account WITH THIS BUSINESS: details prefill from
 // their profile and nothing account-shaped is asked again here. The
 // /api/book guest fallback (account created at checkout) remains only
 // for a session that expires mid-flow; the confirmation screen then
@@ -135,7 +135,7 @@ export default function BookingFlow({
   staffServices?: StaffService[];
   availability?: Availability[];
   demoMode: boolean;
-  /** Slug-based demo shop: the whole flow is a local simulation —
+  /** Slug-based demo shop: the whole flow is a local simulation: 
    *  no API calls, no database writes, no messages sent. */
   demoShop?: boolean;
   preselectedServiceId?: string;
@@ -276,7 +276,7 @@ export default function BookingFlow({
   useEffect(() => {
     if (!serviceId || !date) return;
     setSlot("");
-    // Demo shops: slots are generated locally from the weekly hours —
+    // Demo shops: slots are generated locally from the weekly hours: 
     // the slots API (and its appointments read) is never touched.
     if (isDemo) {
       const svc = services.find((s) => s.id === serviceId);
@@ -292,7 +292,7 @@ export default function BookingFlow({
       setSlotsLoading(false);
       return;
     }
-    // Real fetch: guard against stale responses — a slow reply for a
+    // Real fetch: guard against stale responses: a slow reply for a
     // previous day must never overwrite the new day's times (it would
     // offer, and book, the wrong day).
     let live = true;
@@ -320,7 +320,7 @@ export default function BookingFlow({
     setForm({ ...form, [k]: e.target.value });
 
   async function confirm() {
-    // Demo shops: pure simulation. No fetch, no booking, no messages —
+    // Demo shops: pure simulation. No fetch, no booking, no messages: 
     // just a locally drawn sample confirmation code and the previews.
     if (isDemo) {
       setResult({
@@ -350,7 +350,7 @@ export default function BookingFlow({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Booking failed — please try again.");
+        setError(data.error ?? "Booking failed. Please try again.");
         if (res.status === 409) setStep(2);
         setBusy(false);
         return;
@@ -364,13 +364,13 @@ export default function BookingFlow({
       });
       setStep(5);
     } catch {
-      setError("Booking failed — please try again.");
+      setError("Booking failed. Please try again.");
     }
     setBusy(false);
   }
 
   // Demo shop confirmation: a SAMPLE screen. Nothing was booked, saved
-  // or sent — it shows the visitor exactly what a real customer gets,
+  // or sent: it shows the visitor exactly what a real customer gets,
   // including the three reminder texts rendered with their details.
   if (step === 5 && result?.demoShop) {
     const when = slot
@@ -387,7 +387,7 @@ export default function BookingFlow({
     return (
       <div>
         <div className="notice" role="note">
-          <strong>Demo — no real booking was made.</strong> Nothing was saved,
+          <strong>Demo: no real booking was made.</strong> Nothing was saved,
           and no text or email was sent. This is a sample of what your
           customers would see.
         </div>
@@ -424,7 +424,7 @@ export default function BookingFlow({
         <div className="card">
           <h2>Here&apos;s the text your customer would get</h2>
           <p className="small" style={{ marginTop: 0 }}>
-            Every real booking sends these three messages — by text and email
+            Every real booking sends these three messages, by text and email
             at the same time. Shown here with your sample details; in the demo
             they are never actually sent.
           </p>
@@ -478,7 +478,7 @@ export default function BookingFlow({
           <h2 style={{ marginTop: 10 }}>You&apos;re booked!</h2>
           {result?.demoMode ? (
             <p className="lede">
-              Demo mode: this confirmed on sample data — nothing was saved, and no
+              Demo mode: this confirmed on sample data. Nothing was saved, and no
               reminder was sent.
             </p>
           ) : (
@@ -530,7 +530,7 @@ export default function BookingFlow({
             <p className="small">
               {businessName} asks customers to fill in the{" "}
               <strong>{result.intakeFormName}</strong> form before their
-              visit — it only takes a couple of minutes.
+              visit, and it only takes a couple of minutes.
             </p>
             <Link href={`/manage/${result.manageToken}/form`} className="btn btn-primary">
               Fill in the form
@@ -608,7 +608,7 @@ export default function BookingFlow({
       </p>
       {isDemo && (
         <div className="notice" role="note">
-          <strong>Demo shop</strong> — try the whole booking flow. Nothing is
+          <strong>Demo shop.</strong> Try the whole booking flow. Nothing is
           real: no booking is saved and no messages are sent.
         </div>
       )}
@@ -707,7 +707,7 @@ export default function BookingFlow({
             {slotsLoading ? (
               <p className="small">Loading times…</p>
             ) : slots.length === 0 ? (
-              <p className="small">No open times that day — try another day.</p>
+              <p className="small">No open times that day. Try another day.</p>
             ) : (
               <div className="c3-times">
                 {slots.map((s) => (
@@ -745,7 +745,7 @@ export default function BookingFlow({
             </label>
             {isDemo && (
               <p className="small" style={{ fontWeight: 400 }}>
-                Demo only — use any name and number you like. Nothing is saved
+                Demo only. Use any name and number you like. Nothing is saved
                 or sent, and no account is created.
               </p>
             )}
@@ -816,29 +816,29 @@ export default function BookingFlow({
                 <p style={{ margin: 0 }}>{form.notes}</p>
               </div>
             ) : (
-              <p className="small" style={{ margin: "12px 0 0" }}>
+              <div className="c3-note-box">
                 No note for the office.{" "}
                 <button type="button" className="c3-underlink" onClick={() => setStep(3)}>
                   Add a note
                 </button>
-              </p>
+              </div>
             )}
             {isDemo ? (
-              <p className="small" style={{ marginTop: 14 }}>
-                This is the demo — nothing will be booked or sent. On the next
+              <p className="small c3-info-box">
+                This is the demo. Nothing will be booked or sent. On the next
                 screen you&apos;ll see a sample confirmation and the exact
                 reminder texts your customer would get.
               </p>
             ) : (
               <>
-                <p className="small" style={{ marginTop: 14 }}>
+                <p className="small c3-info-box">
                   We&apos;ll email a confirmation now, then reminders 24 hours and 2 hours
-                  before, when the booking is made far enough ahead — each with a
+                  before, when the booking is made far enough ahead, each with a
                   link to reschedule or cancel.
                 </p>
-                {cancelNote && <p className="small">{cancelNote}</p>}
-                <p style={{ margin: "10px 0 0", fontWeight: 600 }}>
-                  Nothing to pay online — you pay at the office.
+                {cancelNote && <p className="small c3-info-box">{cancelNote}</p>}
+                <p className="c3-info-box" style={{ fontWeight: 600 }}>
+                  Nothing to pay online. You pay at the office.
                 </p>
               </>
             )}
@@ -848,7 +848,7 @@ export default function BookingFlow({
       )}
 
       {demoMode && step < 5 && (
-        <p className="small center">Demo business — the flow works end to end on sample data; nothing is saved yet.</p>
+        <p className="small center">Demo business. The flow works end to end on sample data; nothing is saved yet.</p>
       )}
     </div>
   );

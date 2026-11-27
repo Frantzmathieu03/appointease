@@ -20,13 +20,13 @@ export default async function OwnerSignInPage() {
     <main className="column">
       {!isSupabaseConfigured() && (
         <div className="notice">
-          Demo mode — owner accounts turn on when the live database is connected.
+          Demo mode. Owner accounts turn on when the live database is connected.
         </div>
       )}
       <p className="eyebrow">For businesses</p>
       <SignInForm
         nextPath="/owner/dashboard"
-        title="Business sign-in"
+        title="Business sign in"
         subtitle="Your dashboard: today's appointments, calendar, customers and inbox."
         signupHref="/owner/signup"
         signupText="New business? Create your booking page"

@@ -40,7 +40,7 @@ export default function LocationsManager({ businessId }: { businessId: string })
   if (ready === false) {
     return (
       <p className="small" style={{ margin: 0 }}>
-        Locations aren&apos;t ready yet — please check back soon. Your main
+        Locations aren&apos;t ready yet. Please check back soon. Your main
         address in Business details above is the one customers see.
       </p>
     );
@@ -61,7 +61,7 @@ export default function LocationsManager({ businessId }: { businessId: string })
       : await supabase.from("locations").insert({ business_id: businessId, ...row });
     setBusy(false);
     if (error) {
-      setMsg("That didn't save — please try again.");
+      setMsg("That didn't save. Please try again.");
       return;
     }
     setForm({ name: "", address: "", phone: "" });
@@ -72,7 +72,7 @@ export default function LocationsManager({ businessId }: { businessId: string })
 
   async function remove(loc: Location) {
     const ok = window.confirm(
-      `Remove ${loc.name}? Appointments already booked there stay on the calendar — they just won't show a location anymore.`
+      `Remove ${loc.name}? Appointments already booked there stay on the calendar. They just won't show a location anymore.`
     );
     if (!ok) return;
     const supabase = createBrowserSupabase();
@@ -94,7 +94,7 @@ export default function LocationsManager({ businessId }: { businessId: string })
     <div>
       <p className="small" style={{ marginTop: 0 }}>
         Got more than one branch? Add each one here. With no locations
-        added, customers just see your main address — nothing to do.
+        added, customers just see your main address. Nothing to do.
       </p>
       {msg && <p className="small" style={{ margin: "0 0 10px" }}>{msg}</p>}
       {locations.map((loc) => (

@@ -12,9 +12,9 @@ import { businessAuthContext } from "@/lib/auth-context";
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; email?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, email } = await searchParams;
   const business = await businessAuthContext(next);
   if (business && next) {
     return (
@@ -26,7 +26,7 @@ export default async function SignupPage({
   return (
     <main className="column">
       <BusinessContextHeader next={next} />
-      <SignupForm nextPath={next ?? "/my-appointments"} businessName={business?.name} />
+      <SignupForm nextPath={next ?? "/my-appointments"} businessName={business?.name} initialEmail={email ?? ""} />
     </main>
   );
 }

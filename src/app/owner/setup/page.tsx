@@ -13,7 +13,7 @@ export default async function OwnerSetupPage() {
     return (
       <main className="column">
         <div className="notice">
-          Demo mode — business setup turns on when the live database is connected.
+          Demo mode. Business setup turns on when the live database is connected.
         </div>
         <Link href="/main-street-barbers" className="btn btn-primary btn-block">
           See a finished business page
@@ -44,7 +44,7 @@ export default async function OwnerSetupPage() {
     .eq("business_id", business.id);
   const hours = (availability ?? []) as Availability[];
   // Only the name is required to create the business (Frantz,
-  // 2026-11-25) — address, phone and the rest are optional and can be
+  // 2026-11-25): address, phone and the rest are optional and can be
   // added anytime, so this step is done once the business exists.
   const detailsDone = Boolean(business.name);
   const hoursDone = hours.length >= 1;
@@ -54,7 +54,7 @@ export default async function OwnerSetupPage() {
   // opening hours, publish. Services, team and photos all live in the
   // dashboard, after the account exists.
   const steps = [
-    { label: "Business created — link reserved", done: true },
+    { label: "Business created, link reserved", done: true },
     { label: "Business details", done: detailsDone },
     { label: "Opening hours", done: hoursDone },
     { label: "Publish your booking page", done: business.published },
@@ -106,7 +106,7 @@ export default async function OwnerSetupPage() {
         {business.published && (
           <p className="small" style={{ marginTop: 10 }}>
             Next, in your dashboard: add your services, your team, and your
-            logo and photos — your page starts taking bookings as soon as
+            logo and photos. Your page starts taking bookings as soon as
             your first service is added.
           </p>
         )}

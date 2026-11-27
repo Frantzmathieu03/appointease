@@ -9,7 +9,7 @@ import type { BusinessMember, MemberRole, Service, StaffMember, TeamInvite } fro
 
 /**
  * Team (Owner Dashboard Plan, 2026-11-26): member cards on the left
- * (owner first — dark green Owner tag; Manager blue-grey; Staff
+ * (owner first: dark green Owner tag; Manager blue-grey; Staff
  * light green; invited people on a dashed card with an orange
  * Invited tag and a Resend button), the invite card on the right
  * (Name / Email or mobile number / Role buttons with Owner disabled
@@ -55,7 +55,7 @@ export default function TeamManager({
   ownerEmail: string | null;
   siteUrl: string;
   /** The business's plan + seats in use (active staff calendars).
-   * At the cap, a Staff invite stops with the upgrade prompt —
+   * At the cap, a Staff invite stops with the upgrade prompt: 
    * here, and again on the server in /api/team/invite. */
   plan: Plan;
   seatsUsed: number;
@@ -121,7 +121,7 @@ export default function TeamManager({
         // Seat limit: the add is stopped; show the upgrade prompt.
         setLimitHit(true);
       } else if (!res.ok) {
-        setError(data.error ?? "Could not send the invite — please try again.");
+        setError(data.error ?? "Could not send the invite. Please try again.");
       } else {
         setLastLink(data.link as string);
         setSuccess(
@@ -135,7 +135,7 @@ export default function TeamManager({
         router.refresh();
       }
     } catch {
-      setError("Could not send the invite — please try again.");
+      setError("Could not send the invite. Please try again.");
     }
     setBusy(false);
   }
@@ -154,14 +154,14 @@ export default function TeamManager({
         setSuccess(
           data.emailed
             ? `Invite emailed to ${i.email} again. The link, if you want to send it yourself:`
-            : "Email isn't sending right now — send them this link yourself:"
+            : "Email isn't sending right now. Send them this link yourself:"
         );
         setError("");
       } else {
-        setError(data.error ?? "Could not re-send that invite.");
+        setError(data.error ?? "Could not resend that invite.");
       }
     } catch {
-      setError("Could not re-send that invite.");
+      setError("Could not resend that invite.");
     }
     setResending("");
   }
@@ -208,7 +208,7 @@ export default function TeamManager({
       .update({ role: editRole })
       .eq("id", m.id);
     if (roleErr) {
-      setEditNote("That change didn't save — please try again.");
+      setEditNote("That change didn't save. Please try again.");
       return;
     }
     if (m.staff_id) {
@@ -224,7 +224,7 @@ export default function TeamManager({
     return (
       <div className="card">
         <p className="small" style={{ margin: 0 }}>
-          Team sign-ins turn on with the next database update — for now your
+          Team sign ins turn on with the next database update. For now your
           team works under your one owner login.
         </p>
       </div>
@@ -264,7 +264,7 @@ export default function TeamManager({
                   </p>
                   <p className="d2-member-sub">
                     {m.staff_id
-                      ? `Calendar: ${staffName(m.staff_id) ?? "—"}`
+                      ? `Calendar: ${staffName(m.staff_id) ?? "None"}`
                       : m.role === "manager"
                         ? "Sees the whole business"
                         : "No calendar linked"}
@@ -341,7 +341,7 @@ export default function TeamManager({
           );
         })}
         {members.length === 0 && pending.length === 0 && declinedInvites.length === 0 && (
-          <p className="small">No team logins yet — invite your first team member.</p>
+          <p className="small">No team logins yet. Invite your first team member.</p>
         )}
 
         {/* Invited cards */}
@@ -402,7 +402,7 @@ export default function TeamManager({
         ))}
       </div>
 
-      {/* Invite card — owner only */}
+      {/* Invite card: owner only */}
       {isOwner && (
         <div className="card" style={{ marginBottom: 0 }}>
           <h2 style={{ marginTop: 0 }}>Invite a team member</h2>
@@ -459,7 +459,7 @@ export default function TeamManager({
                 {inviteRole === "staff"
                   ? "Staff see only their own calendar, clients and messages."
                   : "Managers see the whole business, but can't manage the team or billing."}{" "}
-                The owner is the account holder — there's one owner per business.
+                The owner is the account holder. There's one owner per business.
               </p>
             </div>
             {inviteRole === "staff" && services.length > 0 && (

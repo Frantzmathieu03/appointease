@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-// Contact form — posts to /api/contact, which emails the AppointEase inbox
+// Contact form: posts to /api/contact, which emails the AppointEase inbox
 // via Resend with reply_to set to the submitter.
 export default function ContactForm() {
   const [name, setName] = useState("");
@@ -24,7 +24,7 @@ export default function ContactForm() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data?.error ?? "Something went wrong — please email us directly.");
+        setError(data?.error ?? "Something went wrong. Please email us directly.");
         setStatus("error");
         return;
       }
@@ -34,7 +34,7 @@ export default function ContactForm() {
       setMessage("");
       setTopic("Business owner");
     } catch {
-      setError("Something went wrong — please email us directly.");
+      setError("Something went wrong. Please email us directly.");
       setStatus("error");
     }
   }
@@ -42,7 +42,7 @@ export default function ContactForm() {
   if (status === "sent") {
     return (
       <div className="success">
-        Thanks — your message is on its way. We read every message and will
+        Thanks, your message is on its way. We read every message and will
         reply to the email address you gave us.
       </div>
     );

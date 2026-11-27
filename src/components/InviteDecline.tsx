@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-/** Decline button for /invite/[token] — posts to the decline API
+/** Decline button for /invite/[token]: posts to the decline API
  *  route. Two steps (Decline, then Confirm) so a stray tap never
  *  answers an invite by accident. On success the page swaps to a
  *  plain thank-you; the Team page shows the invite as Declined. */

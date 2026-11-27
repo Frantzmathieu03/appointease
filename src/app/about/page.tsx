@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About — AppointEase",
+  title: "About · AppointEase",
   description:
-    "AppointEase is built and run by Frantz Mathieu in Boston, MA — booking pages and automatic reminders for appointment-based businesses.",
+    "AppointEase is built and run by Frantz Mathieu in Boston, MA. Booking pages and automatic reminders for appointment based businesses.",
 };
 
-// About — honest and short: who built this, why it exists, how to reach
+// About: honest and short: who built this, why it exists, how to reach
 // a human. No invented company name, no address, no phone.
 export default function AboutPage() {
   return (
@@ -15,7 +15,7 @@ export default function AboutPage() {
         <div className="section-head" style={{ paddingTop: 42 }}>
           <p className="eyebrow">About</p>
           <h1 style={{ fontSize: "clamp(30px, 4.6vw, 42px)" }}>
-            Hi, I&apos;m Frantz — I built AppointEase, and I run it, from Boston, Massachusetts.
+            Hi, I&apos;m Frantz. I built AppointEase, and I run it, from Boston, Massachusetts.
           </h1>
         </div>
 
@@ -39,13 +39,13 @@ export default function AboutPage() {
               AppointEase started with a problem every appointment business
               knows too well: the phone rings while your hands are busy, a
               customer forgets and never shows, and the chair sits empty.
-              No-shows and phone tag quietly cost local shops real money
+              No shows and phone tag quietly cost local shops real money
               every single week.
             </p>
             <p style={{ lineHeight: 1.65, margin: "0 0 14px" }}>
               So I built the fix I wished they had. AppointEase gives a
-              business its own booking page — customers pick a service and a
-              time in a few taps — and then confirmations and reminders
+              business its own booking page. Customers pick a service and a
+              time in a few taps, and then confirmations and reminders
               go out automatically, by text and email at the same time:
               right away, 24 hours before, and 2 hours before (when the
               booking is made far enough ahead), each with a link to
@@ -56,7 +56,7 @@ export default function AboutPage() {
             <p style={{ lineHeight: 1.65, margin: "0 0 14px" }}>
               AppointEase is new and small, and I&apos;d rather be honest
               about that than dress it up. When you write to support,
-              you&apos;re writing to me — and I read every message myself.
+              you&apos;re writing to me, and I read every message myself.
             </p>
             <p style={{ lineHeight: 1.65, margin: 0 }}>
               Questions, ideas, or a problem with your page? Email me at{" "}

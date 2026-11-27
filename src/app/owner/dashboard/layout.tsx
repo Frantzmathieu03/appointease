@@ -4,7 +4,7 @@ import UnreadBadge from "@/components/UnreadBadge";
 import NativeBridge from "@/components/NativeBridge";
 import DashNav, { type DashNavItem } from "@/components/DashNav";
 
-// Owner workspace shell — Owner Dashboard Plan (Frantz, 2026-11-26):
+// Owner workspace shell: Owner Dashboard Plan (Frantz, 2026-11-26):
 // a white top bar across the full width (round logo + business name
 // on the left; View booking page, a bell with a red dot when there
 // are unread messages, and the signed-in person's initials on the
@@ -52,7 +52,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="dash2">
-      {/* Native app bridge with this business as context — inert on web. */}
+      {/* Native app bridge with this business as context: inert on web. */}
       <NativeBridge businessId={business.id} />
       {/* Inter (plan spec: 400/600/700), scoped to the dashboard. */}
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
@@ -82,7 +82,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Link
               href="/owner/dashboard/inbox"
               className="d2-bell"
-              aria-label="Notifications — customer messages"
+              aria-label="Notifications: customer messages"
             >
               <svg
                 width="21"
@@ -121,7 +121,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             {!business.published && isOwner && (
               <div className="d2-setupbar">
                 <span>
-                  Your booking page isn&apos;t published yet — {link.replace(/^https?:\/\//, "")}{" "}
+                  Your booking page isn&apos;t published yet: {link.replace(/^https?:\/\//, "")}{" "}
                   is not live for customers.
                 </span>
                 <Link href="/owner/setup" style={{ fontWeight: 700 }}>

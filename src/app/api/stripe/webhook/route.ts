@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     if ((dedupeError as { code?: string }).code === "23505") {
       return NextResponse.json({ received: true, duplicate: true });
     }
-    // If the dedupe table itself is unreachable, keep going — the sync
+    // If the dedupe table itself is unreachable, keep going: the sync
     // below is state-based and safe to repeat.
     console.error("stripe_events insert failed:", dedupeError.message);
   }
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
         break;
     }
   } catch (err) {
-    // Return 500 so Stripe retries — and remove the dedupe row first, so
+    // Return 500 so Stripe retries: and remove the dedupe row first, so
     // the retry re-enters the handler instead of being skipped as a
     // duplicate. The sync itself is state-based, so reprocessing is safe.
     await admin.from("stripe_events").delete().eq("id", event.id);

@@ -1,7 +1,7 @@
 // Writes Stripe subscription state onto the businesses row (migration
 // 0004 columns). Used by the webhook; every write is a full sync from the
-// subscription's current state, so handling the same event twice — or
-// events arriving out of order — converges to the same row. That is what
+// subscription's current state, so handling the same event twice: or
+// events arriving out of order: converges to the same row. That is what
 // makes the webhook idempotent beyond the stripe_events dedupe table.
 
 import type Stripe from "stripe";

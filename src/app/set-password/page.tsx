@@ -6,12 +6,12 @@ import { createBrowserSupabase } from "@/lib/supabase-browser";
 
 // Landing page for password reset / account-claim emails. The email link
 // goes through /auth/callback, which exchanges the code for a session and
-// redirects here — so a valid session means the link was real. Setting
+// redirects here: so a valid session means the link was real. Setting
 // the password is just an updateUser on that session.
 //
 // The link carries a lane destination in ?to= (set by whichever form
 // asked for the reset): owners land on /owner/dashboard, customers
-// land on their own business's /<slug>/my — a customer never leaves
+// land on their own business's /<slug>/my: a customer never leaves
 // that business's world. Links without ?to= keep the original
 // generic done screen.
 export default function SetPasswordPage() {
@@ -51,7 +51,7 @@ export default function SetPasswordPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (password !== confirm) {
-      setError("Those passwords don't match — try again.");
+      setError("Those passwords don't match. Try again.");
       return;
     }
     setBusy(true);
@@ -59,7 +59,7 @@ export default function SetPasswordPage() {
     const supabase = createBrowserSupabase();
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      setError("That didn't work — the link may have expired. Request a new one from the sign-in page.");
+      setError("That didn't work. The link may have expired. Request a new one from the sign in page.");
       setBusy(false);
       return;
     }
@@ -84,7 +84,7 @@ export default function SetPasswordPage() {
           <h2>This link has expired</h2>
           <p className="lede">
             Password links only work once, and only for a short time.
-            Request a new one from the sign-in page.
+            Request a new one from the sign in page.
           </p>
           <Link href={backHref} className="btn btn-primary">{backLabel}</Link>
         </div>
@@ -134,7 +134,7 @@ export default function SetPasswordPage() {
         <p className="lede" style={{ marginBottom: 16 }}>
           {dest
             ? "Pick a password for your account."
-            : "Pick a password for your AppointEase account — it works at every business here."}
+            : "Pick a password for your AppointEase account. It works at every business here."}
         </p>
         {error && <div className="error">{error}</div>}
         <form onSubmit={onSubmit}>

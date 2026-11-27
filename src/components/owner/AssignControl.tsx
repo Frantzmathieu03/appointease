@@ -6,7 +6,7 @@ import { createBrowserSupabase } from "@/lib/supabase-browser";
 import type { StaffMember } from "@/lib/types";
 
 /**
- * "Assigned to: <name> [Change]" — per-business client assignment
+ * "Assigned to: <name> [Change]": per-business client assignment
  * (business_customers.assigned_staff_id, migration 0010). Every change
  * also appends an `assigned` row to the customer's timeline. Until
  * migration 0010 is applied the update fails softly with a note.
@@ -43,7 +43,7 @@ export default function AssignControl({
       .eq("business_id", businessId)
       .eq("customer_id", customerId);
     if (error) {
-      setNote("Assignment isn't available yet — it turns on with the next database update.");
+      setNote("Assignment isn't available yet. It turns on with the next database update.");
       setValue(assignedStaffId ?? "");
       setBusy(false);
       return;

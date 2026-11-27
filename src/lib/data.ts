@@ -179,7 +179,7 @@ async function assembleBusinessPageData(
   };
 }
 
-/** Hours summary like "Mon–Sat · 9:00 AM–6:00 PM" for page headers. */export function hoursSummary(availability: Availability[]): string {
+/** Hours summary like "Mon to Sat · 9:00 AM to 6:00 PM" for page headers. */export function hoursSummary(availability: Availability[]): string {
   const byDay = new Map<number, Availability>();
   for (const a of availability) {
     if (a.staff_id === null && !byDay.has(a.weekday)) byDay.set(a.weekday, a);
@@ -196,15 +196,15 @@ async function assembleBusinessPageData(
   };
   const range =
     days.length > 1 && days[days.length - 1] - days[0] === days.length - 1
-      ? `${names[days[0]]}–${names[days[days.length - 1]]}`
+      ? `${names[days[0]]} to ${names[days[days.length - 1]]}`
       : days.map((d) => names[d]).join(", ");
-  return `${range} · ${fmt(first.open_time)}–${fmt(first.close_time)}`;
+  return `${range} · ${fmt(first.open_time)} to ${fmt(first.close_time)}`;
 }
 
 export interface OpenStatus {
   /** "open" when now falls inside one of today's rows, else "closed". */
   state: "open" | "closed";
-  /** Today's hours, e.g. "9 AM – 5 PM": null when closed today. */
+  /** Today's hours, e.g. "9 AM to 5 PM": null when closed today. */
   todayLabel: string | null;
   /** Truthful note, e.g. "Open now · closes 5 PM" / "Closed · opens Sat 9 AM". */
   note: string;
@@ -269,7 +269,7 @@ export function openStatus(availability: Availability[], timeZone: string): Open
     const inside = span.rows.some(
       (r) => nowMinutes >= toMinutes(r.open_time) && nowMinutes < toMinutes(r.close_time)
     );
-    const todayLabel = `${fmtClock(span.openRaw)} – ${fmtClock(span.closeRaw)}`;
+    const todayLabel = `${fmtClock(span.openRaw)} to ${fmtClock(span.closeRaw)}`;
     if (inside) {
       const current = span.rows.find(
         (r) => nowMinutes >= toMinutes(r.open_time) && nowMinutes < toMinutes(r.close_time)
@@ -322,8 +322,8 @@ export function openStatus(availability: Availability[], timeZone: string): Open
 /**
  * Grouped hours lines for the business page's "Hours & location"
  * card (Frantz's plan, 2026-11-26): consecutive days with identical
- * hours share one line, Monday first: e.g. "Mon – Fri · 9 AM – 5 PM"
- * and "Sat – Sun · Closed". Days with no availability rows count as
+ * hours share one line, Monday first: e.g. "Mon to Fri · 9 AM to 5 PM"
+ * and "Sat to Sun · Closed". Days with no availability rows count as
  * closed. Business-wide rows (staff_id null) define a day's hours;
  * when a day has only per-staff rows, the widest span counts. Empty
  * array when the business has no availability at all.
@@ -347,7 +347,7 @@ export function hoursLines(availability: Availability[]): string[] {
     const use = wide.length > 0 ? wide : rows;
     const open = use.reduce((a, b) => (toMinutes(a.open_time) <= toMinutes(b.open_time) ? a : b)).open_time;
     const close = use.reduce((a, b) => (toMinutes(a.close_time) >= toMinutes(b.close_time) ? a : b)).close_time;
-    return `${fmtClock(open)} – ${fmtClock(close)}`;
+    return `${fmtClock(open)} to ${fmtClock(close)}`;
   };
   // Monday-first order: 1,2,3,4,5,6,0.
   const order = [1, 2, 3, 4, 5, 6, 0];
@@ -360,7 +360,7 @@ export function hoursLines(availability: Availability[]): string[] {
     const range =
       start === end
         ? DAY_NAMES[order[start]]
-        : `${DAY_NAMES[order[start]]} – ${DAY_NAMES[order[end]]}`;
+        : `${DAY_NAMES[order[start]]} to ${DAY_NAMES[order[end]]}`;
     lines.push(`${range} · ${labels[start]}`);
     start = end + 1;
   }

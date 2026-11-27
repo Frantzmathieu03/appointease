@@ -5,12 +5,12 @@ import { scheduleReminders } from "@/lib/reminders";
 import { generateConfirmationCode } from "@/lib/confirmation";
 import { logCustomerEvent } from "@/lib/events";
 
-// POST /api/owner/book — the owner (or a team login) books an appointment
+// POST /api/owner/book: the owner (or a team login) books an appointment
 // for a customer from the dashboard (PDF §4: click an empty calendar
 // slot / "New appointment"). Body:
 //   { businessId, serviceId, staffId, startsAt,
-//     customerId }                       — existing customer of the business
-//   or { ..., guest: { name, phone, email } }  — brand-new customer
+//     customerId }: existing customer of the business
+//   or { ..., guest: { name, phone, email } }: brand-new customer
 // Slot safety is the same as the public flow: the database exclusion
 // constraint makes double-booking impossible (23P01 → 409). The booking
 // lands on the customer's timeline as `booked` by a team member.
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
         user_metadata: { full_name: name, phone: guest.phone ?? null },
       });
       if (createErr || !created.user) {
-        return NextResponse.json({ error: "Could not create that customer — please try again." }, { status: 500 });
+        return NextResponse.json({ error: "Could not create that customer. Please try again." }, { status: 500 });
       }
       resolvedCustomerId = created.user.id;
       await logCustomerEvent(admin, {
@@ -174,9 +174,9 @@ export async function POST(req: NextRequest) {
   }
   if (apptErr || !apptId) {
     if (apptErr && apptErr.code === "23P01") {
-      return NextResponse.json({ error: "That time was just taken — please pick another." }, { status: 409 });
+      return NextResponse.json({ error: "That time was just taken. Please pick another." }, { status: 409 });
     }
-    return NextResponse.json({ error: "Booking failed — please try again." }, { status: 500 });
+    return NextResponse.json({ error: "Booking failed. Please try again." }, { status: 500 });
   }
 
   await scheduleReminders(admin, apptId, start);

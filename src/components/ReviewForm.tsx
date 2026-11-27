@@ -7,7 +7,7 @@ export default function ReviewForm({ appointmentId }: { appointmentId: string })
   const [comment, setComment] = useState("");
   const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
 
-  if (state === "done") return <p className="small">Thanks — your review was submitted ✓</p>;
+  if (state === "done") return <p className="small">Thanks, your review was submitted ✓</p>;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,7 +48,7 @@ export default function ReviewForm({ appointmentId }: { appointmentId: string })
       <button className="btn" type="submit" disabled={state === "busy"} style={{ marginTop: 8 }}>
         {state === "busy" ? "Sending…" : "Leave a review"}
       </button>
-      {state === "error" && <p className="small">That did not go through — please try again.</p>}
+      {state === "error" && <p className="small">That did not go through. Please try again.</p>}
     </form>
   );
 }

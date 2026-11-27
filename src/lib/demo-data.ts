@@ -1,4 +1,4 @@
-// Demo-mode fallback data — mirrors supabase/seed.sql exactly.
+// Demo-mode fallback data: mirrors supabase/seed.sql exactly.
 // Used only while NEXT_PUBLIC_SUPABASE_URL is still a placeholder, so the
 // public page and booking flow can be shown before the real project exists.
 import type { Availability, Business, Service, StaffMember } from "./types";
@@ -12,7 +12,7 @@ export const DEMO_BUSINESS: Business = {
   type: "Barbershop",
   category: "barbershops",
   logo_url: null,
-  description: "Walk-ins welcome. Book ahead to skip the wait.",
+  description: "Walk ins welcome. Book ahead to skip the wait.",
   address: "25 Main St, Boston, MA",
   phone: "617-555-0142",
   email: "owner@mainstreetbarber.example",

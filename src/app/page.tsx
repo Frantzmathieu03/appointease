@@ -5,7 +5,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { REVIEWS } from "@/lib/reviews";
 import HomeAnimations from "@/components/HomeAnimations";
 
-// Category cards for "Made for your kind of business" — labels and
+// Category cards for "Made for your kind of business": labels and
 // blurbs come from the shared category list; the photos are the
 // resized people-at-work shots under /images/cats/<slug>.jpg (hair
 // salons show stylists at work, dental shows the team with a patient).
@@ -16,7 +16,7 @@ const CAT_CARDS = CATEGORIES.filter((c) => c.image !== null).map((c) => ({
   img: `/images/cats/${c.slug}.jpg`,
 }));
 
-// Landing page — Homepage New Design (Frantz, 2026-11-26): one hero
+// Landing page: Homepage New Design (Frantz, 2026-11-26): one hero
 // with the current looping video, three steps, six feature cards,
 // pricing by team size, and a closing call to action. Real product
 // claims only: no testimonials, quotes, ratings or invented counts.
@@ -40,7 +40,7 @@ const FEATURES: { icon: string; title: string; body: string; dark?: boolean }[] 
   {
     icon: "🔔",
     title: "Text + email reminders",
-    body: "A confirmation right away, then another 24 hours and 2 hours before — each with links to reschedule or cancel.",
+    body: "A confirmation right away, then another 24 hours and 2 hours before, each with links to reschedule or cancel.",
   },
   {
     icon: "🗂️",
@@ -55,12 +55,12 @@ const FEATURES: { icon: string; title: string; body: string; dark?: boolean }[] 
   {
     icon: "📝",
     title: "Forms",
-    body: "Questions and file uploads before the visit, with ready-made templates for law offices and salons.",
+    body: "Questions and file uploads before the visit, with ready made templates for law offices and salons.",
   },
   {
     icon: "💬",
     title: "One inbox",
-    body: "Message back and forth with clients from one inbox — nothing buried in a personal phone.",
+    body: "Message back and forth with clients from one inbox. Nothing is buried in a personal phone.",
   },
   {
     icon: "💵",
@@ -79,12 +79,12 @@ export default function HomePage() {
         <div className="mkt-container">
           <div className="notice" style={{ marginTop: 18 }}>
             Demo mode: the live database is not connected yet. The sample business
-            page works end to end with demo data — nothing is saved.
+            page works end to end with demo data. Nothing is saved.
           </div>
         </div>
       )}
 
-      {/* Hero — one hero at every width. Text centered, the current
+      {/* Hero: one hero at every width. Text centered, the current
           hero video right in a rounded frame on desktop; stacked
           centered on phones. The three floating notes show on
           desktop only. */}
@@ -103,7 +103,7 @@ export default function HomePage() {
               playsInline
               preload="auto"
               poster="/hero/hero-poster.jpg"
-              aria-label="AppointEase in action — a client booking an appointment and a business owner checking the day's bookings"
+              aria-label="AppointEase in action: a client booking an appointment and a business owner checking the day's bookings"
             >
               <source src="/hero/hero-video.mp4" type="video/mp4" />
             </video>
@@ -111,8 +111,8 @@ export default function HomePage() {
           <div className="hp-hero-bottom">
             <p className="hp-sub">
               Your own booking page, automatic text reminders, and every
-              client&apos;s history in one place — for law offices, barbers,
-              salons and every appointment-based business.
+              client&apos;s history in one place, for law offices, barbers,
+              salons and every appointment based business.
             </p>
             <div className="hp-ctas">
               <Link href="/owner/signup" className="btn btn-primary btn-lg">Create my booking page</Link>
@@ -150,7 +150,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* The short version — true product facts only, counting up
+      {/* The short version: true product facts only, counting up
           as the band scrolls into view. */}
       <section className="hp-section hp-stats-section" data-reveal>
         <div className="mkt-container">
@@ -161,7 +161,7 @@ export default function HomePage() {
             </div>
             <div className="hp-stat">
               <span className="hp-stat-num"><span data-count="3">3</span></span>
-              <span className="hp-stat-label">reminders with every booking — right away, 24 hours and 2 hours before</span>
+              <span className="hp-stat-label">reminders with every booking: right away, 24 hours and 2 hours before</span>
             </div>
             <div className="hp-stat">
               <span className="hp-stat-num"><span data-count="3">3</span></span>
@@ -169,7 +169,7 @@ export default function HomePage() {
             </div>
             <div className="hp-stat">
               <span className="hp-stat-num">$<span data-count="0">0</span></span>
-              <span className="hp-stat-label">of your clients&apos; money touches AppointEase — they pay you directly</span>
+              <span className="hp-stat-label">of your clients&apos; money touches AppointEase. They pay you directly</span>
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function HomePage() {
             <div className="step">
               <span className="step-num">2</span>
               <h3>Share your link</h3>
-              <p>Put appointease.io/your-business on Instagram, Google and your texts.</p>
+              <p>Put appointease.io/yourshop on Instagram, Google and your texts.</p>
             </div>
             <div className="step">
               <span className="step-num">3</span>
@@ -201,7 +201,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Made for your kind of business — the real categories, with
+      {/* Made for your kind of business: the real categories, with
           people at work in each one. */}
       <section className="hp-section hp-section-pale" data-reveal>
         <div className="mkt-container">
@@ -231,7 +231,7 @@ export default function HomePage() {
         <div className="mkt-container">
           <div className="section-head">
             <h2>A day with AppointEase</h2>
-            <p className="lede">One booking, start to finish — while you work.</p>
+            <p className="lede">One booking, start to finish, while you work.</p>
           </div>
           <div className="hp-panel">
           <div className="hp-day">
@@ -241,15 +241,15 @@ export default function HomePage() {
               <div className="hp-day-stage">
                 <div className="hp-day-card hp-day-card-1">
                   <span className="hp-note-ico">📅</span>
-                  <span><strong>New booking</strong> — James · Haircut · Fri 3:00 PM</span>
+                  <span><strong>New booking</strong> · James · Haircut · Fri 3:00 PM</span>
                 </div>
                 <div className="hp-day-card hp-day-card-2">
                   <span className="hp-note-ico">🔔</span>
-                  <span><strong>Reminder sent</strong> — 24 hours before · Delivered</span>
+                  <span><strong>Reminder sent</strong> · 24 hours before · Delivered</span>
                 </div>
                 <div className="hp-day-card hp-day-card-3">
                   <span className="hp-note-ico">📝</span>
-                  <span><strong>Visit notes saved</strong> — James · next visit in 3 weeks</span>
+                  <span><strong>Visit notes saved</strong> · James · next visit in 3 weeks</span>
                 </div>
               </div>
               <p className="hp-phone-foot">Every client, one history</p>
@@ -257,7 +257,7 @@ export default function HomePage() {
             <ol className="hp-day-caps">
               <li className="hp-day-cap hp-day-cap-1">
                 <strong>A client books</strong>
-                <span>From your page, any time of day — no phone tag.</span>
+                <span>From your page, any time of day, with no phone tag.</span>
               </li>
               <li className="hp-day-cap hp-day-cap-2">
                 <strong>Reminders go out on their own</strong>
@@ -277,7 +277,7 @@ export default function HomePage() {
       <section className="hp-section hp-section-pale" data-reveal>
         <div className="mkt-container">
           <div className="section-head">
-            <h2>Everything your front desk does — automatically</h2>
+            <h2>Everything your front desk does, automatically</h2>
           </div>
           <div className="hp-cards">
             {FEATURES.map((f) => (
@@ -291,7 +291,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* People at work — a real shop moment on loop: booked online,
+      {/* People at work: a real shop moment on loop: booked online,
           welcomed in person. Muted and lazy, below the fold. */}
       <section className="hp-section" data-reveal>
         <div className="mkt-container">
@@ -308,7 +308,7 @@ export default function HomePage() {
               playsInline
               preload="metadata"
               poster="/videos/people-shop-poster.jpg"
-              aria-label="Inside a barbershop — the barber welcomes a client who booked online while another client checks his phone"
+              aria-label="Inside a barbershop: the barber welcomes a client who booked online while another client checks his phone"
             >
               <source src="/videos/people-shop.mp4" type="video/mp4" />
             </video>
@@ -325,7 +325,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Reviews — real words from real businesses, data-driven from
+      {/* Reviews: real words from real businesses, data-driven from
           src/lib/reviews.ts. The section renders ONLY when at least
           two real reviews exist there. It stays hidden until the
           first pilot shops give real words with permission: never
@@ -406,7 +406,7 @@ export default function HomePage() {
             ))}
           </div>
           <p className="pricing-note">
-            Your plan grows with your team — we&apos;ll let you know when it&apos;s time to upgrade.
+            Your plan grows with your team. We&apos;ll let you know when it&apos;s time to upgrade.
           </p>
         </div>
       </section>
@@ -461,7 +461,7 @@ export default function HomePage() {
       <div className="mkt-container">
         <section className="cta-band hp-cta" data-reveal>
           <h2>Your booking page can be live today</h2>
-          <p>Questions? Email support@appointease.io — a real person answers.</p>
+          <p>Questions? Email support@appointease.io. A real person answers.</p>
           <Link href="/owner/signup" className="btn btn-white btn-lg">Create my booking page</Link>
         </section>
       </div>

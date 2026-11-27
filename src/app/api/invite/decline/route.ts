@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 
-// POST /api/invite/decline — body { token }.
+// POST /api/invite/decline: body { token }.
 // Declining a team invite (migration 0019): the token is the
 // credential, no sign-in needed, the same trust level as viewing
 // the invite. Sets team_invites.declined_at; the Team page then

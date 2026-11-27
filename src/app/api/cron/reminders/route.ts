@@ -4,7 +4,7 @@ import { processDueReminders } from "@/lib/reminders";
 
 // GET /api/cron/reminders?key=<CRON_SECRET>
 // Sends every due confirmation / 24h / 2h reminder.
-// Point a scheduler at it every few minutes: Vercel Cron (see vercel.json —
+// Point a scheduler at it every few minutes: Vercel Cron (see vercel.json: 
 // Vercel sends the secret as an Authorization: Bearer header), Supabase
 // pg_cron, or any external pinger.
 export async function GET(req: NextRequest) {

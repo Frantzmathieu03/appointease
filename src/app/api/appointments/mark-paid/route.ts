@@ -4,11 +4,11 @@ import { createAdminSupabase } from "@/lib/supabase";
 
 // Mark paid (revised Dashboard Changes PDF, 2026-11-26): the front
 // desk marks that the customer paid AT THE OFFICE. This is offline
-// bookkeeping only — no money moves through AppointEase. The mark is
+// bookkeeping only: no money moves through AppointEase. The mark is
 // a 'marked_paid' row on the customer's timeline (migration 0015
 // widens the event-type check; until it lands this route answers a
 // plain not-yet note and saves nothing). Any signed-in team member of
-// the business may mark (owner, manager, staff — the front desk),
+// the business may mark (owner, manager, staff: the front desk),
 // which is why the write goes through the service role after the
 // membership check in requireBusiness: the 0010 insert policy on
 // customer_events is owner-only.
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   }
   if ((appt as { status: string }).status === "cancelled") {
     return NextResponse.json(
-      { error: "This appointment was cancelled — there's nothing to mark paid." },
+      { error: "This appointment was cancelled. There's nothing to mark paid." },
       { status: 400 }
     );
   }
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "Marking paid turns on with the next update — nothing was saved. Try again shortly.",
+          "Marking paid turns on with the next update. Nothing was saved. Try again shortly.",
       },
       { status: 503 }
     );

@@ -5,15 +5,15 @@ import { businessAuthContext } from "@/lib/auth-context";
 import { isSupabaseConfigured } from "@/lib/supabase-config";
 
 // Customer log in. From a business's own pages (next=/<slug>/…) this
-// is that business's log in screen — the same screen as its sign up,
+// is that business's log in screen: the same screen as its sign up,
 // flipped (Customer Side Plan, Frantz 2026-11-26). Otherwise the
 // platform form renders as before.
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; email?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, email } = await searchParams;
   const business = await businessAuthContext(next);
   if (business && next) {
     return (
@@ -26,14 +26,15 @@ export default async function LoginPage({
     <main className="column">
       {!isSupabaseConfigured() && (
         <div className="notice">
-          Demo mode — accounts turn on when the live database is connected.
+          Demo mode. Accounts turn on when the live database is connected.
           You can still browse the sample business and try the booking flow.
         </div>
       )}
       <BusinessContextHeader next={next} />
       <SignInForm
         nextPath={next ?? "/my-appointments"}
-        signupHref={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}
+        signupHref={next ? `/signup?next=${encodeURIComponent(next)}${email ? `&email=${encodeURIComponent(email)}` : ""}` : "/signup"}
+        initialEmail={email ?? ""}
       />
     </main>
   );

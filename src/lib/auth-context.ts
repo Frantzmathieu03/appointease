@@ -5,10 +5,10 @@ import { isSupabaseConfigured } from "./supabase-config";
 // (Customer Side Plan, Frantz 2026-11-26): when a customer arrives
 // from a business's own pages, the return path (next=/<slug>/…)
 // names that business, and the auth screen becomes THAT business's
-// sign up / log in screen — its logo, its name, and the promise that
-// the account lives only with that office. Anything unexpected — no
+// sign up / log in screen: its logo, its name, and the promise that
+// the account lives only with that office. Anything unexpected: no
 // next, a reserved path, an unknown or unpublished slug, a database
-// error — resolves to null and the pages render their platform
+// error: resolves to null and the pages render their platform
 // forms, exactly as before.
 const RESERVED_SEGMENTS = new Set([
   "login",

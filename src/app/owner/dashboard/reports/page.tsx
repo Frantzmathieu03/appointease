@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { requireBusiness, siteUrl } from "@/lib/owner";
 import CopyLinkButton from "@/components/CopyLinkButton";
 
-// Reports: plain numbers about the work — appointments booked, visits
+// Reports: plain numbers about the work: appointments booked, visits
 // completed, no-shows, cancellations and why, busiest team member,
 // most-booked service, new vs returning customers. Every number is
 // counted from this business's real appointment rows.
@@ -112,7 +112,7 @@ export default async function DashboardReportsPage({
           <h2>Nothing to report yet</h2>
           <p className="lede" style={{ marginBottom: 12 }}>
             Reports appear here after your first appointments. Share your
-            booking link and this page fills itself in — appointments
+            booking link and this page fills itself in: appointments
             booked, visits finished, and who your busiest team member is.
           </p>
           <CopyLinkButton url={bookingLink} />

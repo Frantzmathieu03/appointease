@@ -15,11 +15,11 @@ const money = (cents: number) =>
 // The appointment page's pay-at-the-office block (revised Dashboard
 // Changes PDF, 2026-11-26): a price line ("$250 · Pay at the office")
 // plus the front desk's optional Mark paid control. Marking writes a
-// 'marked_paid' timeline event through /api/appointments/mark-paid —
+// 'marked_paid' timeline event through /api/appointments/mark-paid: 
 // offline bookkeeping only; AppointEase never collects the money.
 // Once marked, the paid line shows and the form steps aside; a small
 // "Mark another payment" link brings it back (a second mark is a
-// second event — there is no undo).
+// second event: there is no undo).
 export default function MarkPaid({
   appointmentId,
   priceLine,

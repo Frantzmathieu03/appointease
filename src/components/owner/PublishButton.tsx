@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 
 // The publish gate reads the SAVED state, straight from the database.
-// Publishing needs ONE thing (Frantz, 2026-11-25): opening hours — at
+// Publishing needs ONE thing (Frantz, 2026-11-25): opening hours: at
 // least one availability row for this business (any staff_id,
 // including the business-wide null rows). Services are NOT required
 // to publish; a page with no services yet simply says it is not taking
 // bookings yet. The count is re-checked when the card appears and
 // whenever the owner comes back to this tab, so the button lights up
-// as soon as the hours are saved — no page reload needed. (Before
+// as soon as the hours are saved: no page reload needed. (Before
 // this, the gate only saw the values the page first loaded with, so
 // an owner who saved hours in the same visit was told they were still
 // missing.) The words under the button name only what is missing.
@@ -55,7 +55,7 @@ export default function PublishButton({
   if (published) {
     return (
       <div>
-        <p className="success">Your booking page is live — customers can book right now.</p>
+        <p className="success">Your booking page is live. Customers can book right now.</p>
         <button className="btn" onClick={toggle} disabled={busy}>
           Unpublish page
         </button>

@@ -1,14 +1,14 @@
-// Subscription plans — the single source of truth for AppointEase pricing.
+// Subscription plans: the single source of truth for AppointEase pricing.
 // Owner decision (Frantz, 2026-11-24, FINAL): Solo $29.99/mo ·
 // Team $49.99/mo · Business $149.99/mo. 14-day free trial, no card
-// upfront. Customers who book never pay anything — only businesses
+// upfront. Customers who book never pay anything: only businesses
 // subscribe.
-// Team-size bands (Frantz, 2026-11-26, his own numbers — these
+// Team-size bands (Frantz, 2026-11-26, his own numbers: these
 // supersede the revised PDF's bands): Solo 1 · Team 5 · Business 15
 // people with a calendar, owner included, counted as active staff
 // calendars. Prices unchanged. At the cap, adding a person stops
 // with an upgrade prompt (see seatLimitMessage + the invite route).
-// Trial length: 14 days (Frantz, 2026-11-26 — was 30). New signups
+// Trial length: 14 days (Frantz, 2026-11-26: was 30). New signups
 // only; existing businesses keep the trial_ends_at they already have.
 // Change prices HERE and every surface (settings UI, gating, checkout)
 // follows. Stripe price IDs live in env (see src/lib/stripe.ts).
@@ -26,7 +26,7 @@ export interface Plan {
   monthlyCents: number;
   staffLimit: number;
   blurb: string;
-  /** Concrete, checkable card bullets — only what the product delivers. */
+  /** Concrete, checkable card bullets: only what the product delivers. */
   features: string[];
 }
 
@@ -36,7 +36,7 @@ export const PLANS: Plan[] = [
     name: "Solo",
     monthlyCents: 2999,
     staffLimit: 1,
-    blurb: "For a one-person shop that runs on appointments.",
+    blurb: "For a one person shop that runs on appointments.",
     features: [
       "1 team member",
       "Booking page",
@@ -89,7 +89,7 @@ export function nextPlan(plan: Plan): Plan | null {
 
 /**
  * The at-the-cap sentence (Frantz's wording, 2026-11-26): name the
- * current plan's cover, then the upgrade — or, on Business, just the
+ * current plan's cover, then the upgrade: or, on Business, just the
  * cover. Shown when adding a person would pass the plan's limit.
  */
 export function seatLimitMessage(plan: Plan): string {
@@ -113,7 +113,7 @@ export function formatPlanPrice(cents: number): string {
 }
 
 // ---------------------------------------------------------------------------
-// Billing state — decides whether a business's public booking page is live.
+// Billing state: decides whether a business's public booking page is live.
 //   • Stripe subscription active/trialing            → live
 //   • No subscription yet, still inside free trial   → live
 //   • Subscription cancelled / past_due / unpaid     → live for a 3-day

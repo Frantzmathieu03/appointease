@@ -6,11 +6,11 @@ import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { formatServicePrice, visitTypeLabel, type PriceType, type Service } from "@/lib/types";
 
 // Services, kept simple (Frantz, 2026-11-25): the add form asks for a
-// name and how long it takes, plus — per his business page plan
-// (2026-11-26) — ONE optional price row: how the price shows on the
+// name and how long it takes, plus: per his business page plan
+// (2026-11-26): ONE optional price row: how the price shows on the
 // public page (no price / exact / starts at / free) and the dollar
 // amount when there is one. The attached form, where it happens, and
-// who offers it are still NOT edited here — those columns and any
+// who offers it are still NOT edited here: those columns and any
 // values already saved stay exactly as they are, and booking keeps
 // honoring them. The row line shows the saved price words exactly as
 // customers see them.
@@ -44,7 +44,7 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
     setMsg("");
     const supabase = createBrowserSupabase();
     // The optional price row (business page plan, 2026-11-26): an
-    // exact / starts-at price needs its dollar amount — without one
+    // exact / starts-at price needs its dollar amount: without one
     // the service simply saves with no price shown.
     const dollars = parseFloat(price);
     const priceCents =
@@ -104,7 +104,7 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
   return (
     <div>
       {msg && <p className="small" style={{ margin: "0 0 10px" }}>{msg}</p>}
-      {services.length === 0 && <p className="small">No services yet — add your first one below.</p>}
+      {services.length === 0 && <p className="small">No services yet. Add your first one below.</p>}
       {services.map((s) => (
         <div key={s.id} className="service-row">
           <div>

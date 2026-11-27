@@ -23,8 +23,8 @@ import { categoryLabel } from "@/lib/categories";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 
 // The public business page, rebuilt to Frantz's written page plan +
-// design pictures (2026-11-26): everything centered in a 390–480px
-// column — top-right Log in / Sign up (the page's only auth buttons),
+// design pictures (2026-11-26): everything centered in a 390 to 480px
+// column: top-right Log in / Sign up (the page's only auth buttons),
 // a cover photo with the round logo overlapping it, the name and a
 // quiet "Type · City, ST" line, an open-status pill, the owner's own
 // words, one big Book button, Call / Message / Directions squares,
@@ -92,12 +92,12 @@ export default async function BusinessPage({
     // Join on return for an UNPUBLISHED business (Frantz, 2026-11-25):
     // the preview above serves insiders only, so a brand-new customer
     // returning from sign-up with the join marker is not a member yet
-    // and the fetch misses — the page must not 404 before the join can
+    // and the fetch misses: the page must not 404 before the join can
     // run. Look the business up by slug without the published filter
     // (service-role, minimal fields; RLS hides the row from a new
     // customer), and when it exists and the signed-in user is not the
     // owner, join them and redirect to their customer dashboard
-    // (/<slug>/my) — which now renders for them as a member. A
+    // (/<slug>/my): which now renders for them as a member. A
     // business that truly does not exist still 404s, signed-out
     // returns still 404, and the owner never joins their own business.
     if (join && !isDemoShop(slug) && isSupabaseConfigured()) {
@@ -126,22 +126,22 @@ export default async function BusinessPage({
   const { business, services } = page;
   const tz = business.timezone;
   // The Book button always shows (Frantz, 2026-11-26): a business is
-  // never blocked from taking bookings for having no services yet —
+  // never blocked from taking bookings for having no services yet: 
   // page data supplies the generic default appointment in that case
   // (see lib/default-service), and every business also gets a real
   // default service at creation and by backfill.
   // Demo shops (public examples): labeled as demos, contact rows hidden,
-  // no call/message actions — booking is a safe simulation (see lib/demo).
+  // no call/message actions: booking is a safe simulation (see lib/demo).
   const demoShop = isDemoShop(slug);
 
   // Join on return (per-business account model, Frantz 2026-11-25):
   // the header's Sign up / Sign in buttons on this business's own
   // pages carry the join marker (?join=1) in their return path, so a
   // visitor who just completed sign-up or sign-in through them lands
-  // back here WITH the marker — that deliberate completion is what
+  // back here WITH the marker: that deliberate completion is what
   // joins them to this business, exactly like the booking and
   // message gates. Join, then land them on their own customer
-  // dashboard (/<slug>/my) — after sign-in a customer should see
+  // dashboard (/<slug>/my): after sign-in a customer should see
   // THEIR name and THEIR information, not the business storefront
   // again (Frantz, 2026-11-26). An already-joined member returning
   // through the same buttons lands there too. A plain page view (no
@@ -168,7 +168,7 @@ export default async function BusinessPage({
 
   // The top-right auth row (the plan replaces the old slim header on
   // this page): "My dashboard" for anyone signed in with a home at
-  // this business — the OWNER dashboard for the owner and active
+  // this business: the OWNER dashboard for the owner and active
   // team members, the customer dashboard for a joined customer (the
   // exact rule BusinessHeader applies on the book / message / my
   // surfaces, Frantz 2026-11-26). Demo shops keep their sample
@@ -228,7 +228,7 @@ export default async function BusinessPage({
 
   // Billing gate: a business whose trial ended with no active subscription
   // (or whose subscription lapsed past its grace window) shows a paused
-  // notice instead of the booking page. Nothing is deleted — existing
+  // notice instead of the booking page. Nothing is deleted: existing
   // appointments stay manageable and the owner dashboard stays open.
   if (!getBillingState(business).bookingLive) {
     return (
@@ -261,7 +261,7 @@ export default async function BusinessPage({
 
   // Per-business accounts (Frantz, 2026-11-25): merely VIEWING this
   // page does not join anyone to the business. Being signed in to
-  // AppointEase does not make you a client of this business — the
+  // AppointEase does not make you a client of this business: the
   // membership starts at the deliberate join steps: the booking
   // account step, the message join step, or opening the customer's
   // dashboard for this business. That is what lets the page show
@@ -272,7 +272,7 @@ export default async function BusinessPage({
   const status = openStatus(page.availability, tz);
 
   // If the signed-in customer has a next appointment here, it sits on
-  // the page — with Reschedule / Cancel one tap away (owner spec).
+  // the page: with Reschedule / Cancel one tap away (owner spec).
   let nextAppt: { starts_at: string; manage_token: string; serviceName: string; confirmationCode: string | null } | null = null;
   if (!page.demoMode && !demoShop && signedInUser) {
     const supabase = await createServerSupabase();
@@ -330,18 +330,18 @@ export default async function BusinessPage({
 
       {page.demoMode && !demoShop && (
         <div className="notice" style={{ marginBottom: 14 }}>
-          Demo business — running on sample data until the live database is connected.
+          Demo business. Running on sample data until the live database is connected.
         </div>
       )}
       {demoShop && (
         <div className="notice" role="note" style={{ marginBottom: 14 }}>
-          <strong>Demo shop</strong> — this is a live demo of an AppointEase
+          <strong>Demo shop.</strong> This is a live demo of an AppointEase
           booking page. Try booking, nothing is real: no appointment is
           saved and no messages are sent.
         </div>
       )}
 
-      {/* Cover photo — its own image (businesses.cover_url); with no
+      {/* Cover photo: its own image (businesses.cover_url); with no
           cover set, a plain soft-green block of the same size. */}
       <div className="bp-cover-wrap">
         <div className="bp-cover">
@@ -370,7 +370,7 @@ export default async function BusinessPage({
         </div>
       )}
 
-      {/* Open status pill — hidden when the business has no hours. */}
+      {/* Open status pill: hidden when the business has no hours. */}
       {status && (
         <div className="bp-status">
           <span className="bp-pill">
@@ -380,7 +380,7 @@ export default async function BusinessPage({
         </div>
       )}
 
-      {/* The owner's own words — one centered paragraph, no card. */}
+      {/* The owner's own words: one centered paragraph, no card. */}
       {business.description?.trim() && (
         <p className="bp-about">{business.description.trim()}</p>
       )}
@@ -389,7 +389,7 @@ export default async function BusinessPage({
         <section className="bp-card bp-next">
           <p className="eyebrow" style={{ margin: "0 0 6px" }}>Your next appointment</p>
           <p className="bp-next-when">
-            {nextAppt.serviceName} — {formatDateInZone(new Date(nextAppt.starts_at), tz)} at{" "}
+            {nextAppt.serviceName} · {formatDateInZone(new Date(nextAppt.starts_at), tz)} at{" "}
             {formatTimeInZone(new Date(nextAppt.starts_at), tz)}
           </p>
           {nextAppt.confirmationCode && (
@@ -404,7 +404,7 @@ export default async function BusinessPage({
         </section>
       )}
 
-      {/* The one big Book button — always shown, no matter how many
+      {/* The one big Book button: always shown, no matter how many
           services the business has added (Frantz, 2026-11-26). The
           booking page runs its account/join steps from here. */}
       <Link className="bp-book" href={`/${slug}/book`}>
@@ -441,7 +441,7 @@ export default async function BusinessPage({
         </div>
       )}
 
-      {/* Photos — the whole card is hidden when the owner has none. */}
+      {/* Photos: the whole card is hidden when the owner has none. */}
       {page.photos.length > 0 && (
         <section className="bp-card">
           <h2 className="bp-card-title">{business.gallery_title?.trim() || "Our work"}</h2>
