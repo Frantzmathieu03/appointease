@@ -9,6 +9,14 @@ import { BUSINESS_TYPES } from "@/lib/owner-shared";
 import { CATEGORIES, DEFAULT_CATEGORY } from "@/lib/categories";
 import { standardServiceNames, DEFAULT_SERVICE_MINUTES } from "@/lib/default-service";
 
+// Top level paths that are real AppointEase pages or system routes:
+// a business link can never take one of these names.
+const RESERVED_SLUGS = new Set([
+  "owner", "login", "signup", "explore", "pricing", "about", "terms",
+  "privacy", "contact", "admin", "api", "my-appointments", "auth",
+  "manage", "set-password", "robots.txt", "sitemap.xml", "favicon.ico",
+]);
+
 /**
  * Creates the owner's business row with its slug reserved
  * (appointease.io/<slug>). Slug collisions get a numeric suffix.
@@ -39,8 +47,13 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
       return;
     }
     const base = slugify(name) || "my-business";
+    // Reserved words can never be a business link (fix guide,
+    // 2026-11-27): a shop named "Login" must not take
+    // appointease.io/login and collide with the real page. A reserved
+    // base starts from the first suffix instead.
+    const startAttempt = RESERVED_SLUGS.has(base) ? 1 : 0;
     let created = false;
-    for (let attempt = 0; attempt < 6 && !created; attempt++) {
+    for (let attempt = startAttempt; attempt < 6 && !created; attempt++) {
       const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
       const { error } = await supabase.from("businesses").insert({
         owner_id: user.id,
@@ -107,7 +120,14 @@ export default function CreateBusinessForm({ afterCreate = "/owner/setup" }: { a
       </label>
       {name && (
         <p className="small" style={{ marginTop: -8, marginBottom: 12 }}>
-          Your link: <strong>appointease.io/{slugify(name) || "yourshop"}</strong>
+          Your link:{" "}
+          <strong>
+            appointease.io/
+            {(() => {
+              const b = slugify(name) || "yourshop";
+              return RESERVED_SLUGS.has(b) ? `${b}-2` : b;
+            })()}
+          </strong>
         </p>
       )}
       <label className="field">

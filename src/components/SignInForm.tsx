@@ -43,7 +43,7 @@ export default function SignInForm({
     const supabase = createBrowserSupabase();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setError("That email and password did not match. Try again, or create an account below.");
+      setError("That email and password did not match. Try again or reset your password.");
       setBusy(false);
       return;
     }

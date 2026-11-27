@@ -15,7 +15,9 @@ export default function ContactPage() {
           <h1 style={{ fontSize: "clamp(30px, 4.6vw, 42px)" }}>Talk to a human</h1>
           <p className="lede">
             Questions about your booking page, a booking you made, or anything
-            else, send us a message and we&apos;ll get back to you.
+            else, send us a message and we&apos;ll get back to you. We answer
+            every message within one business day, Monday to Friday, 9 AM to
+            6 PM Eastern.
           </p>
         </div>
 

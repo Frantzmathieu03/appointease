@@ -80,11 +80,12 @@ export default async function DashboardSettingsPage() {
       <div className="card">
         <h2>Reminder schedule</h2>
         <p className="small" style={{ margin: 0 }}>
-          Every confirmed appointment gets a confirmation right away, then a
-          reminder 24 hours before and another 2 hours before, by text
-          message and email at the same time (when the booking is made far
-          enough ahead). Every reminder carries the customer&apos;s secure
-          link to reschedule or cancel.
+          Every confirmed appointment gets a confirmation email right away,
+          then a reminder email 24 hours before and another 2 hours before
+          (when the booking is made far enough ahead). Every reminder
+          carries the customer&apos;s secure link to reschedule or cancel.
+          Text reminders are not on yet. When they are, clients who opted
+          in will get these by text too.
         </p>
       </div>
 
@@ -135,7 +136,7 @@ export default async function DashboardSettingsPage() {
 
       <div className="card" id="services">
         <h2>Services</h2>
-        <ServicesManager businessId={business.id} />
+        <ServicesManager businessId={business.id} category={business.category} />
       </div>
 
       <div className="card">

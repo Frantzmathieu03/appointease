@@ -52,6 +52,26 @@ export async function POST(req: NextRequest) {
         { status: 502 }
       );
     }
+    // Confirmation copy to the submitter (fix guide, 2026-11-27):
+    // best effort only. The message itself is already delivered, so
+    // a failed confirmation never fails the request.
+    try {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from,
+          to: email,
+          subject: "We got your message · AppointEase",
+          text: `Hi ${name},\n\nThanks, we got your message. We answer every message within one business day, Monday to Friday, 9 AM to 6 PM Eastern.\n\nYour message:\n${message}\n\nAppointEase\n`,
+        }),
+      });
+    } catch {
+      // Best effort: ignore.
+    }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(

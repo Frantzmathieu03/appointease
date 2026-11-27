@@ -317,11 +317,12 @@ export default async function BusinessPage({
     return [addr];
   })();
 
-  // The three squares. Demo shops keep their behavior: no Call and no
-  // Message (booking there is a simulation), Directions only.
+  // The three squares. Demo shops show Call and Message too when they
+  // have a phone (Frantz, 2026-11-27): the demo page should look and
+  // read like a real shop's page. Demo writes stay simulations.
   const squares: ("call" | "message" | "directions")[] = [];
-  if (business.phone && !demoShop) squares.push("call");
-  if (!demoShop && !page.demoMode) squares.push("message");
+  if (business.phone) squares.push("call");
+  if (!page.demoMode) squares.push("message");
   if (business.address) squares.push("directions");
 
   return (

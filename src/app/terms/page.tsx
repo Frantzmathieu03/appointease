@@ -11,7 +11,7 @@ export default function TermsPage() {
     <main className="legal">
       <p className="eyebrow">Legal</p>
       <h1>Terms of Service</h1>
-      <p className="legal-updated">Effective November 24, 2026</p>
+      <p className="legal-updated">Effective November 27, 2026</p>
 
       <p>
         Welcome to AppointEase. AppointEase provides an online booking platform
@@ -47,19 +47,26 @@ export default function TermsPage() {
         <li>Businesses subscribe to a paid plan based on team size. Every plan begins with a 14-day free trial; no payment card is required to start the trial.</li>
         <li>If a business does not subscribe when its trial ends, its public booking page pauses. Account data is not deleted, and the page goes live again when a subscription is active.</li>
         <li>Paid subscriptions renew monthly until cancelled. You can cancel at any time from your billing settings; cancellation takes effect at the end of the current billing period.</li>
-        <li>Payments are processed by our payment provider. AppointEase does not store full payment card numbers.</li>
+        <li>Subscription payments are processed by Stripe. AppointEase does not store full payment card numbers. AppointEase does not process payments between you and your clients.</li>
         <li>Customers never pay AppointEase to book an appointment. Any price for a service is set by, and paid to, the business.</li>
       </ul>
 
-      <h2>4. Bookings, reminders and messages</h2>
+      <h2>4. Plans, team size and refunds</h2>
       <ul>
-        <li>When a customer books, AppointEase sends a confirmation and reminders before the appointment by text message and email at booking, 24 hours before, and 2 hours before (when the booking is made far enough ahead), each with a secure link to reschedule or cancel.</li>
-        <li>By providing a phone number and email address when booking, the customer agrees to receive these transactional messages about their appointments. Message and data rates may apply. Reply STOP to a text to stop text reminders for that number; appointment emails can be managed through the business.</li>
+        <li><strong>Plans and team size.</strong> Solo covers 1 person, Team covers 2 to 5 people, and Business covers 6 to 15 people. If your team grows past your plan, adding a person moves you to the next plan up, and the difference is charged on a prorated basis for the rest of the current billing period. Moving to a smaller plan takes effect at the next billing date.</li>
+        <li><strong>Paused pages.</strong> When a trial ends without a subscription, or a subscription lapses, the public booking page pauses and new bookings stop. Appointments already booked stay in your account, and their reminders still go out. Subscribing again restores the page as it was.</li>
+        <li><strong>Refunds.</strong> You can cancel your plan at any time from the Billing page in your dashboard. Your plan stays active until the end of the period you paid for. We do not give partial refunds for unused time, except where the law requires it. If you were charged by mistake, email support@appointease.io within 30 days and we will fix it.</li>
+      </ul>
+
+      <h2>5. Bookings, reminders and messages</h2>
+      <ul>
+        <li>When a customer books, AppointEase sends a confirmation email at booking, then reminder emails 24 hours before and 2 hours before the appointment (when the booking is made far enough ahead), each with a secure link to reschedule or cancel.</li>
+        <li>Text message reminders are not on yet. When texting turns on, customers who opted in will also get these messages by text: a confirmation and reminders 24 hours and 2 hours before each appointment, and replies from the business. Texts are only about appointments; AppointEase never sends marketing texts. Message and data rates may apply. Reply STOP to stop texts for that number, and HELP for help. Appointment emails can be managed through the business.</li>
         <li>Businesses are responsible for honoring appointments booked through their page, for the accuracy of their services, prices and hours, and for responding to customer messages.</li>
         <li>Customers are responsible for showing up on time or using the reschedule/cancel link as early as possible when plans change.</li>
       </ul>
 
-      <h2>5. Acceptable use</h2>
+      <h2>6. Acceptable use</h2>
       <p>You agree not to:</p>
       <ul>
         <li>Use AppointEase for any unlawful purpose, or to book, offer, or advertise unlawful services.</li>
@@ -69,7 +76,7 @@ export default function TermsPage() {
         <li>Scrape, copy, or resell the platform or its data except as permitted by law.</li>
       </ul>
 
-      <h2>6. Your content</h2>
+      <h2>7. Your content</h2>
       <p>
         Businesses keep ownership of the content they add: business names,
         descriptions, photos, services and prices. By adding content, you give
@@ -77,15 +84,17 @@ export default function TermsPage() {
         customer discovery listings so customers can find and book with you.
       </p>
 
-      <h2>7. Third-party services</h2>
+      <h2>8. Third-party services</h2>
       <p>
-        AppointEase relies on third-party providers for hosting, payments,
-        email and text delivery. Your use of payment features is also subject
-        to the payment provider&apos;s terms. AppointEase is not responsible
-        for services provided by the businesses listed on the platform.
+        AppointEase relies on third-party providers: Vercel for hosting,
+        Supabase for the database and accounts, Resend for email delivery,
+        Twilio for text messaging, and Stripe for subscription payments.
+        Your use of subscription payments is also subject to Stripe&apos;s
+        terms. AppointEase is not responsible for services provided by the
+        businesses listed on the platform.
       </p>
 
-      <h2>8. Disclaimers</h2>
+      <h2>9. Disclaimers</h2>
       <p>
         AppointEase is provided &quot;as is&quot; and &quot;as available.&quot;
         We work to keep the platform reliable, but we do not guarantee that it
@@ -93,7 +102,7 @@ export default function TermsPage() {
         delivered by carriers or email providers outside our control.
       </p>
 
-      <h2>9. Limitation of liability</h2>
+      <h2>10. Limitation of liability</h2>
       <p>
         To the fullest extent permitted by law, AppointEase&apos;s total
         liability for any claim arising from use of the platform is limited to
@@ -103,14 +112,17 @@ export default function TermsPage() {
         omissions of businesses or customers using the platform.
       </p>
 
-      <h2>10. Termination</h2>
+      <h2>11. Termination</h2>
       <p>
-        You may stop using AppointEase and close your account at any time. We
-        may suspend or terminate an account that violates these terms, with
-        notice where reasonably possible.
+        You may stop using AppointEase at any time, and you can delete your
+        account from your Settings (business accounts) or your account area
+        (customer accounts). Deletion is scheduled 48 hours ahead, and you
+        can cancel it any time in that window; after that the account is
+        deleted. We may suspend or terminate an account that violates these
+        terms, with notice where reasonably possible.
       </p>
 
-      <h2>11. Changes to these terms</h2>
+      <h2>12. Changes to these terms</h2>
       <p>
         We may update these terms from time to time. When we make material
         changes, we will update the effective date above and, where practical,
@@ -118,13 +130,13 @@ export default function TermsPage() {
         changes take effect means you accept the updated terms.
       </p>
 
-      <h2>12. Governing law</h2>
+      <h2>13. Governing law</h2>
       <p>
         These terms are governed by the laws of the Commonwealth of
         Massachusetts, without regard to its conflict-of-laws rules.
       </p>
 
-      <h2>13. Contact</h2>
+      <h2>14. Contact</h2>
       <p>
         Questions about these terms? Email us at{" "}
         <a href="mailto:support@appointease.io">support@appointease.io</a>{" "}

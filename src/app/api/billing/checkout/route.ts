@@ -94,6 +94,9 @@ export async function POST(req: NextRequest) {
   const trialEndSecs = Math.floor(new Date(business.trial_ends_at).getTime() / 1000);
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
+    // Promo codes saved at signup are redeemed here (fix guide,
+    // 2026-11-27): the checkout page offers the code field.
+    allow_promotion_codes: true,
     customer: customerId,
     line_items: [{ price, quantity: 1 }],
     client_reference_id: business.id,

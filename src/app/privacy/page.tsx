@@ -11,7 +11,7 @@ export default function PrivacyPage() {
     <main className="legal">
       <p className="eyebrow">Legal</p>
       <h1>Privacy Policy</h1>
-      <p className="legal-updated">Effective November 24, 2026</p>
+      <p className="legal-updated">Effective November 27, 2026</p>
 
       <p>
         This policy explains what information AppointEase collects, how we use
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
       <h2>3. How we use information</h2>
       <ul>
         <li>To provide the service: create and display booking pages, take bookings, and show each business only its own customers, appointments and messages.</li>
-        <li>To send appointment confirmations and reminders by text message and email (at booking, 24 hours before, and 2 hours before, when the booking is made far enough ahead), including secure reschedule/cancel links.</li>
+        <li>To send appointment confirmations and reminders by email (at booking, 24 hours before, and 2 hours before, when the booking is made far enough ahead), including secure reschedule/cancel links. When text messaging turns on, the same messages go by text to customers who opted in (see the Text messages section).</li>
         <li>To let businesses and customers message each other, and to notify you about new messages.</li>
         <li>To process subscriptions, prevent fraud and abuse, and keep the platform secure.</li>
         <li>To respond to support requests and improve the service.</li>
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
       <h2>4. How we share information</h2>
       <ul>
         <li><strong>With the business you book.</strong> Your name, contact details, booking details and messages are shared with that business so it can serve you.</li>
-        <li><strong>With service providers.</strong> We use trusted providers to run AppointEase, for example hosting and database, payment processing, email delivery and text messaging. They receive only the information needed to perform their service.</li>
+        <li><strong>With service providers.</strong> We use trusted providers to run AppointEase: Vercel for hosting, Supabase for the database and accounts, Resend for email delivery, Twilio for text messaging, and Stripe for subscription payments. They receive only the information needed to perform their service.</li>
         <li><strong>For legal reasons.</strong> We may disclose information if required by law, court order, or to protect the rights and safety of our users and the platform.</li>
         <li><strong>Never sold.</strong> We do not sell your personal information, and we do not share it for third-party advertising.</li>
       </ul>
@@ -84,30 +84,45 @@ export default function PrivacyPage() {
         account is active and as needed to provide the service, resolve
         disputes, and meet legal obligations. When a subscription lapses, data
         is retained so the business can reactivate without starting over.
+        When you delete your account (see the next section), your account and
+        personal information are removed from the live service once the 48
+        hour window passes; some records may be kept where the law requires.
       </p>
 
-      <h2>8. Your rights and choices</h2>
+      <h2>8. Text messages</h2>
+      <p>
+        Text messaging is not on yet. When it turns on, customers who opted
+        in will get appointment texts only: a confirmation when they book,
+        and reminders 24 hours and 2 hours before the appointment, plus
+        replies from the business they booked with. Consent is given on the
+        business&apos;s page when joining or booking. Reply STOP to stop
+        texts, and HELP for help. Message and data rates may apply.
+        AppointEase never sends marketing texts, and phone numbers are never
+        sold or shared for marketing.
+      </p>
+
+      <h2>9. Your rights and choices</h2>
       <ul>
         <li><strong>Access and correction.</strong> You can view and update your account and booking information in the app, or contact us for help.</li>
-        <li><strong>Deletion.</strong> You can ask us to delete your account and personal information; some records may be kept where the law requires.</li>
-        <li><strong>Text messages.</strong> Reply STOP to stop appointment text reminders for your number. Essential booking emails can be managed by contacting us or the business.</li>
+        <li><strong>Deletion.</strong> You can delete your account and personal information yourself, in the app: business owners from Settings, customers from their account area on the business&apos;s page. Deletion is scheduled 48 hours ahead, and you can cancel it any time in that window. After that, the account is deleted; some records may be kept where the law requires.</li>
+        <li><strong>Text messages.</strong> Once texting is on, reply STOP to stop appointment texts for your number, and HELP for help. Essential booking emails can be managed by contacting us or the business.</li>
         <li><strong>Marketing.</strong> We do not send marketing texts. If we ever offer optional product emails, you will be able to unsubscribe at any time.</li>
       </ul>
 
-      <h2>9. Children</h2>
+      <h2>10. Children</h2>
       <p>
         AppointEase is intended for adults and businesses. We do not knowingly
         collect personal information from children under 13.
       </p>
 
-      <h2>10. Changes to this policy</h2>
+      <h2>11. Changes to this policy</h2>
       <p>
         We may update this policy from time to time. When we make material
         changes, we will update the effective date above and, where practical,
         notify account holders by email.
       </p>
 
-      <h2>11. Contact</h2>
+      <h2>12. Contact</h2>
       <p>
         Questions about privacy? Email us at{" "}
         <a href="mailto:support@appointease.io">support@appointease.io</a>{" "}

@@ -14,7 +14,7 @@ import AppleSignInButton from "@/components/AppleSignInButton";
 // the dashboard picks it up there.
 export default function OwnerSignupPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", promo: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [phase, setPhase] = useState<"account" | "business" | "checkEmail">("account");
@@ -45,7 +45,17 @@ export default function OwnerSignupPage() {
       email: form.email,
       password: form.password,
       options: {
-        data: { full_name: form.name },
+        // A promo code typed here is saved on the account; the code
+        // itself is redeemed at Stripe checkout, where promotion
+        // codes are turned on. A ?ref= on the signup link is saved
+        // the same way so a referring partner can be credited.
+        data: {
+          full_name: form.name,
+          ...(form.promo.trim() ? { promo_code: form.promo.trim() } : {}),
+          ...(typeof window !== "undefined" && new URLSearchParams(window.location.search).get("ref")
+            ? { referral_ref: new URLSearchParams(window.location.search).get("ref") }
+            : {}),
+        },
         // Confirming the email lands the owner straight in "Name
         // your business" (/owner/setup shows exactly that when no
         // business exists yet): no confirm-then-sign-in-again loop
@@ -54,7 +64,13 @@ export default function OwnerSignupPage() {
       },
     });
     if (error) {
-      setError(error.message);
+      // Plain words for the common case (fix guide, 2026-11-27): an
+      // email that already has an account points at log in.
+      if (/already/i.test(error.message)) {
+        setError("That email already has an account. Log in instead.");
+      } else {
+        setError(error.message);
+      }
       setBusy(false);
       return;
     }
@@ -89,7 +105,8 @@ export default function OwnerSignupPage() {
       <p className="eyebrow center">For businesses</p>
       <h1 className="center" style={{ fontSize: 30 }}>Create your booking page</h1>
       <p className="lede center">
-        14 days free, no card required. Your page link is reserved the moment
+        14 days free, no card needed. After that, plans start at
+        $29.99/month. Cancel anytime. Your page link is reserved the moment
         you name your business.
       </p>
 
@@ -116,10 +133,19 @@ export default function OwnerSignupPage() {
               <span>Password</span>
               <input type="password" required minLength={8} value={form.password} onChange={set("password")} autoComplete="new-password" />
             </label>
+            <p className="small" style={{ marginTop: -6 }}>At least 8 characters.</p>
+            <label className="field">
+              <span>Promo code (optional)</span>
+              <input value={form.promo} onChange={set("promo")} autoComplete="off" placeholder="Have a promo code?" />
+            </label>
             <button className="btn btn-block" type="submit" disabled={busy}>
               {busy ? "Creating…" : "Continue"}
             </button>
           </form>
+          <p className="small center" style={{ marginTop: 14 }}>
+            By continuing, you agree to our <Link href="/terms">Terms of Service</Link> and{" "}
+            <Link href="/privacy">Privacy Policy</Link>.
+          </p>
           <p className="small center" style={{ marginTop: 14 }}>
             Already have an account? <Link href="/owner">Log in</Link>
           </p>

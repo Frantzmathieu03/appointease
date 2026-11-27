@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { formatServicePrice, visitTypeLabel, type PriceType, type Service } from "@/lib/types";
+import { normalizedServiceName, serviceTemplatesFor } from "@/lib/service-templates";
 
 // Services, kept simple (Frantz, 2026-11-25): the add form asks for a
 // name and how long it takes, plus: per his business page plan
@@ -14,7 +15,7 @@ import { formatServicePrice, visitTypeLabel, type PriceType, type Service } from
 // values already saved stay exactly as they are, and booking keeps
 // honoring them. The row line shows the saved price words exactly as
 // customers see them.
-export default function ServicesManager({ businessId }: { businessId: string }) {
+export default function ServicesManager({ businessId, category }: { businessId: string; category?: string | null }) {
   const router = useRouter();
   const [services, setServices] = useState<Service[]>([]);
   const [form, setForm] = useState({ name: "", duration: "30" });
@@ -38,8 +39,44 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
     load();
   }, [load]);
 
+  // Near duplicate warning (fix guide, 2026-11-27): a name that
+  // matches one already on the list, apart from case, spacing or a
+  // trailing "s", is flagged instead of quietly added twice.
+  function nearDuplicate(name: string): Service | undefined {
+    const wanted = normalizedServiceName(name);
+    return services.find((s) => normalizedServiceName(s.name) === wanted);
+  }
+
+  async function addTemplate(name: string, durationMinutes: number) {
+    const dupe = nearDuplicate(name);
+    if (dupe) {
+      setMsg(`"${dupe.name}" is already on your list.`);
+      return;
+    }
+    setBusy(true);
+    setMsg("");
+    const supabase = createBrowserSupabase();
+    const { error } = await supabase
+      .from("services")
+      .insert({ business_id: businessId, name, duration_minutes: durationMinutes });
+    setBusy(false);
+    if (error) {
+      console.error("Service template add failed", error);
+      setMsg("That service couldn't be added. Please try again.");
+      return;
+    }
+    setMsg(`Added "${name}". Set its price in the list below if you want one shown.`);
+    load();
+    router.refresh();
+  }
+
   async function add(e: React.FormEvent) {
     e.preventDefault();
+    const dupe = nearDuplicate(form.name);
+    if (dupe) {
+      setMsg(`Heads up: this looks a lot like "${dupe.name}", which is already on your list. Pick a different name if it is a different service.`);
+      return;
+    }
     setBusy(true);
     setMsg("");
     const supabase = createBrowserSupabase();
@@ -120,6 +157,27 @@ export default function ServicesManager({ businessId }: { businessId: string }) 
           </button>
         </div>
       ))}
+      <div style={{ marginTop: 18 }}>
+        <p style={{ fontWeight: 700, margin: "0 0 4px" }}>Quick add</p>
+        <p className="small" style={{ margin: "0 0 10px" }}>
+          Common services for your kind of business. Tap one to add it.
+          You can set its price after.
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {serviceTemplatesFor(category).map((t) => (
+            <button
+              key={t.name}
+              type="button"
+              className="btn"
+              style={{ padding: "7px 13px" }}
+              disabled={busy}
+              onClick={() => addTemplate(t.name, t.durationMinutes)}
+            >
+              + {t.name} · {t.durationMinutes} min
+            </button>
+          ))}
+        </div>
+      </div>
       <form onSubmit={add} style={{ marginTop: 14 }}>
         <label className="field">
           <span>Service name</span>

@@ -130,6 +130,12 @@ export default function HoursManager({
           )}
         </div>
       ))}
+      {days.slice(1, 6).every((d) => d.closed) && (
+        <p className="small" role="note" style={{ marginTop: 12, fontWeight: 600 }}>
+          Heads up: you are closed every weekday, so customers will almost
+          never find a time. Open at least one weekday if you can.
+        </p>
+      )}
       <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={save} disabled={busy}>
         {busy ? "Saving…" : saved ? "Saved ✓" : "Save hours"}
       </button>

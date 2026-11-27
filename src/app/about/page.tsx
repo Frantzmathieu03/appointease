@@ -15,7 +15,7 @@ export default function AboutPage() {
         <div className="section-head" style={{ paddingTop: 42 }}>
           <p className="eyebrow">About</p>
           <h1 style={{ fontSize: "clamp(30px, 4.6vw, 42px)" }}>
-            Hi, I&apos;m Frantz. I built AppointEase, and I run it, from Boston, Massachusetts.
+            Hi, I&apos;m Frantz Mathieu, founder of AppointEase.
           </h1>
         </div>
 
@@ -46,8 +46,8 @@ export default function AboutPage() {
               So I built the fix I wished they had. AppointEase gives a
               business its own booking page. Customers pick a service and a
               time in a few taps, and then confirmations and reminders
-              go out automatically, by text and email at the same time:
-              right away, 24 hours before, and 2 hours before (when the
+              go out automatically, by email: right away, 24 hours
+              before, and 2 hours before (when the
               booking is made far enough ahead), each with a link to
               reschedule or cancel. Fewer empty chairs, less time on
               the phone, and a page that looks like your business, not a

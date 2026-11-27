@@ -40,7 +40,7 @@ function ClaimAccountCard({ email, slug }: { email: string; slug: string }) {
     <div className="card center" style={{ marginTop: 16 }}>
       <h2>Your booking is saved</h2>
       <p className="lede">
-        The link in your confirmation text and email always works to change
+        The link in your confirmation email always works to change
         or cancel, no password needed. Want a password too, so you can sign
         in and see your appointments with this business in one place?
       </p>
@@ -424,8 +424,9 @@ export default function BookingFlow({
         <div className="card">
           <h2>Here&apos;s the text your customer would get</h2>
           <p className="small" style={{ marginTop: 0 }}>
-            Every real booking sends these three messages, by text and email
-            at the same time. Shown here with your sample details; in the demo
+            Every real booking sends these three messages by email. Text
+            reminders join them once texting is on, for customers who
+            opted in. Shown here with your sample details; in the demo
             they are never actually sent.
           </p>
           {previews.map((p) => (
@@ -739,6 +740,12 @@ export default function BookingFlow({
               <span>Mobile number</span>
               <input type="tel" required value={form.phone} onChange={set("phone")} autoComplete="tel" />
             </label>
+            <p className="small" style={{ fontWeight: 400, marginTop: -6 }}>
+              Reminders go by email today. When texting turns on, this number
+              gets appointment texts only if you opted in: a confirmation and
+              up to 2 reminders per booking. Msg and data rates may apply.
+              Reply STOP to opt out, HELP for help.
+            </p>
             <label className="field">
               <span>Email</span>
               <input type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
@@ -838,7 +845,7 @@ export default function BookingFlow({
                 </p>
                 {cancelNote && <p className="small c3-info-box">{cancelNote}</p>}
                 <p className="c3-info-box" style={{ fontWeight: 600 }}>
-                  Nothing to pay online. You pay at the office.
+                  You will pay at {businessName}. Nothing to pay online.
                 </p>
               </>
             )}

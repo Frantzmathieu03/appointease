@@ -143,7 +143,7 @@ export default function SiteChrome({
               </a>
             ))}
           </div>
-          <div className="footer-bottom">© 2026 AppointEase · support@appointease.io</div>
+          <div className="footer-bottom">© 2026 AppointEase · <a href="mailto:support@appointease.io">support@appointease.io</a></div>
         </div>
       </footer>
     </>

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import SignInForm from "@/components/SignInForm";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getOwnerBusiness } from "@/lib/owner";
@@ -31,6 +32,9 @@ export default async function OwnerSignInPage() {
         signupHref="/owner/signup"
         signupText="New business? Create your booking page"
       />
+      <p className="small center" style={{ marginTop: 14 }}>
+        Booking an appointment? <Link href="/login">Log in here</Link>
+      </p>
     </main>
   );
 }

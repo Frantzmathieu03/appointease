@@ -64,7 +64,11 @@ export default function SignupForm({
       },
     });
     if (error) {
-      setError(error.message);
+      if (/already/i.test(error.message)) {
+        setError("That email already has an account. Log in instead.");
+      } else {
+        setError(error.message);
+      }
       setBusy(false);
       return;
     }
@@ -106,7 +110,7 @@ export default function SignupForm({
       <p className="lede" style={{ marginBottom: 16 }}>
         {businessName
           ? `Your account is only with ${businessName}.`
-          : "Your account is only with this business."}
+          : "Find the business you want to book on their AppointEase link."}
       </p>
       {error && <div className="error">{error}</div>}
       <button className="btn btn-primary btn-block btn-google" type="button" onClick={google}>
@@ -125,17 +129,26 @@ export default function SignupForm({
           <input type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
         </label>
         <label className="field">
-          <span>Phone (for text reminders)</span>
+          <span>Phone (for reminders)</span>
           <input type="tel" required value={form.phone} onChange={set("phone")} autoComplete="tel" />
         </label>
+        <p className="small" style={{ marginTop: -6 }}>
+          Reminders go by email today. When texting turns on, appointment
+          texts go to this number only if you opt in.
+        </p>
         <label className="field">
           <span>Password</span>
           <input type="password" required minLength={8} value={form.password} onChange={set("password")} autoComplete="new-password" />
         </label>
+        <p className="small" style={{ marginTop: -6 }}>At least 8 characters.</p>
         <button className="btn btn-block" type="submit" disabled={busy}>
           {busy ? "Creating…" : "Create account"}
         </button>
       </form>
+      <p className="small center" style={{ marginTop: 14 }}>
+        By continuing, you agree to our <Link href="/terms">Terms of Service</Link> and{" "}
+        <Link href="/privacy">Privacy Policy</Link>.
+      </p>
       <p className="small center" style={{ marginTop: 14 }}>
         Already have an account?{" "}
         <Link href={nextPath !== "/my-appointments" ? `/login?next=${encodeURIComponent(nextPath)}` : "/login"}>

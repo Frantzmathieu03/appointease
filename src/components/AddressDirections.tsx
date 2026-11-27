@@ -35,9 +35,11 @@ export default function AddressDirections({
   }, []);
 
   const q = encodeURIComponent(address);
+  // Real directions links (fix guide, 2026-11-27): Google dir and
+  // Apple daddr open with the route to the address ready, not a search.
   const maps = [
-    { label: "Google Maps", href: `https://www.google.com/maps/search/?api=1&query=${q}` },
-    { label: "Apple Maps", href: `https://maps.apple.com/?q=${q}` },
+    { label: "Google Maps", href: `https://www.google.com/maps/dir/?api=1&destination=${q}` },
+    { label: "Apple Maps", href: `https://maps.apple.com/?daddr=${q}` },
   ];
   if (appleFirst) maps.reverse();
   const options = [

@@ -5,6 +5,7 @@ import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from 
 import { isBusinessMember } from "./profile";
 import { DEMO_AVAILABILITY, DEMO_BUSINESS, DEMO_SERVICES, DEMO_STAFF } from "./demo-data";
 import { orderServicesForDisplay, syntheticStandardServices } from "./default-service";
+import { getBillingState } from "./plans";
 import type {
   Availability,
   Business,
@@ -465,7 +466,7 @@ export async function getPublishedBusinesses(): Promise<{
   }
 
   const supabase = await createServerSupabase();
-  const baseCols = "id, slug, name, address, logo_url";
+  const baseCols = "id, slug, name, address, logo_url, phone, plan, trial_ends_at, subscription_status, subscription_current_period_end, billing_lapsed_at";
   type Row = Record<string, unknown>;
   let rows: Row[] = [];
   // The demo businesses stay published so their demo pages keep working,
@@ -486,6 +487,29 @@ export async function getPublishedBusinesses(): Promise<{
     rows = ((fallback.data ?? []) as Row[]).map((r) => ({ ...r, category: "other" }));
   } else {
     rows = (withCategory.data ?? []) as Row[];
+  }
+
+  // Directory completeness (fix guide, 2026-11-27): Find a Business
+  // lists only real, complete businesses that are open for booking
+  // today: a full street address with a ZIP code, a phone number, at
+  // least one active service with a real price, and a plan or trial
+  // that is live. Test businesses and half finished pages never show.
+  rows = rows.filter((r) => {
+    const address = typeof r.address === "string" ? r.address : "";
+    if (!/\b\d{5}\b/.test(address)) return false;
+    if (typeof r.phone !== "string" || !r.phone.trim()) return false;
+    const billing = getBillingState(r as unknown as Business);
+    return billing.bookingLive;
+  });
+  if (rows.length > 0) {
+    const { data: priced } = await supabase
+      .from("services")
+      .select("business_id")
+      .in("business_id", rows.map((r) => r.id as string))
+      .eq("active", true)
+      .or("and(price_type.eq.exact,price_cents.gt.0),and(price_type.eq.from,price_cents.gt.0),price_type.eq.free");
+    const withPricedService = new Set((priced ?? []).map((s) => s.business_id as string));
+    rows = rows.filter((r) => withPricedService.has(r.id as string));
   }
 
   const ids = rows.map((r) => r.id as string);

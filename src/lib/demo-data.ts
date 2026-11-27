@@ -13,7 +13,7 @@ export const DEMO_BUSINESS: Business = {
   category: "barbershops",
   logo_url: null,
   description: "Walk ins welcome. Book ahead to skip the wait.",
-  address: "25 Main St, Boston, MA",
+  address: "25 Main St, Boston, MA 02129",
   phone: "617-555-0142",
   email: "owner@mainstreetbarber.example",
   timezone: "America/New_York",

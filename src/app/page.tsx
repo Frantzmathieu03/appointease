@@ -27,19 +27,19 @@ const CAT_CARDS = CATEGORIES.filter((c) => c.image !== null).map((c) => ({
  *  with a plain two step label in our own words. */
 const PEOPLE_FLOW: { slug: string; category: string; from: string; to: string }[] = [
   { slug: "barbershops", category: "Barbershops", from: "Booked", to: "Reminded" },
-  { slug: "hair-salons", category: "Hair salons", from: "Messaged", to: "Answered" },
-  { slug: "nail-salons-spas", category: "Nail salons and spas", from: "Booked", to: "Confirmed" },
-  { slug: "law-offices", category: "Law offices", from: "Asked", to: "Booked" },
-  { slug: "dental-offices", category: "Dental offices", from: "Reminded", to: "Arrived" },
-  { slug: "doctors-clinics", category: "Doctors and clinics", from: "Booked", to: "Seen" },
-  { slug: "pet-groomers", category: "Pet groomers", from: "Messaged", to: "Booked" },
-  { slug: "auto-repair", category: "Auto repair", from: "Booked", to: "Ready" },
+  { slug: "hair-salons", category: "Hair Salons", from: "Messaged", to: "Answered" },
+  { slug: "nail-salons-spas", category: "Nail Salons & Spas", from: "Booked", to: "Confirmed" },
+  { slug: "law-offices", category: "Law Offices", from: "Asked", to: "Booked" },
+  { slug: "dental-offices", category: "Dental Offices", from: "Reminded", to: "Arrived" },
+  { slug: "doctors-clinics", category: "Doctors & Clinics", from: "Booked", to: "Seen" },
+  { slug: "pet-groomers", category: "Pet Groomers", from: "Messaged", to: "Booked" },
+  { slug: "auto-repair", category: "Auto Repair", from: "Booked", to: "Ready" },
 ];
 
 const FEATURES: { icon: string; title: string; body: string; dark?: boolean }[] = [
   {
     icon: "🔔",
-    title: "Text + email reminders",
+    title: "Email reminders",
     body: "A confirmation right away, then another 24 hours and 2 hours before, each with links to reschedule or cancel.",
   },
   {
@@ -152,7 +152,7 @@ export default function HomePage() {
           </div>
           <div className="hp-hero-bottom">
             <p className="hp-sub">
-              Your own booking page, automatic text reminders, and every
+              Your own booking page, automatic email reminders, and every
               client&apos;s history in one place, for law offices, barbers,
               salons and every appointment based business.
             </p>
@@ -254,14 +254,14 @@ export default function HomePage() {
             </div>
 
             <div className="hp-scene">
-              <p className="hp-scene-head">Calendar · This week</p>
+              <p className="hp-scene-head">Calendar · December 2026</p>
               <div className="hp-scene-body" aria-hidden="true">
                 <div className="hp-cal-days">
-                  <span>Thu<strong>3</strong></span>
-                  <span className="hp-cal-on">Fri<strong>4</strong></span>
-                  <span>Sat<strong>5</strong></span>
-                  <span>Sun<strong>6</strong></span>
                   <span>Mon<strong>7</strong></span>
+                  <span>Tue<strong>8</strong></span>
+                  <span>Wed<strong>9</strong></span>
+                  <span>Thu<strong>10</strong></span>
+                  <span className="hp-cal-on">Fri<strong>11</strong></span>
                 </div>
                 <div className="hp-cal-slots">
                   <div className="hp-cal-row">
@@ -358,7 +358,7 @@ export default function HomePage() {
             {CAT_CARDS.map((c) => (
               <div key={c.slug} className="hp-cat-card">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={c.img} alt="" loading="lazy" className="hp-cat-img" />
+                <img src={c.img} alt={`${c.label} at work`} loading="lazy" className="hp-cat-img" />
                 <h3>{c.label}</h3>
                 <p>{c.blurb}</p>
               </div>
@@ -595,7 +595,7 @@ export default function HomePage() {
             {PEOPLE_FLOW.map((p) => (
               <figure key={p.slug} className="hp-pc-card">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/images/cats/${p.slug}.jpg`} alt="" loading="lazy" />
+                <img src={`/images/cats/${p.slug}.jpg`} alt={`${p.category} at work`} loading="lazy" />
                 <figcaption>
                   <span className="hp-pc-cat">{p.category}</span>
                   <span className="hp-pc-pair">

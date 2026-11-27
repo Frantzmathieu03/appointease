@@ -78,7 +78,11 @@ export default function CustomerAuth({
       },
     });
     if (error) {
-      setError(error.message);
+      if (/already/i.test(error.message)) {
+        setError("That email already has an account. Log in instead.");
+      } else {
+        setError(error.message);
+      }
       setBusy(false);
       return;
     }
@@ -106,7 +110,7 @@ export default function CustomerAuth({
       password: form.password,
     });
     if (error) {
-      setError("That email and password did not match. Try again, or create an account below.");
+      setError("That email and password did not match. Try again or reset your password.");
       setBusy(false);
       return;
     }
@@ -232,6 +236,7 @@ export default function CustomerAuth({
                 autoComplete="new-password"
               />
             </label>
+            <p className="small" style={{ marginTop: -6 }}>At least 8 characters.</p>
             <label className="c3-consent">
               <input
                 type="checkbox"
@@ -243,6 +248,10 @@ export default function CustomerAuth({
             <button className="btn btn-primary btn-block" type="submit" disabled={busy} style={{ minHeight: 50 }}>
               {busy ? "Creating…" : "Create account"}
             </button>
+            <p className="small center" style={{ marginTop: 12 }}>
+              By continuing, you agree to our <Link href="/terms">Terms of Service</Link> and{" "}
+              <Link href="/privacy">Privacy Policy</Link>.
+            </p>
           </form>
         ) : (
           <form onSubmit={login}>

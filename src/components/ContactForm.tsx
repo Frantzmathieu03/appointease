@@ -42,8 +42,8 @@ export default function ContactForm() {
   if (status === "sent") {
     return (
       <div className="success">
-        Thanks, your message is on its way. We read every message and will
-        reply to the email address you gave us.
+        Thanks, we got your message. We&apos;ll email you within one
+        business day.
       </div>
     );
   }
@@ -52,11 +52,11 @@ export default function ContactForm() {
     <form onSubmit={onSubmit}>
       {status === "error" && <div className="error">{error}</div>}
       <label className="field">
-        <span>Your name</span>
+        <span>Your name *</span>
         <input value={name} onChange={(e) => setName(e.target.value)} required autoComplete="name" placeholder="Jane Smith" />
       </label>
       <label className="field">
-        <span>Email address</span>
+        <span>Email address *</span>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" placeholder="you@example.com" />
       </label>
       <label className="field">
@@ -68,7 +68,7 @@ export default function ContactForm() {
         </select>
       </label>
       <label className="field">
-        <span>Message</span>
+        <span>Message *</span>
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} required placeholder="How can we help?" />
       </label>
       <button type="submit" className="btn btn-primary btn-block" disabled={status === "sending"}>
