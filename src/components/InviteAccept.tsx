@@ -36,7 +36,7 @@ export default function InviteAccept({ token }: { token: string }) {
     <div>
       {error && <div className="error">{error}</div>}
       <button className="btn btn-primary btn-block" onClick={accept} disabled={busy}>
-        {busy ? "Joining…" : "Accept invite"}
+        {busy ? "Joining…" : "Accept the invite"}
       </button>
     </div>
   );

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireBusiness, siteUrl } from "@/lib/owner";
 import { planById, seatLimitMessage } from "@/lib/plans";
 import { sendEmail } from "@/lib/notify";
+import { createAdminSupabase } from "@/lib/supabase";
 
 // POST /api/team/invite — team invites (Owner Dashboard Plan,
 // 2026-11-26). OWNER ONLY: managers see the whole business except
@@ -37,21 +38,54 @@ export async function POST(req: NextRequest) {
   }
 
   const base = siteUrl();
-  const emailInvite = async (to: string, link: string, inviteName: string | null) => {
+  const inviterName =
+    (user.user_metadata?.full_name as string | undefined) ??
+    (user.user_metadata?.name as string | undefined) ??
+    null;
+  const emailInvite = async (
+    to: string,
+    link: string,
+    inviteName: string | null,
+    forRole: string
+  ) => {
+    const roleWords = forRole === "manager" ? "a manager" : "a staff member";
     const res = await sendEmail({
       to,
       subject: `You're invited to join ${business.name} on AppointEase`,
       text: [
         `Hello${inviteName ? ` ${inviteName}` : ""},`,
         "",
-        `${business.name} invited you to join their team on AppointEase.`,
-        "Open this link, sign in with this email address, and you're in:",
+        `${inviterName ? `${inviterName} from ` : ""}${business.name} invited you to join their team on AppointEase as ${roleWords}.`,
+        "Open this link, sign in with this email address, and you're in. You can also decline the invite on that page.",
         "",
         link,
         "",
         "The link works for 7 days. If it expires, ask the business to send a new one.",
       ].join("\n"),
+      html: [
+        `<p>Hello${inviteName ? ` ${inviteName}` : ""},</p>`,
+        `<p>${inviterName ? `${inviterName} from ` : ""}<strong>${business.name}</strong> invited you to join their team on AppointEase as ${roleWords}.</p>`,
+        `<p><a href="${link}" style="display:inline-block;background:#1e4d33;color:#ffffff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700">Accept or decline the invite</a></p>`,
+        `<p>Sign in with this email address (${to}) to accept. The link works for 7 days. If it expires, ask the business to send a new one.</p>`,
+        `<p style="color:#5b6b61;font-size:13px">Or open this link: ${link}</p>`,
+      ].join("\n"),
     });
+    // Record the send in the operator audit log (same table the
+    // message dispatcher uses). Best effort: the log never blocks
+    // the invite itself.
+    try {
+      const admin = createAdminSupabase();
+      await admin.from("notifications_log").insert({
+        kind: "team_invite",
+        business_id: business.id,
+        channel: "email",
+        recipient: to,
+        status: res.delivered ? "sent" : "failed",
+        detail: res.detail,
+      });
+    } catch {
+      // Audit only.
+    }
     return res.delivered;
   };
 
@@ -59,7 +93,7 @@ export async function POST(req: NextRequest) {
   if (typeof body.resendOf === "string" && body.resendOf) {
     const { data: invite } = await supabase
       .from("team_invites")
-      .select("id, email, name, token, accepted_at")
+      .select("id, email, name, token, accepted_at, role")
       .eq("business_id", business.id)
       .eq("id", body.resendOf)
       .maybeSingle();
@@ -71,7 +105,8 @@ export async function POST(req: NextRequest) {
     const emailed = await emailInvite(
       invite.email as string,
       link,
-      (invite as { name?: string | null }).name ?? null
+      (invite as { name?: string | null }).name ?? null,
+      (invite as { role?: string }).role ?? "staff"
     );
     return NextResponse.json({ ok: true, link, emailed });
   }
@@ -191,6 +226,6 @@ export async function POST(req: NextRequest) {
   }
 
   const link = `${base}/invite/${data.token}`;
-  const emailed = await emailInvite(email, link, name || null);
+  const emailed = await emailInvite(email, link, name || null, inviteRole);
   return NextResponse.json({ ok: true, link, emailed });
 }

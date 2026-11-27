@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createAdminSupabase, createServerSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import InviteAccept from "@/components/InviteAccept";
+import InviteDecline from "@/components/InviteDecline";
 
 // Team invite landing: /invite/<token>. The token is the credential for
 // VIEWING the invite; accepting requires signing in with the invited
@@ -21,11 +22,29 @@ export default async function InvitePage({
   }
 
   const admin = createAdminSupabase();
-  const { data: invite } = await admin
-    .from("team_invites")
-    .select("id, email, role, expires_at, accepted_at, businesses:business_id ( name )")
-    .eq("token", token)
-    .maybeSingle();
+  // declined_at arrives with migration 0019; the wide select
+  // feature-detects it and the narrow one runs until it lands
+  // (no Decline offer is shown before then).
+  let invite: unknown = null;
+  let declinedKnown = true;
+  {
+    const wide = await admin
+      .from("team_invites")
+      .select("id, email, role, expires_at, accepted_at, declined_at, businesses:business_id ( name )")
+      .eq("token", token)
+      .maybeSingle();
+    if (!wide.error) {
+      invite = wide.data;
+    } else {
+      declinedKnown = false;
+      const narrow = await admin
+        .from("team_invites")
+        .select("id, email, role, expires_at, accepted_at, businesses:business_id ( name )")
+        .eq("token", token)
+        .maybeSingle();
+      invite = narrow.data;
+    }
+  }
 
   if (!invite) {
     return (
@@ -40,8 +59,10 @@ export default async function InvitePage({
     role: string;
     expires_at: string;
     accepted_at: string | null;
+    declined_at?: string | null;
     businesses: { name: string } | null;
   };
+  const declined = declinedKnown && !!inv.declined_at;
   const businessName = inv.businesses?.name ?? "a business";
   const expired = new Date(inv.expires_at).getTime() < Date.now();
 
@@ -67,6 +88,10 @@ export default async function InvitePage({
           This invite was already accepted.{" "}
           <Link href="/owner/dashboard">Open the dashboard</Link>.
         </div>
+      ) : declined ? (
+        <div className="notice">
+          You declined this invite. If that was a mistake, ask {businessName} to send a new one.
+        </div>
       ) : expired ? (
         <div className="error">This invite has expired — ask {businessName} to send a new one.</div>
       ) : !user ? (
@@ -82,6 +107,7 @@ export default async function InvitePage({
               Create account
             </Link>
           </div>
+          {declinedKnown && <InviteDecline token={token} />}
         </div>
       ) : (
         <div className="card">
@@ -89,6 +115,7 @@ export default async function InvitePage({
             Signed in as {user.email}.
           </p>
           <InviteAccept token={token} />
+          {declinedKnown && <InviteDecline token={token} />}
         </div>
       )}
       <p className="small center" style={{ marginTop: 16 }}>

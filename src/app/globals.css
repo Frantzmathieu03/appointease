@@ -1556,6 +1556,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .tag-manager { background: #dce4ec; color: #33475b; }
 .tag-staff { background: #e1f2e6; color: #1e6b3a; }
 .tag-invited { background: #fcebd5; color: #8a5410; }
+.tag-declined { background: #fbe9e7; color: #b3261e; }
 
 /* — Today — */
 .d2-date-line { font-size: 13.5px; color: #5b6b61; margin: 0 0 2px; }

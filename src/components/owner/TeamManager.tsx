@@ -79,7 +79,10 @@ export default function TeamManager({
   const [editServices, setEditServices] = useState<Set<string>>(new Set());
   const [editNote, setEditNote] = useState("");
 
-  const pending = invites.filter((i) => !i.accepted_at && new Date(i.expires_at).getTime() > Date.now());
+  const pending = invites.filter(
+    (i) => !i.accepted_at && !i.declined_at && new Date(i.expires_at).getTime() > Date.now()
+  );
+  const declinedInvites = invites.filter((i) => !!i.declined_at && !i.accepted_at);
   const staffName = (id: string | null) => staff.find((s) => s.id === id)?.name ?? null;
   const initialsOf = (label: string) => {
     const p = label.replace(/@.*$/, "").trim().split(/[\s._-]+/).filter(Boolean);
@@ -337,7 +340,7 @@ export default function TeamManager({
             </div>
           );
         })}
-        {members.length === 0 && pending.length === 0 && (
+        {members.length === 0 && pending.length === 0 && declinedInvites.length === 0 && (
           <p className="small">No team logins yet — invite your first team member.</p>
         )}
 
@@ -380,6 +383,21 @@ export default function TeamManager({
                 </button>
               </span>
             )}
+          </div>
+        ))}
+
+        {/* Declined invite cards: a real answer, shown plainly.
+            No seat was consumed and there is nothing to resend. */}
+        {declinedInvites.map((i) => (
+          <div key={i.id} className="d2-member invited">
+            <span className="d2-ava" aria-hidden="true">{initialsOf(i.name || i.email)}</span>
+            <div className="d2-member-main">
+              <p className="d2-member-name">{i.name || i.email}</p>
+              <p className="d2-member-sub">
+                {i.name ? `${i.email} · ` : ""}Declined the invite
+              </p>
+            </div>
+            <span className="tag tag-declined">Declined</span>
           </div>
         ))}
       </div>

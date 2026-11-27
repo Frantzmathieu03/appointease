@@ -18,6 +18,8 @@ export async function sendEmail(opts: {
   to: string;
   subject: string;
   text: string;
+  /** Optional HTML version (sent alongside the text version). */
+  html?: string;
 }): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM ?? "AppointEase <reminders@appointease.io>";
@@ -44,6 +46,7 @@ export async function sendEmail(opts: {
         to: opts.to,
         subject: opts.subject,
         text: opts.text,
+        ...(opts.html ? { html: opts.html } : {}),
       }),
     });
     if (!res.ok) {

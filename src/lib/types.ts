@@ -311,6 +311,8 @@ export interface TeamInvite {
   token: string;
   expires_at: string;
   accepted_at: string | null;
+  /** When the person declined the invite (migration 0019). */
+  declined_at?: string | null;
   created_at: string;
 }
 
