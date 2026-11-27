@@ -317,6 +317,136 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* A look inside AppointEase: four small dashboard scenes
+          that animate gently on a loop (assigning a client, a
+          customer message, an email reminder, a new booking).
+          Product scenes only, like the day cards above: first
+          names and real photos, never testimonials, praise
+          quotes or ratings. CSS animation only; static under
+          prefers-reduced-motion. */}
+      <section className="hp-section" data-reveal>
+        <div className="mkt-container">
+          <div className="section-head">
+            <h2>A look inside AppointEase</h2>
+            <p className="lede">Assigning, messaging, reminding and booking, all in one place.</p>
+          </div>
+          <div className="hp-scenes">
+            <div className="hp-scene">
+              <p className="hp-scene-head">Team · Assign a client</p>
+              <div className="hp-scene-body" aria-hidden="true">
+                <div className="hp-scene-row">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="hp-scene-face" src="/images/faces/maya.jpg" alt="" loading="lazy" />
+                  <div className="hp-scene-who">
+                    <span className="hp-scene-name">Maya</span>
+                    <span className="hp-scene-sub">New client</span>
+                  </div>
+                </div>
+                <div className="hp-scene-arrow"><span /></div>
+                <div className="hp-scene-row hp-scene-row-staff">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="hp-scene-face" src="/images/faces/elena.jpg" alt="" loading="lazy" />
+                  <div className="hp-scene-who">
+                    <span className="hp-scene-name">Elena</span>
+                    <span className="hp-scene-sub">Stylist</span>
+                  </div>
+                  <span className="hp-scene-pill hp-anim-assigned">✓ Assigned</span>
+                </div>
+              </div>
+              <p className="hp-scene-cap">Every client lands with the right person on your team.</p>
+            </div>
+
+            <div className="hp-scene">
+              <p className="hp-scene-head">Inbox · Messages</p>
+              <div className="hp-scene-body hp-scene-thread" aria-hidden="true">
+                <div className="hp-brow hp-anim-msg-in">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="hp-scene-face hp-scene-face-sm" src="/images/faces/sofia.jpg" alt="" loading="lazy" />
+                  <p className="hp-bubble hp-bubble-in">Hi! Can I move my appointment to Saturday morning?</p>
+                </div>
+                <div className="hp-brow hp-brow-out hp-anim-typing">
+                  <p className="hp-bubble hp-bubble-typing"><span /><span /><span /></p>
+                </div>
+                <div className="hp-brow hp-brow-out hp-anim-msg-out">
+                  <p className="hp-bubble hp-bubble-out">Of course. You are all set for Saturday at 10:00 AM.</p>
+                </div>
+              </div>
+              <p className="hp-scene-cap">Customer messages land in one tidy inbox.</p>
+            </div>
+
+            <div className="hp-scene">
+              <p className="hp-scene-head">Reminders · Email</p>
+              <div className="hp-scene-body" aria-hidden="true">
+                <div className="hp-mail-top">
+                  <span className="hp-mail-tile">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                      <path d="m3 7 9 6 9-6" />
+                    </svg>
+                  </span>
+                  <div className="hp-mail-who">
+                    <strong>Appointment reminder</strong>
+                    <span className="hp-mail-to">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img className="hp-scene-face hp-scene-face-xs" src="/images/faces/lucas.jpg" alt="" loading="lazy" />
+                      To: Lucas
+                    </span>
+                  </div>
+                  <span className="hp-scene-pill hp-anim-delivered">✓ Delivered</span>
+                </div>
+                <p className="hp-mail-subject">Your appointment is tomorrow at 10:00 AM</p>
+                <p className="hp-mail-text">
+                  Hi Lucas, a quick reminder about your appointment tomorrow.
+                  Need a different time? You can reschedule or cancel right
+                  from this email.
+                </p>
+                <div className="hp-mail-chips"><span>Reschedule</span><span>Cancel</span></div>
+              </div>
+              <p className="hp-scene-cap">Reminders send themselves, right on time.</p>
+            </div>
+
+            <div className="hp-scene">
+              <p className="hp-scene-head">Calendar · This week</p>
+              <div className="hp-scene-body" aria-hidden="true">
+                <div className="hp-cal-days">
+                  <span>Thu<strong>3</strong></span>
+                  <span className="hp-cal-on">Fri<strong>4</strong></span>
+                  <span>Sat<strong>5</strong></span>
+                  <span>Sun<strong>6</strong></span>
+                  <span>Mon<strong>7</strong></span>
+                </div>
+                <div className="hp-cal-slots">
+                  <div className="hp-cal-row">
+                    <span className="hp-cal-time">9:00 AM</span>
+                    <span className="hp-cal-slot hp-cal-busy">Booked</span>
+                  </div>
+                  <div className="hp-cal-row">
+                    <span className="hp-cal-time">11:00 AM</span>
+                    <span className="hp-cal-slot">Open</span>
+                  </div>
+                  <div className="hp-cal-row">
+                    <span className="hp-cal-time">1:00 PM</span>
+                    <span className="hp-cal-slot hp-cal-busy">Booked</span>
+                  </div>
+                  <div className="hp-cal-row">
+                    <span className="hp-cal-time">3:00 PM</span>
+                    <span className="hp-cal-slot hp-cal-newslot">
+                      <span className="hp-cal-book hp-anim-book">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img className="hp-scene-face hp-scene-face-sm" src="/images/faces/daniel.jpg" alt="" loading="lazy" />
+                        <span className="hp-cal-book-who"><strong>Daniel</strong><span>Haircut</span></span>
+                        <span className="hp-cal-tag hp-anim-tag">New booking</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p className="hp-scene-cap">New bookings drop straight onto the calendar.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Feature cards */}
       <section className="hp-section hp-section-pale" data-reveal>
         <div className="mkt-container">

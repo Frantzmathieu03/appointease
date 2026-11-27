@@ -2523,3 +2523,218 @@ footer.site-footer { padding: 0; text-align: left; }
   flex: none; background: #1e4d33; color: #fff; border-radius: 999px;
   padding: 2px 9px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.04em;
 }
+
+/* A look inside AppointEase (Frantz, 2026-11-27): four small
+   dashboard scenes that animate gently on a loop: assigning a
+   client, a customer message with a reply, an email reminder,
+   and a new booking landing on the calendar. Product scenes
+   only (first names, real photos), never testimonials. All
+   animation is opacity and transform, so nothing shifts layout;
+   the scenes pause on hover and are fully static under
+   prefers-reduced-motion. */
+.hp-scenes {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  max-width: 1020px; margin: 0 auto;
+}
+@media (max-width: 760px) { .hp-scenes { grid-template-columns: 1fr; } }
+.hp-scene {
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 18px;
+  padding: 18px; text-align: left; display: flex; flex-direction: column;
+  box-shadow: 0 8px 24px rgba(22, 34, 27, 0.05);
+}
+.hp-scene-head {
+  font-size: 12.5px; font-weight: 800; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--hp-green); margin: 0 0 12px;
+}
+.hp-scene-body {
+  background: var(--hp-bg); border: 1px solid #e3ebe3; border-radius: 14px;
+  padding: 14px; flex: 1;
+}
+.hp-scene-cap { margin: 14px 2px 0; font-size: 14.5px; color: var(--hp-muted); line-height: 1.5; }
+.hp-scene-face { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none; display: block; }
+.hp-scene-face-sm { width: 34px; height: 34px; }
+.hp-scene-face-xs { width: 20px; height: 20px; }
+.hp-scene-pill {
+  background: var(--hp-green); color: #fff; border-radius: 999px;
+  padding: 4px 11px; font-size: 12px; font-weight: 800;
+  white-space: nowrap; flex: none;
+}
+
+/* Scene rows (assign) */
+.hp-scene-row {
+  display: flex; align-items: center; gap: 12px;
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 14px;
+  padding: 10px 12px;
+}
+.hp-scene-who { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.hp-scene-name { font-weight: 700; font-size: 15px; color: var(--hp-ink); }
+.hp-scene-sub { font-size: 13px; color: var(--hp-muted); }
+.hp-scene-arrow { display: flex; justify-content: center; padding: 5px 0; }
+.hp-scene-arrow span { width: 2px; height: 15px; background: #b9cbb9; border-radius: 2px; position: relative; }
+.hp-scene-arrow span::after {
+  content: ""; position: absolute; bottom: -1px; left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: #b9cbb9; border-bottom: 0;
+}
+.hp-scene-row-staff { animation: hpStaffGlow 9s ease-in-out 1s infinite; }
+@keyframes hpStaffGlow {
+  0%, 22% { background: #fff; border-color: var(--hp-line); }
+  34%, 80% { background: #eef6ee; border-color: #bcd6bc; }
+  92%, 100% { background: #fff; border-color: var(--hp-line); }
+}
+.hp-anim-assigned { opacity: 0; animation: hpAssigned 9s ease-in-out 1s infinite; }
+@keyframes hpAssigned {
+  0%, 18% { opacity: 0; transform: scale(0.7) translateX(6px); }
+  30%, 82% { opacity: 1; transform: none; }
+  94%, 100% { opacity: 0; transform: scale(0.7) translateX(6px); }
+}
+
+/* Scene thread (message) */
+.hp-scene-thread { display: flex; flex-direction: column; gap: 10px; }
+.hp-brow { display: flex; gap: 9px; align-items: flex-end; margin: 0; }
+.hp-brow-out { justify-content: flex-end; }
+.hp-bubble {
+  margin: 0; max-width: 82%; font-size: 13.5px; line-height: 1.45;
+  padding: 9px 12px; border-radius: 14px;
+}
+.hp-bubble-in { background: #fff; border: 1px solid var(--hp-line); color: var(--hp-ink); border-bottom-left-radius: 5px; }
+.hp-bubble-out { background: var(--hp-green); color: #fff; border-bottom-right-radius: 5px; }
+.hp-bubble-typing { background: #fff; border: 1px solid var(--hp-line); display: inline-flex; gap: 4px; padding: 12px; }
+.hp-bubble-typing span {
+  display: block; width: 6px; height: 6px; border-radius: 50%;
+  background: #9db2a2; animation: hpDot 1.1s ease-in-out infinite;
+}
+.hp-bubble-typing span:nth-child(2) { animation-delay: 0.15s; }
+.hp-bubble-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes hpDot {
+  0%, 60%, 100% { transform: none; opacity: 0.5; }
+  30% { transform: translateY(-3px); opacity: 1; }
+}
+.hp-anim-msg-in { opacity: 0; animation: hpMsgIn 11s ease-in-out 0.3s infinite; }
+@keyframes hpMsgIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  7%, 86% { opacity: 1; transform: none; }
+  95%, 100% { opacity: 0; transform: translateY(-6px); }
+}
+.hp-anim-typing { opacity: 0; animation: hpTyping 11s ease-in-out 0.3s infinite; }
+@keyframes hpTyping {
+  0%, 16% { opacity: 0; transform: translateY(8px); }
+  22%, 34% { opacity: 1; transform: none; }
+  40%, 100% { opacity: 0; transform: translateY(4px); }
+}
+.hp-anim-msg-out { opacity: 0; animation: hpMsgOut 11s ease-in-out 0.3s infinite; }
+@keyframes hpMsgOut {
+  0%, 42% { opacity: 0; transform: translateY(10px); }
+  50%, 86% { opacity: 1; transform: none; }
+  95%, 100% { opacity: 0; transform: translateY(-6px); }
+}
+
+/* Scene mail (email reminder) */
+.hp-mail-top { display: flex; align-items: center; gap: 11px; }
+.hp-mail-tile {
+  width: 38px; height: 38px; flex: none; border-radius: 11px;
+  background: var(--hp-green); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.hp-mail-tile svg { width: 20px; height: 20px; display: block; }
+.hp-mail-who { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.hp-mail-who strong { font-size: 14.5px; color: var(--hp-ink); }
+.hp-mail-to { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--hp-muted); margin-top: 2px; }
+.hp-mail-subject { font-weight: 800; font-size: 15.5px; color: var(--hp-ink); margin: 13px 0 5px; }
+.hp-mail-text { font-size: 13.5px; line-height: 1.55; color: #40534a; margin: 0; }
+.hp-mail-chips { display: flex; gap: 8px; margin-top: 12px; }
+.hp-mail-chips span {
+  border: 1px solid var(--hp-green); color: var(--hp-green);
+  font-weight: 700; font-size: 12.5px; border-radius: 999px;
+  padding: 5px 13px; background: #fff;
+}
+.hp-anim-delivered { opacity: 0; animation: hpDelivered 10s ease-in-out 2.2s infinite; }
+@keyframes hpDelivered {
+  0%, 26% { opacity: 0; transform: scale(0.7); }
+  36%, 84% { opacity: 1; transform: none; }
+  94%, 100% { opacity: 0; transform: scale(0.7); }
+}
+
+/* Scene calendar (new booking) */
+.hp-cal-days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px; }
+.hp-cal-days > span {
+  text-align: center; font-size: 11.5px; color: var(--hp-muted);
+  background: #fff; border: 1px solid var(--hp-line); border-radius: 10px;
+  padding: 6px 0 7px; display: flex; flex-direction: column; gap: 1px;
+}
+.hp-cal-days strong { font-size: 15px; color: var(--hp-ink); }
+.hp-cal-days .hp-cal-on { background: var(--hp-green); border-color: var(--hp-green); color: #cfe3d3; }
+.hp-cal-days .hp-cal-on strong { color: #fff; }
+.hp-cal-slots { display: flex; flex-direction: column; gap: 7px; }
+.hp-cal-row { display: flex; align-items: stretch; gap: 10px; }
+.hp-cal-time {
+  width: 58px; flex: none; font-size: 12px; font-weight: 700;
+  color: var(--hp-muted); display: flex; align-items: center;
+}
+.hp-cal-slot {
+  flex: 1; min-height: 42px; border-radius: 10px; position: relative;
+  display: flex; align-items: center; padding: 5px 10px;
+  font-size: 12.5px; color: var(--hp-muted);
+  background: #fff; border: 1px solid var(--hp-line);
+}
+.hp-cal-busy { background: #edf2ed; }
+.hp-cal-newslot { border: 1.5px dashed #b9cbb9; background: transparent; }
+.hp-cal-book {
+  position: absolute; inset: 0; display: flex; align-items: center; gap: 9px;
+  background: #e7f1e8; border: 1px solid #bcd6bc; border-radius: 10px;
+  padding: 4px 8px;
+}
+.hp-cal-book-who { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.hp-cal-book-who strong { font-size: 13.5px; color: var(--hp-ink); }
+.hp-cal-book-who span { font-size: 12px; color: var(--hp-muted); }
+.hp-cal-tag {
+  margin-left: auto; background: var(--hp-green); color: #fff;
+  font-size: 11px; font-weight: 800; border-radius: 999px;
+  padding: 3px 9px; white-space: nowrap; flex: none;
+}
+.hp-anim-book { opacity: 0; animation: hpBook 10s ease-in-out 1.6s infinite; }
+@keyframes hpBook {
+  0%, 20% { opacity: 0; transform: scale(0.75) translateY(6px); }
+  32% { opacity: 1; transform: scale(1.04) translateY(0); }
+  38%, 86% { opacity: 1; transform: none; }
+  95%, 100% { opacity: 0; transform: scale(0.85); }
+}
+.hp-anim-tag { opacity: 0; animation: hpTag 10s ease-in-out 1.6s infinite; }
+@keyframes hpTag {
+  0%, 34% { opacity: 0; transform: translateX(8px); }
+  44%, 86% { opacity: 1; transform: none; }
+  95%, 100% { opacity: 0; transform: translateX(8px); }
+}
+
+/* Pause the scene loops while a card is hovered. */
+.hp-scene:hover .hp-anim-assigned,
+.hp-scene:hover .hp-anim-msg-in,
+.hp-scene:hover .hp-anim-typing,
+.hp-scene:hover .hp-anim-msg-out,
+.hp-scene:hover .hp-anim-delivered,
+.hp-scene:hover .hp-anim-book,
+.hp-scene:hover .hp-anim-tag,
+.hp-scene:hover .hp-scene-row-staff,
+.hp-scene:hover .hp-bubble-typing span { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-anim-assigned, .hp-anim-msg-in, .hp-anim-msg-out,
+  .hp-anim-delivered, .hp-anim-book, .hp-anim-tag,
+  .hp-scene-row-staff { animation: none; opacity: 1; transform: none; }
+  .hp-anim-typing { display: none; }
+  .hp-bubble-typing span { animation: none; }
+}
+
+/* Footer social row (Frantz, 2026-11-27): one clean icon per
+   social account, in a row above the copyright line. Only live
+   accounts render; Instagram, X and TikTok slot into the same
+   row when those accounts exist. */
+.footer-social { display: flex; gap: 10px; margin-top: 26px; }
+.footer-social-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--line); background: #fff; color: var(--muted);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.footer-social-link:hover { color: var(--green); border-color: var(--green); }
+.footer-social-link svg { width: 20px; height: 20px; display: block; }

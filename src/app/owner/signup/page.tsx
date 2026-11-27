@@ -94,7 +94,7 @@ export default function OwnerSignupPage() {
 
       {phase === "account" && (
         <div className="card">
-          <h2 className="center">Your login</h2>
+          <h2 className="center">Create your account</h2>
           {error && <div className="error">{error}</div>}
           <button className="btn btn-primary btn-block btn-google" type="button" onClick={google}>
             <GoogleLogo />
