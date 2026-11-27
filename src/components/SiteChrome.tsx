@@ -19,7 +19,7 @@ import { usePathname } from "next/navigation";
  *     the platform header. The /owner sign-in page keeps the header.
  * A first path segment that is not a known platform route is treated
  * as a business slug. The platform header (Pricing · Business
- * sign-in · Start free) stays on the platform's own pages: homepage,
+ * Log in · Get started for free) stays on the platform's own pages: homepage,
  * /explore, pricing and the owner sign-in pages.
  */
 const PLATFORM_SEGMENTS = new Set([
@@ -62,9 +62,9 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
             <nav className="header-links">
               <Link href="/explore" className="header-link-text header-link-find">Find a business</Link>
               <Link href="/#pricing" className="header-link-text">Pricing</Link>
-              <Link href="/owner" className="header-link-text">Business sign-in</Link>
+              <Link href="/owner" className="header-link-text">Log in</Link>
               <Link href="/owner/signup" className="btn btn-primary header-cta">
-                Start free
+                Get started for free
               </Link>
             </nav>
           </header>
@@ -88,7 +88,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
               <Link href="/contact">Contact</Link>
               <Link href="/terms">Terms of Service</Link>
               <Link href="/privacy">Privacy Policy</Link>
-              <Link href="/owner">Business sign-in</Link>
+              <Link href="/owner">Log in</Link>
             </div>
           </div>
           <div className="footer-bottom">© 2026 AppointEase · support@appointease.io</div>

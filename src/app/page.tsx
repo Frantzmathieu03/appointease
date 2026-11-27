@@ -23,6 +23,19 @@ const CAT_CARDS = CATEGORIES.filter((c) => c.image !== null).map((c) => ({
 // The reviews section renders only once at least two real reviews
 // exist in src/lib/reviews.ts (real businesses, with permission).
 
+/** The people carousel: one wide card per kind of business, each
+ *  with a plain two step label in our own words. */
+const PEOPLE_FLOW: { slug: string; category: string; from: string; to: string }[] = [
+  { slug: "barbershops", category: "Barbershops", from: "Booked", to: "Reminded" },
+  { slug: "hair-salons", category: "Hair salons", from: "Messaged", to: "Answered" },
+  { slug: "nail-salons-spas", category: "Nail salons and spas", from: "Booked", to: "Confirmed" },
+  { slug: "law-offices", category: "Law offices", from: "Asked", to: "Booked" },
+  { slug: "dental-offices", category: "Dental offices", from: "Reminded", to: "Arrived" },
+  { slug: "doctors-clinics", category: "Doctors and clinics", from: "Booked", to: "Seen" },
+  { slug: "pet-groomers", category: "Pet groomers", from: "Messaged", to: "Booked" },
+  { slug: "auto-repair", category: "Auto repair", from: "Booked", to: "Ready" },
+];
+
 const FEATURES: { icon: string; title: string; body: string; dark?: boolean }[] = [
   {
     icon: "🔔",
@@ -94,20 +107,6 @@ export default function HomePage() {
             >
               <source src="/hero/hero-video.mp4" type="video/mp4" />
             </video>
-            <div className="hp-notes" aria-hidden="true">
-              <div className="hp-note hp-note-1">
-                <span className="hp-note-ico">📅</span>
-                <span><strong>New booking</strong> — James · Haircut · Fri 3:00 PM</span>
-              </div>
-              <div className="hp-note hp-note-2">
-                <span className="hp-note-ico">🔔</span>
-                <span><strong>Reminder sent</strong> — 24 hours before · Delivered</span>
-              </div>
-              <div className="hp-note hp-note-3">
-                <span className="hp-note-ico">📝</span>
-                <span><strong>Visit notes saved</strong> — James · next visit in 3 weeks</span>
-              </div>
-            </div>
           </div>
           <div className="hp-hero-bottom">
             <p className="hp-sub">
@@ -223,10 +222,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* A day with AppointEase — a looping phone sequence: a booking
-          comes in, the reminder goes out, the visit lands in the
-          client's history. Pure CSS animation; static under
-          prefers-reduced-motion. */}
+      {/* A day with AppointEase: ONE card inside the phone rotates
+          through the three moments that used to float on the hero
+          video (Frantz's correction: off the video, into this
+          animated card, wording unchanged). Pure CSS animation;
+          static under prefers-reduced-motion. */}
       <section className="hp-section" data-reveal>
         <div className="mkt-container">
           <div className="section-head">
@@ -241,11 +241,11 @@ export default function HomePage() {
               <div className="hp-day-stage">
                 <div className="hp-day-card hp-day-card-1">
                   <span className="hp-note-ico">📅</span>
-                  <span><strong>New booking</strong> — James · Haircut · Sat 10:00 AM</span>
+                  <span><strong>New booking</strong> — James · Haircut · Fri 3:00 PM</span>
                 </div>
                 <div className="hp-day-card hp-day-card-2">
                   <span className="hp-note-ico">🔔</span>
-                  <span><strong>Reminder sent</strong> — “See you tomorrow at 10:00 AM” · text + email</span>
+                  <span><strong>Reminder sent</strong> — 24 hours before · Delivered</span>
                 </div>
                 <div className="hp-day-card hp-day-card-3">
                   <span className="hp-note-ico">📝</span>
@@ -401,29 +401,48 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Behind the counter — the people AppointEase is built for.
-          Scene labels only; these are not testimonials. */}
+      {/* Behind the counter: a slow people carousel in the spirit
+          of the reference Frantz sent. Wide photo cards glide
+          sideways on their own; each carries a small two pill
+          label pair in our own words. Scene labels only; these
+          are not testimonials. Pauses on hover; still (and
+          hand scrollable) under prefers-reduced-motion. */}
       <section className="hp-section hp-section-pale" data-reveal>
         <div className="mkt-container">
           <div className="section-head">
             <h2>For the people behind the counter</h2>
           </div>
-          <div className="hp-people">
-            <figure className="hp-person">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/cats/reception.jpg" alt="" loading="lazy" />
-              <figcaption>At the front desk</figcaption>
-            </figure>
-            <figure className="hp-person">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/cats/wellness-desk.jpg" alt="" loading="lazy" />
-              <figcaption>At the spa</figcaption>
-            </figure>
-            <figure className="hp-person">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/cats/pet-groomers.jpg" alt="" loading="lazy" />
-              <figcaption>At the groomer</figcaption>
-            </figure>
+        </div>
+        <div className="hp-carousel">
+          <div className="hp-carousel-track">
+            {PEOPLE_FLOW.map((p) => (
+              <figure key={p.slug} className="hp-pc-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/images/cats/${p.slug}.jpg`} alt="" loading="lazy" />
+                <figcaption>
+                  <span className="hp-pc-cat">{p.category}</span>
+                  <span className="hp-pc-pair">
+                    <span className="hp-pc-pill">{p.from}</span>
+                    <span className="hp-pc-arrow" aria-hidden="true">→</span>
+                    <span className="hp-pc-pill">{p.to}</span>
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+            {PEOPLE_FLOW.map((p) => (
+              <figure key={`dup-${p.slug}`} className="hp-pc-card" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/images/cats/${p.slug}.jpg`} alt="" loading="lazy" />
+                <figcaption>
+                  <span className="hp-pc-cat">{p.category}</span>
+                  <span className="hp-pc-pair">
+                    <span className="hp-pc-pill">{p.from}</span>
+                    <span className="hp-pc-arrow" aria-hidden="true">→</span>
+                    <span className="hp-pc-pill">{p.to}</span>
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
           </div>
         </div>
       </section>
