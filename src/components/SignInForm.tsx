@@ -89,8 +89,10 @@ export default function SignInForm({
     }
     const supabase = createBrowserSupabase();
     // Same message whether or not the account exists — never reveal which.
+    // The set-password page carries the owner lane home: after the
+    // password is set, its button opens the dashboard.
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/set-password")}`,
+      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/set-password?to=/owner/dashboard")}`,
     });
     setNotice("If that email has an account, we sent a password reset link.");
   }

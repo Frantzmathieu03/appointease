@@ -8,6 +8,12 @@ import { createBrowserSupabase } from "@/lib/supabase-browser";
 // goes through /auth/callback, which exchanges the code for a session and
 // redirects here — so a valid session means the link was real. Setting
 // the password is just an updateUser on that session.
+//
+// The link carries a lane destination in ?to= (set by whichever form
+// asked for the reset): owners land on /owner/dashboard, customers
+// land on their own business's /<slug>/my — a customer never leaves
+// that business's world. Links without ?to= keep the original
+// generic done screen.
 export default function SetPasswordPage() {
   // null = still checking the link's session.
   const [hasSession, setHasSession] = useState<boolean | null>(null);
@@ -16,9 +22,15 @@ export default function SetPasswordPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [dest, setDest] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
+      const raw = new URLSearchParams(window.location.search).get("to");
+      // Allowlist: a local path only, never a protocol or host jump.
+      if (raw && raw.startsWith("/") && !raw.startsWith("//") && !raw.includes("\\") && raw.length < 200) {
+        setDest(raw);
+      }
       const supabase = createBrowserSupabase();
       const {
         data: { session },
@@ -26,6 +38,15 @@ export default function SetPasswordPage() {
       setHasSession(!!session);
     })();
   }, []);
+
+  const isOwnerLane = dest === "/owner/dashboard";
+  const isCustomerLane = !!dest && dest.endsWith("/my");
+  const backHref = isOwnerLane
+    ? "/owner"
+    : isCustomerLane
+      ? `/${dest!.split("/")[1]}`
+      : "/login";
+  const backLabel = isCustomerLane ? "Back to the business page" : "Go to sign in";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,13 +86,29 @@ export default function SetPasswordPage() {
             Password links only work once, and only for a short time.
             Request a new one from the sign-in page.
           </p>
-          <Link href="/login" className="btn btn-primary">Go to sign in</Link>
+          <Link href={backHref} className="btn btn-primary">{backLabel}</Link>
         </div>
       </main>
     );
   }
 
   if (done) {
+    if (dest) {
+      return (
+        <main className="column">
+          <div className="card center">
+            <div style={{ fontSize: 40, marginBottom: 6 }}>✓</div>
+            <h2>Your password is set</h2>
+            <p className="lede">
+              You can now sign in with your email and this password.
+            </p>
+            <Link href={dest} className="btn btn-primary">
+              {isOwnerLane ? "Open my dashboard" : "Go to my page"}
+            </Link>
+          </div>
+        </main>
+      );
+    }
     return (
       <main className="column">
         <div className="card center">
@@ -95,8 +132,9 @@ export default function SetPasswordPage() {
       <div className="card">
         <h2>Set your password</h2>
         <p className="lede" style={{ marginBottom: 16 }}>
-          Pick a password for your AppointEase account — it works at every
-          business here.
+          {dest
+            ? "Pick a password for your account."
+            : "Pick a password for your AppointEase account — it works at every business here."}
         </p>
         {error && <div className="error">{error}</div>}
         <form onSubmit={onSubmit}>

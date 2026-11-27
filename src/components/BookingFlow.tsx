@@ -24,14 +24,14 @@ import { generateConfirmationCode } from "@/lib/confirmation";
 // but a password lets the customer sign in and see everything in one
 // place. This only ever SENDS a set-password email; it never blocks or
 // delays the confirmation itself.
-function ClaimAccountCard({ email }: { email: string }) {
+function ClaimAccountCard({ email, slug }: { email: string; slug: string }) {
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   async function claim() {
     setState("sending");
     const supabase = createBrowserSupabase();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/set-password")}`,
+      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/set-password?to=/${slug}/my`)}`,
     });
     setState(error ? "error" : "sent");
   }
@@ -538,7 +538,7 @@ export default function BookingFlow({
           </div>
         )}
         {result?.accountCreated && !result?.demoMode && (
-          <ClaimAccountCard email={form.email} />
+          <ClaimAccountCard email={form.email} slug={slug} />
         )}
       </div>
     );

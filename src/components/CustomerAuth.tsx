@@ -140,8 +140,11 @@ export default function CustomerAuth({
       return;
     }
     const supabase = createBrowserSupabase();
+    // The reset keeps the customer inside THIS business's world:
+    // after setting the password they land on this business's own
+    // My dashboard, never anywhere global.
     await supabase.auth.resetPasswordForEmail(form.email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/set-password")}`,
+      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/set-password?to=/${business.slug}/my`)}`,
     });
     setNotice("If that email has an account, we sent a password reset link.");
   }
