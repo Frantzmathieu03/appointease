@@ -511,6 +511,73 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* FAQ (restored at Frantz's word, 2026-11-27): the original
+          five questions from before the Phase 4 rebuild, back in
+          their original place right after pricing. The reminders
+          answer says email only, because texting is not live yet. */}
+      <section className="hp-section" data-reveal>
+        <div className="mkt-container">
+          <div className="section-head">
+            <p className="eyebrow">Questions</p>
+            <h2>Good to know</h2>
+          </div>
+          <div className="faq-list">
+            <details className="faq-item">
+              <summary>Does it cost my customers anything to book?</summary>
+              <p>No. Booking is always free for customers. Only businesses subscribe, after their free trial.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Do my clients pay through AppointEase?</summary>
+              <p>No. Clients pay you directly, the way you already take payment. AppointEase never touches their money.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Can AppointEase take a deposit or a no show fee for me?</summary>
+              <p>No. AppointEase does not take client money at all, so it cannot hold deposits or charge no show fees. Clients pay you directly at your business.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Do I need a card to start the trial?</summary>
+              <p>No. Every plan starts with 14 days free, no card required.</p>
+            </details>
+            <details className="faq-item">
+              <summary>What happens when my trial ends?</summary>
+              <p>You pick a plan to keep going: Solo $29.99 a month, Team $49.99 a month, or Business $149.99 a month. Pay yearly and you get 2 months free. If you do not subscribe, your booking page pauses. Your data is not deleted.</p>
+            </details>
+            <details className="faq-item">
+              <summary>How do reminders work?</summary>
+              <p>By email today. Each appointment gets a confirmation, then a reminder 24 hours before and another 2 hours before, when the booking is made far enough ahead. Text reminders are not live yet.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Can clients reschedule or cancel themselves?</summary>
+              <p>Yes. They use the secure link in their confirmation email, or their account on your business page. Your own cancellation rules still apply.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Can my staff have their own calendars?</summary>
+              <p>Yes. Team and Business plans include multiple staff members, each with their own login, calendar, services and working hours.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Can my staff see all my customers?</summary>
+              <p>No. Staff see only the clients assigned to them. Managers can see more, but Billing and Team stay with the owner.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Do my customers need an account for every business they use?</summary>
+              <p>Yes. Each business has its own customer accounts, kept separate on purpose. A customer joins your business on your page, and nothing mixes with other businesses.</p>
+            </details>
+            <details className="faq-item">
+              <summary>What if I have more than one location?</summary>
+              <p>You can add locations in your dashboard and manage them from the same account.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Can I cancel my subscription anytime?</summary>
+              <p>Yes. You can cancel from Billing whenever you like. No phone call and no cancellation fee.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Can I delete my account if I stop?</summary>
+              <p>Yes. You can delete your account from Settings. The deletion is set for 48 hours later, so you can change your mind and keep your account before then.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
       {/* Behind the counter: a slow people carousel in the spirit
           of the reference Frantz sent. Wide photo cards glide
           sideways on their own; each carries a small two pill
