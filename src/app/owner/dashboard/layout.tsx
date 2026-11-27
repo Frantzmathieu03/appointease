@@ -15,7 +15,7 @@ import DashNav, { type DashNavItem } from "@/components/DashNav";
 // sections; managers see everything except Billing and Team
 // management (the Team page itself is read-only for them).
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { business, role, user } = await requireBusiness();
+  const { business, role, user, memberStaffId } = await requireBusiness();
   const link = `${siteUrl()}/${business.slug}`;
   const isStaff = role === "staff";
   const isOwner = role === "owner";
@@ -32,8 +32,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const navItems: DashNavItem[] = [
     { href: "/owner/dashboard", label: "Today" },
+    { href: "/owner/dashboard/appointments", label: "Appointments", badge: "appointments" },
     { href: "/owner/dashboard/calendar", label: "Calendar" },
-    { href: "/owner/dashboard/inbox", label: "Inbox", badge: true },
+    { href: "/owner/dashboard/inbox", label: "Inbox", badge: "inbox" },
     { href: "/owner/dashboard/customers", label: "Customers" },
     ...(!isStaff
       ? [
@@ -108,7 +109,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       <div className="d2-shell">
         <aside className="d2-side">
-          <DashNav items={navItems} businessId={business.id} />
+          <DashNav items={navItems} businessId={business.id} memberStaffId={memberStaffId} />
           <div className="d2-signout">
             <form action="/auth/signout" method="post">
               <button type="submit">Sign out</button>

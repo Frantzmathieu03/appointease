@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import UnreadBadge from "@/components/UnreadBadge";
+import NewBookingsBadge from "@/components/NewBookingsBadge";
 
 export interface DashNavItem {
   href: string;
   label: string;
-  badge?: boolean;
+  /** Which live count badge rides on this item, if any. */
+  badge?: "inbox" | "appointments";
 }
 
 // The dashboard menu card's section rows (business-page design
@@ -18,9 +20,11 @@ export interface DashNavItem {
 export default function DashNav({
   items,
   businessId,
+  memberStaffId,
 }: {
   items: DashNavItem[];
   businessId: string;
+  memberStaffId?: string | null;
 }) {
   const pathname = usePathname();
   return (
@@ -38,7 +42,10 @@ export default function DashNav({
             className={active ? "active" : undefined}
           >
             {item.label}
-            {item.badge && <UnreadBadge variant="owner" businessId={businessId} />}
+            {item.badge === "inbox" && <UnreadBadge variant="owner" businessId={businessId} />}
+            {item.badge === "appointments" && (
+              <NewBookingsBadge businessId={businessId} memberStaffId={memberStaffId} />
+            )}
           </Link>
         );
       })}

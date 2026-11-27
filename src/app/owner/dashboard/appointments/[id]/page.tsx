@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireBusiness, siteUrl } from "@/lib/owner";
+import { createAdminSupabase } from "@/lib/supabase";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import AssignControl from "@/components/owner/AssignControl";
 import MarkPaid, { type PaidMark } from "@/components/owner/MarkPaid";
@@ -80,6 +81,22 @@ export default async function DashboardAppointmentPage({
   }
   if (!data) notFound();
   const appt = data as unknown as Appt;
+
+  // Opening this page marks the booking as seen (migration 0018):
+  // the Appointments menu badge and NEW tags clear. Written with
+  // the admin client after requireBusiness has proven membership,
+  // so every role can stamp it. Before 0018 lands the update errors
+  // on the missing column and is quietly ignored.
+  try {
+    const admin = createAdminSupabase();
+    await admin
+      .from("appointments")
+      .update({ owner_seen_at: new Date().toISOString() })
+      .eq("id", appt.id)
+      .is("owner_seen_at", null);
+  } catch {
+    // Pre-migration or transient: seeing the page matters more.
+  }
 
   const { data: remData } = await supabase
     .from("reminders")

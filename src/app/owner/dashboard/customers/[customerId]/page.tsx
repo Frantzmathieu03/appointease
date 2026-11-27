@@ -239,6 +239,14 @@ export default async function DashboardCustomerProfilePage({
             <Link href={`/owner/dashboard/inbox/${customerId}`} className="btn">
               Message
             </Link>
+            {customer.phone && (
+              <a
+                href={`tel:+${customer.phone.replace(/\D/g, "").length === 10 ? "1" : ""}${customer.phone.replace(/\D/g, "")}`}
+                className="btn"
+              >
+                Call {formatPhone(customer.phone)}
+              </a>
+            )}
             {noteTarget && (
               <Link href={`/owner/dashboard/appointments/${noteTarget.id}`} className="btn">
                 Add note
