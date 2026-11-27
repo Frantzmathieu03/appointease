@@ -782,6 +782,8 @@ img, video { max-width: 100%; }
 .price-features { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 9px; }
 .price-features li { display: flex; gap: 9px; align-items: flex-start; font-size: 14.5px; line-height: 1.45; }
 .price-check { color: var(--green); font-weight: 800; flex: 0 0 auto; }
+.price-contact { text-align: center; margin: 12px 0 0; font-size: 14.5px; }
+.price-contact a { color: var(--green); font-weight: 600; }
 .price-card .btn { margin-top: auto; }
 
 /* Plan comparison table: scrolls sideways on narrow screens */

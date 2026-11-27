@@ -38,7 +38,7 @@ export const PLANS: Plan[] = [
     staffLimit: 1,
     blurb: "For a one person shop that runs on appointments.",
     features: [
-      "1 team member",
+      "1 person",
       "Booking page",
       "Reminders",
       "Messaging",
@@ -53,7 +53,7 @@ export const PLANS: Plan[] = [
     staffLimit: 5,
     blurb: "For a small team sharing one booking page.",
     features: [
-      "Up to 5 team members",
+      "2 to 5 people",
       "Everything in Solo",
       "Assign clients to each person",
       "Roles",
@@ -67,7 +67,7 @@ export const PLANS: Plan[] = [
     staffLimit: 15,
     blurb: "For bigger teams that need more calendars and faster support.",
     features: [
-      "Up to 15 team members",
+      "6 to 15 people",
       "Everything in Team",
       "Forms + file uploads",
       "Unlimited locations",
@@ -79,6 +79,18 @@ export const PLANS: Plan[] = [
 /** The team-size label for plan cards: "1", "5", or "15". */
 export function staffLimitLabel(plan: Plan): string {
   return String(plan.staffLimit);
+}
+
+/**
+ * The team size range for plan cards, written out in plain words
+ * (Frantz, 2026-11-27: ranges instead of "up to" wording): Solo is
+ * "1 person", Team is "2 to 5 people", Business is "6 to 15 people".
+ * The Business limit stays 15; bigger teams contact us instead.
+ */
+export function planRangeLabel(plan: Plan): string {
+  if (plan.id === "solo") return "1 person";
+  if (plan.id === "team") return "2 to 5 people";
+  return "6 to 15 people";
 }
 
 /** The next plan up, or null on the top plan. */
@@ -93,7 +105,7 @@ export function nextPlan(plan: Plan): Plan | null {
  * cover. Shown when adding a person would pass the plan's limit.
  */
 export function seatLimitMessage(plan: Plan): string {
-  const cover = `Your ${plan.name} plan covers ${plan.staffLimit === 1 ? "1 team member" : `up to ${plan.staffLimit} team members`}.`;
+  const cover = `Your ${plan.name} plan covers ${planRangeLabel(plan)}.`;
   const next = nextPlan(plan);
   if (!next) return cover;
   return `${cover} Upgrade to ${next.name} (${formatPlanPrice(next.monthlyCents)}/mo) to add more people.`;

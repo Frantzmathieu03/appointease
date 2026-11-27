@@ -52,6 +52,11 @@ export default function PricingPlans() {
             <Link href="/owner/signup" className={`btn ${plan.id === "team" ? "btn-primary" : ""} btn-block`}>
               Start free
             </Link>
+            {plan.id === "business" && (
+              <p className="price-contact">
+                <a href="mailto:support@appointease.io">16+ people? Contact us.</a>
+              </p>
+            )}
           </div>
         ))}
       </div>

@@ -8,8 +8,9 @@ import type { StaffMember } from "@/lib/types";
 
 /**
  * Bookable staff calendars. Plan team-size bands live in
- * src/lib/plans.ts (Solo 1 · Team up to 5 · Business up to 15 people
- * with a calendar, owner included: Frantz, 2026-11-26). Adding past
+ * src/lib/plans.ts (Solo 1 person · Team 2 to 5 people · Business
+ * 6 to 15 people with a calendar, owner included: Frantz, 2026-11-26,
+ * range wording 2026-11-27). Adding past
  * the cap stops with the upgrade prompt, here in the UI and again on
  * the server (the invite route, and a database trigger in migration
  * 0015 for direct inserts like this one).
@@ -106,7 +107,7 @@ export default function StaffManager({ businessId }: { businessId: string }) {
         </form>
       )}
       <p className="small" style={{ marginTop: 10 }}>
-        {staff.length} active. Solo includes 1, Team up to 5, Business up to 15.
+        {staff.length} active. Solo is 1 person, Team is 2 to 5 people, Business is 6 to 15 people.
       </p>
     </div>
   );

@@ -5,7 +5,7 @@ import {
   PLANS,
   annualCents,
   formatPlanPrice,
-  staffLimitLabel,
+  planRangeLabel,
   type BillingPhase,
   type PlanId,
 } from "@/lib/plans";
@@ -143,11 +143,13 @@ export default function BillingPanel(props: Props) {
                     {isCurrent ? " · your plan" : ""}
                   </strong>
                   <div className="small">
-                    {plan.staffLimit === 1
-                      ? "1 team member"
-                      : `Up to ${staffLimitLabel(plan)} team members`}{" "}
-                    · {plan.blurb}
+                    {planRangeLabel(plan)} · {plan.blurb}
                   </div>
+                  {plan.id === "business" && (
+                    <div className="small" style={{ marginTop: 4 }}>
+                      <a href="mailto:support@appointease.io">16+ people? Contact us.</a>
+                    </div>
+                  )}
                 </div>
                 <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                   <strong>{price}</strong>
