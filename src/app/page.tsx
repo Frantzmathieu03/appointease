@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { PLANS, formatPlanPrice, annualCents } from "@/lib/plans";
 import { CATEGORIES } from "@/lib/categories";
-import { REVIEWS } from "@/lib/reviews";
+import { REVIEWS, type ReviewEntry } from "@/lib/reviews";
 import HomeAnimations from "@/components/HomeAnimations";
+import PricingPlans from "@/components/PricingPlans";
 
 // Category cards for "Made for your kind of business": labels and
 // blurbs come from the shared category list; the photos are the
@@ -70,6 +70,48 @@ const FEATURES: { icon: string; title: string; body: string; dark?: boolean }[] 
   },
 ];
 
+/** One review card, in the reference format: a VIDEO entry (the
+ *  person on camera, a big bold quote line over the footage, name
+ *  and business under it) or a TEXT entry (round photo, name,
+ *  business, star rating, the plain quote). Used twice by the
+ *  scrolling wall: the set and its duplicate. */
+function reviewCard(r: ReviewEntry, key: string) {
+  return r.kind === "video" ? (
+    <figure key={key} className="hp-rv-video">
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        poster={r.poster}
+        aria-label={`${r.name}, ${r.business}`}
+      >
+        <source src={r.video} type="video/mp4" />
+      </video>
+      <figcaption className="hp-rv-overlay">
+        <span className="hp-rv-quote">{r.quote}</span>
+        <span className="hp-rv-who">{r.name} · {r.business}</span>
+      </figcaption>
+    </figure>
+  ) : (
+    <figure key={key} className="hp-rv-text">
+      <div className="hp-rv-head">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="hp-rv-photo" src={r.photo} alt="" loading="lazy" />
+        <div>
+          <div className="hp-rv-name">{r.name}</div>
+          <div className="hp-rv-biz">{r.business}</div>
+        </div>
+      </div>
+      <span className="hp-stars" aria-label={`${r.stars} out of 5 stars`}>
+        {"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}
+      </span>
+      <blockquote>{r.quote}</blockquote>
+    </figure>
+  );
+}
+
 export default function HomePage() {
   const demoMode = !isSupabaseConfigured();
   return (
@@ -129,24 +171,26 @@ export default function HomePage() {
           opens with both filters already filled in. */}
       <section className="hp-section hp-find-section" data-reveal>
         <div className="mkt-container">
-          <div className="hp-head">
-            <h2>Find a business</h2>
-            <p className="hp-lede">
-              Looking for your barber, your salon, your lawyer? Search by
-              name, or by ZIP code or city.
-            </p>
+          <div className="hp-find-card">
+            <div className="hp-head">
+              <h2>Find a business</h2>
+              <p className="hp-lede">
+                Looking for your barber, your salon, your lawyer? Search by
+                name, or by ZIP code or city.
+              </p>
+            </div>
+            <form className="hp-find" action="/explore" method="get">
+              <label className="hp-find-field">
+                <span>Business name</span>
+                <input type="text" name="q" placeholder="e.g. Main Street Barbers" autoComplete="off" />
+              </label>
+              <label className="hp-find-field">
+                <span>ZIP code or city</span>
+                <input type="text" name="place" placeholder="e.g. 02062 or Norwood" autoComplete="off" />
+              </label>
+              <button type="submit" className="btn btn-primary btn-lg hp-find-btn">Search</button>
+            </form>
           </div>
-          <form className="hp-find" action="/explore" method="get">
-            <label className="hp-find-field">
-              <span>Business name</span>
-              <input type="text" name="q" placeholder="e.g. Main Street Barbers" autoComplete="off" />
-            </label>
-            <label className="hp-find-field">
-              <span>ZIP code or city</span>
-              <input type="text" name="place" placeholder="e.g. 02062 or Norwood" autoComplete="off" />
-            </label>
-            <button type="submit" className="btn btn-primary btn-lg hp-find-btn">Search</button>
-          </form>
         </div>
       </section>
 
@@ -326,10 +370,12 @@ export default function HomePage() {
       </section>
 
       {/* Reviews: real words from real businesses, data-driven from
-          src/lib/reviews.ts. The section renders ONLY when at least
-          two real reviews exist there. It stays hidden until the
-          first pilot shops give real words with permission: never
-          placeholders, never invented quotes, names, or ratings. */}
+          src/lib/reviews.ts, shown as a slow scrolling wall (the
+          set and its duplicate on one track). The section renders
+          ONLY when at least two real reviews exist there. It stays
+          hidden until the first pilot shops give real words with
+          permission: never placeholders, never invented quotes,
+          names, or ratings. */}
       {REVIEWS.length >= 2 && (
         <section className="hp-section hp-reviews" data-reveal>
           <div className="mkt-container">
@@ -337,43 +383,15 @@ export default function HomePage() {
               <h2>Real words from real businesses</h2>
             </div>
           </div>
-          <div className="hp-reviews-track">
-            {REVIEWS.map((r, i) =>
-              r.kind === "video" ? (
-                <figure key={i} className="hp-rv-video">
-                  <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    poster={r.poster}
-                    aria-label={`${r.name}, ${r.business}`}
-                  >
-                    <source src={r.video} type="video/mp4" />
-                  </video>
-                  <figcaption className="hp-rv-overlay">
-                    <span className="hp-rv-quote">{r.quote}</span>
-                    <span className="hp-rv-who">{r.name} · {r.business}</span>
-                  </figcaption>
-                </figure>
-              ) : (
-                <figure key={i} className="hp-rv-text">
-                  <div className="hp-rv-head">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="hp-rv-photo" src={r.photo} alt="" loading="lazy" />
-                    <div>
-                      <div className="hp-rv-name">{r.name}</div>
-                      <div className="hp-rv-biz">{r.business}</div>
-                    </div>
-                  </div>
-                  <span className="hp-stars" aria-label={`${r.stars} out of 5 stars`}>
-                    {"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}
-                  </span>
-                  <blockquote>{r.quote}</blockquote>
-                </figure>
-              )
-            )}
+          <div className="hp-reviews-wall">
+            <div className="hp-reviews-track">
+              <div className="hp-reviews-set">
+                {REVIEWS.map((r, i) => reviewCard(r, `a-${i}`))}
+              </div>
+              <div className="hp-reviews-set" aria-hidden="true">
+                {REVIEWS.map((r, i) => reviewCard(r, `b-${i}`))}
+              </div>
+            </div>
           </div>
         </section>
       )}
@@ -385,26 +403,7 @@ export default function HomePage() {
             <h2>Simple pricing that grows with your team</h2>
             <p className="lede">14 days free, no card needed. Pay yearly and get 2 months free.</p>
           </div>
-          <div className="pricing-grid">
-            {PLANS.map((plan) => (
-              <div key={plan.id} className={`price-card${plan.id === "team" ? " featured" : ""}`}>
-                {plan.id === "team" && <span className="price-badge">Most popular</span>}
-                <div className="price-name">{plan.name}</div>
-                <div className="price-amount">
-                  {formatPlanPrice(plan.monthlyCents)}<span>/mo</span>
-                </div>
-                <p className="price-annual">or {formatPlanPrice(annualCents(plan))}/yr</p>
-                <ul className="price-features">
-                  {plan.features.map((f) => (
-                    <li key={f}><span className="price-check" aria-hidden="true">✓</span>{f}</li>
-                  ))}
-                </ul>
-                <Link href="/owner/signup" className={`btn ${plan.id === "team" ? "btn-primary" : ""} btn-block`}>
-                  Start free
-                </Link>
-              </div>
-            ))}
-          </div>
+          <PricingPlans />
           <p className="pricing-note">
             Your plan grows with your team. We&apos;ll let you know when it&apos;s time to upgrade.
           </p>

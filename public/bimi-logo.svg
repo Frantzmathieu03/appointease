@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny-ps" viewBox="0 0 160 160">
+  <title>AppointEase</title>
+  <rect x="0" y="0" width="160" height="160" fill="#E0F0E6"/>
+  <rect x="52" y="21" width="9" height="24" rx="4.5" fill="#005B41"/>
+  <rect x="75.5" y="21" width="9" height="24" rx="4.5" fill="#005B41"/>
+  <rect x="99" y="21" width="9" height="24" rx="4.5" fill="#005B41"/>
+  <rect x="22" y="31" width="116" height="110" rx="14" fill="#005B41"/>
+  <circle cx="56.5" cy="40" r="5.5" fill="#E0F0E6"/>
+  <circle cx="80" cy="40" r="5.5" fill="#E0F0E6"/>
+  <circle cx="103.5" cy="40" r="5.5" fill="#E0F0E6"/>
+  <rect x="34" y="61" width="92" height="66" rx="9" fill="#E6F3EA"/>
+  <polyline points="52,87 74,110 110,73" fill="none" stroke="#005B41" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

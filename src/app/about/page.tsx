@@ -23,7 +23,7 @@ export default function AboutPage() {
           <div className="contact-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/frantz.jpg"
+              src="/images/frantz-owner.jpg"
               alt="Frantz Mathieu, founder of AppointEase"
               width={150}
               height={150}
