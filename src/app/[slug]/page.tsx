@@ -472,7 +472,7 @@ export default async function BusinessPage({
         </section>
       )}
 
-      {(addressLines.length > 0 || hourLines.length > 0 || (business.phone && !demoShop) || page.locations.length > 0) && (
+      {(addressLines.length > 0 || hourLines.length > 0 || (business.phone && !demoShop) || (business.email && !demoShop) || page.locations.length > 0) && (
         <section className="bp-card">
           <h2 className="bp-card-title">Hours &amp; location</h2>
           {addressLines.length > 0 && (
@@ -500,6 +500,11 @@ export default async function BusinessPage({
               <a href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}>
                 {formatPhone(business.phone)}
               </a>
+            </p>
+          )}
+          {business.email && !demoShop && (
+            <p className="bp-phone bp-email">
+              <a href={`mailto:${business.email}`}>{business.email}</a>
             </p>
           )}
           {page.locations.length > 0 &&

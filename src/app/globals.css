@@ -1343,8 +1343,9 @@ footer.site-footer { padding: 0; text-align: left; }
 .bp-cover-wrap { padding: 0 16px; }
 .bp-cover {
   height: 150px; border-radius: 18px; overflow: hidden; background: #dfebdd;
+  box-shadow: 0 6px 18px rgba(22, 34, 27, 0.06);
 }
-.bp-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bp-cover img { width: 100%; height: 100%; object-fit: cover; object-position: center 38%; display: block; }
 
 /* 3 — round logo overlapping the cover's bottom by 46px. */
 .bp-logo {
@@ -1385,6 +1386,7 @@ footer.site-footer { padding: 0; text-align: left; }
   border: none; border-radius: 14px; cursor: pointer;
   background: #1e4d33; color: #fff;
   font-size: 17px; font-weight: 700; text-decoration: none;
+  box-shadow: 0 8px 20px rgba(30, 77, 51, 0.22);
 }
 /* 7 — Call / Message / Directions squares. */
 .bp-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
@@ -1395,21 +1397,23 @@ footer.site-footer { padding: 0; text-align: left; }
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
   color: #16221b; font-size: 13.5px; font-weight: 600; text-decoration: none;
   cursor: pointer; font-family: inherit; width: 100%;
+  box-shadow: 0 4px 14px rgba(22, 34, 27, 0.04);
 }
 .bp-square svg { width: 22px; height: 22px; color: #1e4d33; display: block; }
 
 /* 8–10 — white cards. */
 .bp-card {
   background: #fff; border: 1px solid #dce4dd; border-radius: 16px;
-  padding: 20px; margin-top: 16px;
+  padding: 22px 20px; margin-top: 16px;
+  box-shadow: 0 6px 20px rgba(22, 34, 27, 0.05);
 }
-.bp-card-title { font-size: 18px; font-weight: 700; text-align: center; margin: 0 0 12px; color: #16221b; }
-.bp-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bp-card-title { font-size: 18px; font-weight: 700; text-align: center; margin: 0 0 14px; color: #16221b; }
+.bp-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .bp-photos img {
-  width: 100%; height: 120px; object-fit: cover;
-  border-radius: 12px; display: block;
+  width: 100%; height: 128px; object-fit: cover; object-position: center 38%;
+  border-radius: 14px; display: block; background: #eef3ee;
 }
-.bp-service { text-align: center; padding: 10px 0; }
+.bp-service { text-align: center; padding: 12px 0; }
 .bp-service:first-of-type { padding-top: 2px; }
 .bp-service:last-of-type { padding-bottom: 2px; }
 .bp-service + .bp-service { border-top: 1px solid #edf1ed; }
@@ -1417,8 +1421,10 @@ footer.site-footer { padding: 0; text-align: left; }
 .bp-service-meta { color: #5b6b61; font-size: 14px; margin-top: 2px; }
 .bp-loc { text-align: center; font-size: 15px; line-height: 1.55; margin: 0 0 10px; }
 .bp-hours { text-align: center; font-size: 14.5px; line-height: 1.75; margin: 0; }
-.bp-phone { text-align: center; margin: 10px 0 0; }
+.bp-phone { text-align: center; margin: 12px 0 0; }
 .bp-phone a { color: #16221b; font-weight: 600; font-size: 15px; text-decoration: none; }
+.bp-email { margin-top: 5px; }
+.bp-email a { font-weight: 500; overflow-wrap: anywhere; }
 .bp-branch { text-align: center; padding-top: 12px; margin-top: 12px; border-top: 1px solid #edf1ed; }
 .bp-branch-name { font-weight: 700; font-size: 15px; margin: 0 0 2px; }
 .bp-branch-line { color: #5b6b61; font-size: 14px; margin: 0; }
@@ -1430,7 +1436,7 @@ footer.site-footer { padding: 0; text-align: left; }
 .bp-next-actions { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
 
 /* 11 — footer. */
-.bp-footer { text-align: center; margin-top: 24px; }
+.bp-footer { text-align: center; margin-top: 28px; }
 .bp-footer-links { font-size: 13.5px; color: #5b6b61; }
 .bp-footer-links a { color: #5b6b61; text-decoration: none; }
 .bp-powered { font-size: 12.5px; color: #8a978c; margin: 6px 0 0; }
