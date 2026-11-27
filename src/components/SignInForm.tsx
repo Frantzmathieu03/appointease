@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import GoogleLogo from "@/components/GoogleLogo";
+import AppleSignInButton from "@/components/AppleSignInButton";
 
 export default function SignInForm({
   nextPath = "/my-appointments",
@@ -109,6 +110,7 @@ export default function SignInForm({
         <GoogleLogo />
         Continue with Google
       </button>
+      <AppleSignInButton nextPath={nextPath} onError={setError} />
       <p className="small center" style={{ margin: "12px 0 14px" }}>or use email</p>
       <form onSubmit={onSubmit}>
         <label className="field">

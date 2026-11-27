@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import CreateBusinessForm from "@/components/owner/CreateBusinessForm";
 import GoogleLogo from "@/components/GoogleLogo";
+import AppleSignInButton from "@/components/AppleSignInButton";
 
 // Owner signup: create the login first, then the business (its link is
 // reserved the moment the business row lands). If email confirmation is
@@ -100,6 +101,7 @@ export default function OwnerSignupPage() {
             <GoogleLogo />
             Continue with Google
           </button>
+          <AppleSignInButton nextPath="/owner/setup" onError={setError} />
           <p className="small center" style={{ margin: "12px 0 14px" }}>or use email</p>
           <form onSubmit={onSubmit}>
             <label className="field">

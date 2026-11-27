@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import GoogleLogo from "@/components/GoogleLogo";
+import AppleSignInButton from "@/components/AppleSignInButton";
 
 // Per-business customer accounts (Frantz, 2026-11-25): a customer
 // signs up WITH a business, on that business's page: the membership,
@@ -107,6 +108,7 @@ export default function SignupForm({
         <GoogleLogo />
         Continue with Google
       </button>
+      <AppleSignInButton nextPath={nextPath} onError={setError} />
       <p className="small center" style={{ margin: "12px 0 14px" }}>or use email</p>
       <form onSubmit={onSubmit}>
         <label className="field">

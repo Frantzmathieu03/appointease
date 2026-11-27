@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import GoogleLogo from "@/components/GoogleLogo";
+import AppleSignInButton from "@/components/AppleSignInButton";
 
 /**
  * Account step at the front of booking from a business's page
@@ -69,6 +70,7 @@ export default function AccountGate({
         <GoogleLogo />
         Continue with Google
       </button>
+      <AppleSignInButton nextPath={back} onError={setError} tall />
       <p className="small center gate-or">or use email</p>
       <div className="gate-email-row">
         <Link

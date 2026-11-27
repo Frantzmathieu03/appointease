@@ -24,6 +24,14 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>AppointEase uses Face ID so you can sign in quickly.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>AppointEase uses the camera so you can take a photo for your business page or a form.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>AppointEase uses your photo library so you can add photos to your business page or a form.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

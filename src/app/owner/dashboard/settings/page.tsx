@@ -11,6 +11,7 @@ import BillingPanel from "@/components/owner/BillingPanel";
 import BusinessMediaManager from "@/components/owner/BusinessMediaManager";
 import LocationsManager from "@/components/owner/LocationsManager";
 import PushOptIn from "@/components/PushOptIn";
+import DeleteAccountButton from "@/components/DeleteAccountButton";
 import { FaceIdSetting, NotificationPrefs } from "@/components/owner/AppSettings";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import { getBillingState, planById } from "@/lib/plans";
@@ -158,6 +159,18 @@ export default async function DashboardSettingsPage() {
         <h2>Face ID sign in</h2>
         <FaceIdSetting />
       </div>
+
+      {role === "owner" && (
+      <div className="card">
+        <h2>Delete my account</h2>
+        <DeleteAccountButton
+          intro="Deleting your account deletes your business, its booking page, and everything in it: services, hours, appointments, customers, and messages. Your subscription is cancelled first, so nothing charges again. This cannot be undone."
+          confirmPrompt="Are you sure? Your business and its page will be gone for good."
+          confirmLabel="Yes, delete everything"
+          afterPath="/"
+        />
+      </div>
+      )}
     </div>
   );
 }

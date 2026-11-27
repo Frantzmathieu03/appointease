@@ -1313,6 +1313,15 @@ footer.site-footer { padding: 0; text-align: left; }
 .btn-google .g-badge { width: 22px; height: 22px; border-radius: 6px; }
 .btn-google .g-badge svg { width: 14px; height: 14px; }
 
+/* Sign in with Apple: Apple's own black button treatment, the same
+   height as the Google button so the pair reads as equals. Renders
+   only when the Apple provider is on (AppleSignInButton). */
+.btn-apple { background: #000; border: 1px solid #000; color: #fff; }
+.btn-apple:hover { background: #1a1a1a; }
+.btn-apple .a-badge { display: inline-flex; align-items: center; }
+.btn-apple .a-badge svg { width: 16px; height: 16px; }
+.btn-apple-tall { height: 52px; min-height: 52px; font-size: 16px; }
+
 /* ================================================================
    Business page plan (Frantz's written plan + design pictures,
    2026-11-26). Scoped to /[slug] pages via .bizpage: Inter font,

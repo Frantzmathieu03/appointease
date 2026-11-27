@@ -8,6 +8,7 @@ import { formatPhone } from "@/lib/types";
 import { formatDateInZone, formatTimeInZone } from "@/lib/slots";
 import ReviewForm from "@/components/ReviewForm";
 import ThreadView from "@/components/ThreadView";
+import DeleteAccountButton from "@/components/DeleteAccountButton";
 import AddToCalendar from "@/components/AddToCalendar";
 
 interface ApptRow {
@@ -543,6 +544,16 @@ export default async function BusinessCustomerDashboard({
           {past.map(historyEntry)}
         </>
       )}
+
+      <h2 style={{ marginTop: 22 }}>Account</h2>
+      <div className="card">
+        <DeleteAccountButton
+          intro="Deleting your account cancels your upcoming appointments, and removes your messages and form answers at every business you have joined. This cannot be undone."
+          confirmPrompt="Are you sure? Your account and your information will be gone for good."
+          confirmLabel="Yes, delete my account"
+          afterPath={`/${slug}`}
+        />
+      </div>
     </main>
   );
 }

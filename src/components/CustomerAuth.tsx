@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 import GoogleLogo from "@/components/GoogleLogo";
+import AppleSignInButton from "@/components/AppleSignInButton";
 import type { BusinessAuthContext } from "@/lib/auth-context";
 
 // The per-business sign up / log in screen (Customer Side Plan,
@@ -195,6 +196,11 @@ export default function CustomerAuth({
           <GoogleLogo />
           Continue with Google
         </button>
+        <AppleSignInButton
+          nextPath={returnPath(mode === "signup" && consent)}
+          onError={setError}
+          tall
+        />
         <div className="c3-divider" aria-hidden="true">
           <span>or</span>
         </div>
