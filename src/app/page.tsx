@@ -165,158 +165,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Find a business (restored at Frantz's word, 2026-11-26):
-          someone without a direct link can find a business by name
-          and by ZIP code or city. A plain form onto /explore, which
-          opens with both filters already filled in. */}
-      <section className="hp-section hp-find-section" data-reveal>
-        <div className="mkt-container">
-          <div className="hp-find-card">
-            <div className="hp-head">
-              <h2>Find a business</h2>
-              <p className="hp-lede">
-                Looking for your barber, your salon, your lawyer? Search by
-                name, or by ZIP code or city.
-              </p>
-            </div>
-            <form className="hp-find" action="/explore" method="get">
-              <label className="hp-find-field">
-                <span>Business name</span>
-                <input type="text" name="q" placeholder="e.g. Main Street Barbers" autoComplete="off" />
-              </label>
-              <label className="hp-find-field">
-                <span>ZIP code or city</span>
-                <input type="text" name="place" placeholder="e.g. 02062 or Norwood" autoComplete="off" />
-              </label>
-              <button type="submit" className="btn btn-primary btn-lg hp-find-btn">Search</button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      {/* The short version: true product facts only, counting up
-          as the band scrolls into view. */}
-      <section className="hp-section hp-stats-section" data-reveal>
-        <div className="mkt-container">
-          <div className="hp-stats">
-            <div className="hp-stat">
-              <span className="hp-stat-num"><span data-count="14">14</span></span>
-              <span className="hp-stat-label">days free to try, no card needed</span>
-            </div>
-            <div className="hp-stat">
-              <span className="hp-stat-num"><span data-count="3">3</span></span>
-              <span className="hp-stat-label">reminders with every booking: right away, 24 hours and 2 hours before</span>
-            </div>
-            <div className="hp-stat">
-              <span className="hp-stat-num"><span data-count="3">3</span></span>
-              <span className="hp-stat-label">steps to put your booking page live</span>
-            </div>
-            <div className="hp-stat">
-              <span className="hp-stat-num">$<span data-count="0">0</span></span>
-              <span className="hp-stat-label">of your clients&apos; money touches AppointEase. They pay you directly</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Live in three steps */}
-      <section className="hp-section" data-reveal>
-        <div className="mkt-container">
-          <div className="section-head">
-            <h2>Live in three steps</h2>
-          </div>
-          <div className="steps-grid">
-            <div className="step">
-              <span className="step-num">1</span>
-              <h3>Create your page</h3>
-              <p>Add your logo, photos, services, prices and hours in about 3 minutes.</p>
-            </div>
-            <div className="step">
-              <span className="step-num">2</span>
-              <h3>Share your link</h3>
-              <p>Put appointease.io/yourshop on Instagram, Google and your texts.</p>
-            </div>
-            <div className="step">
-              <span className="step-num">3</span>
-              <h3>Get booked and reminded</h3>
-              <p>Clients book, reschedule and cancel themselves. Reminders go out 24 hours and 2 hours before.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Made for your kind of business: the real categories, with
-          people at work in each one. */}
-      <section className="hp-section hp-section-pale" data-reveal>
-        <div className="mkt-container">
-          <div className="section-head">
-            <h2>Made for your kind of business</h2>
-            <p className="lede">If your day runs on appointments, this is your front desk.</p>
-          </div>
-          <div className="hp-cats">
-            {CAT_CARDS.map((c) => (
-              <div key={c.slug} className="hp-cat-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={c.img} alt="" loading="lazy" className="hp-cat-img" />
-                <h3>{c.label}</h3>
-                <p>{c.blurb}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* A day with AppointEase: ONE card inside the phone rotates
-          through the three moments that used to float on the hero
-          video (Frantz's correction: off the video, into this
-          animated card, wording unchanged). Pure CSS animation;
-          static under prefers-reduced-motion. */}
-      <section className="hp-section" data-reveal>
-        <div className="mkt-container">
-          <div className="section-head">
-            <h2>A day with AppointEase</h2>
-            <p className="lede">One booking, start to finish, while you work.</p>
-          </div>
-          <div className="hp-panel">
-          <div className="hp-day">
-            <div className="hp-phone" aria-hidden="true">
-              <div className="hp-phone-notch" />
-              <p className="hp-phone-head">Today · Main Street Barbers</p>
-              <div className="hp-day-stage">
-                <div className="hp-day-card hp-day-card-1">
-                  <span className="hp-note-ico">📅</span>
-                  <span><strong>New booking</strong> · James · Haircut · Fri 3:00 PM</span>
-                </div>
-                <div className="hp-day-card hp-day-card-2">
-                  <span className="hp-note-ico">🔔</span>
-                  <span><strong>Reminder sent</strong> · 24 hours before · Delivered</span>
-                </div>
-                <div className="hp-day-card hp-day-card-3">
-                  <span className="hp-note-ico">📝</span>
-                  <span><strong>Visit notes saved</strong> · James · next visit in 3 weeks</span>
-                </div>
-              </div>
-              <p className="hp-phone-foot">Every client, one history</p>
-            </div>
-            <ol className="hp-day-caps">
-              <li className="hp-day-cap hp-day-cap-1">
-                <strong>A client books</strong>
-                <span>From your page, any time of day, with no phone tag.</span>
-              </li>
-              <li className="hp-day-cap hp-day-cap-2">
-                <strong>Reminders go out on their own</strong>
-                <span>Right away, 24 hours before, and 2 hours before.</span>
-              </li>
-              <li className="hp-day-cap hp-day-cap-3">
-                <strong>The visit joins their history</strong>
-                <span>Notes and next steps, ready for next time.</span>
-              </li>
-            </ol>
-          </div>
-          </div>
-        </div>
-      </section>
-
       {/* A look inside AppointEase: four small dashboard scenes
           that animate gently on a loop (assigning a client, a
           customer message, an email reminder, a new booking).
@@ -443,6 +291,129 @@ export default function HomePage() {
               </div>
               <p className="hp-scene-cap">New bookings drop straight onto the calendar.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* The short version: true product facts only, counting up
+          as the band scrolls into view. */}
+      <section className="hp-section hp-stats-section" data-reveal>
+        <div className="mkt-container">
+          <div className="hp-stats">
+            <div className="hp-stat">
+              <span className="hp-stat-num"><span data-count="14">14</span></span>
+              <span className="hp-stat-label">days free to try, no card needed</span>
+            </div>
+            <div className="hp-stat">
+              <span className="hp-stat-num"><span data-count="3">3</span></span>
+              <span className="hp-stat-label">reminders with every booking: right away, 24 hours and 2 hours before</span>
+            </div>
+            <div className="hp-stat">
+              <span className="hp-stat-num"><span data-count="3">3</span></span>
+              <span className="hp-stat-label">steps to put your booking page live</span>
+            </div>
+            <div className="hp-stat">
+              <span className="hp-stat-num">$<span data-count="0">0</span></span>
+              <span className="hp-stat-label">of your clients&apos; money touches AppointEase. They pay you directly</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Live in three steps */}
+      <section className="hp-section" data-reveal>
+        <div className="mkt-container">
+          <div className="section-head">
+            <h2>Live in three steps</h2>
+          </div>
+          <div className="steps-grid">
+            <div className="step">
+              <span className="step-num">1</span>
+              <h3>Create your page</h3>
+              <p>Add your logo, photos, services, prices and hours in about 3 minutes.</p>
+            </div>
+            <div className="step">
+              <span className="step-num">2</span>
+              <h3>Share your link</h3>
+              <p>Put appointease.io/yourshop on Instagram, Google and your texts.</p>
+            </div>
+            <div className="step">
+              <span className="step-num">3</span>
+              <h3>Get booked and reminded</h3>
+              <p>Clients book, reschedule and cancel themselves. Reminders go out 24 hours and 2 hours before.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Made for your kind of business: the real categories, with
+          people at work in each one. */}
+      <section className="hp-section hp-section-pale" data-reveal>
+        <div className="mkt-container">
+          <div className="section-head">
+            <h2>Made for your kind of business</h2>
+            <p className="lede">If your day runs on appointments, this is your front desk.</p>
+          </div>
+          <div className="hp-cats">
+            {CAT_CARDS.map((c) => (
+              <div key={c.slug} className="hp-cat-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={c.img} alt="" loading="lazy" className="hp-cat-img" />
+                <h3>{c.label}</h3>
+                <p>{c.blurb}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* A day with AppointEase: ONE card inside the phone rotates
+          through the three moments that used to float on the hero
+          video (Frantz's correction: off the video, into this
+          animated card, wording unchanged). Pure CSS animation;
+          static under prefers-reduced-motion. */}
+      <section className="hp-section" data-reveal>
+        <div className="mkt-container">
+          <div className="section-head">
+            <h2>A day with AppointEase</h2>
+            <p className="lede">One booking, start to finish, while you work.</p>
+          </div>
+          <div className="hp-panel">
+          <div className="hp-day">
+            <div className="hp-phone" aria-hidden="true">
+              <div className="hp-phone-notch" />
+              <p className="hp-phone-head">Today · Main Street Barbers</p>
+              <div className="hp-day-stage">
+                <div className="hp-day-card hp-day-card-1">
+                  <span className="hp-note-ico">📅</span>
+                  <span><strong>New booking</strong> · James · Haircut · Fri 3:00 PM</span>
+                </div>
+                <div className="hp-day-card hp-day-card-2">
+                  <span className="hp-note-ico">🔔</span>
+                  <span><strong>Reminder sent</strong> · 24 hours before · Delivered</span>
+                </div>
+                <div className="hp-day-card hp-day-card-3">
+                  <span className="hp-note-ico">📝</span>
+                  <span><strong>Visit notes saved</strong> · James · next visit in 3 weeks</span>
+                </div>
+              </div>
+              <p className="hp-phone-foot">Every client, one history</p>
+            </div>
+            <ol className="hp-day-caps">
+              <li className="hp-day-cap hp-day-cap-1">
+                <strong>A client books</strong>
+                <span>From your page, any time of day, with no phone tag.</span>
+              </li>
+              <li className="hp-day-cap hp-day-cap-2">
+                <strong>Reminders go out on their own</strong>
+                <span>Right away, 24 hours before, and 2 hours before.</span>
+              </li>
+              <li className="hp-day-cap hp-day-cap-3">
+                <strong>The visit joins their history</strong>
+                <span>Notes and next steps, ready for next time.</span>
+              </li>
+            </ol>
+          </div>
           </div>
         </div>
       </section>
@@ -594,6 +565,35 @@ export default function HomePage() {
           <Link href="/owner/signup" className="btn btn-white btn-lg">Create my booking page</Link>
         </section>
       </div>
+
+      {/* Find a business (restored at Frantz's word, 2026-11-26):
+          someone without a direct link can find a business by name
+          and by ZIP code or city. A plain form onto /explore, which
+          opens with both filters already filled in. */}
+      <section className="hp-section hp-find-section" data-reveal>
+        <div className="mkt-container">
+          <div className="hp-find-card">
+            <div className="hp-head">
+              <h2>Find a business</h2>
+              <p className="hp-lede">
+                Looking for your barber, your salon, your lawyer? Search by
+                name, or by ZIP code or city.
+              </p>
+            </div>
+            <form className="hp-find" action="/explore" method="get">
+              <label className="hp-find-field">
+                <span>Business name</span>
+                <input type="text" name="q" placeholder="e.g. Main Street Barbers" autoComplete="off" />
+              </label>
+              <label className="hp-find-field">
+                <span>ZIP code or city</span>
+                <input type="text" name="place" placeholder="e.g. 02062 or Norwood" autoComplete="off" />
+              </label>
+              <button type="submit" className="btn btn-primary btn-lg hp-find-btn">Search</button>
+            </form>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
